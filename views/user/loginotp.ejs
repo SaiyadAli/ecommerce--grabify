@@ -1,0 +1,38 @@
+<%- include('../partials/authheader.ejs') %>
+<body data-fx-mode="light">
+	<main class="wrapper sb-default">
+		<section class="auth-section anim">
+			<div class="fx-login-page">
+				<div class="container-fluid no-gutters">
+					<div class="row">
+						<div class="offset-lg-6 col-lg-6">
+							<div class="content-detail">
+								<div class="main-info">
+									<div class="hero-container">
+										<!-- Forgot form -->
+										<form class="forgot-form" method="post">
+											<div class="imgcontainer">
+												<a href="index.html"><img src="/assets1/img/logo/full-logo.png" alt="logo" class="logo"></a>
+											</div>
+											<div class="input-control">
+												<h6>Verify Your Email</h6>
+												<p>Please enter the 6 digit code sent to. <b>yourmail@example.com</b></p>
+												<input type="email" placeholder="Enter code" name="email" required>
+												<div class="login-btns">
+													<button type="submit">Reset</button>
+												</div>
+												<div class="login-with-btns">
+													<span class="already-acc">Return to<a href="/user/login" class="login-btn">Login</a></span>
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+<%- include('../partials/authfooter.ejs') %>

@@ -1,0 +1,100 @@
+<%- include('../partials/authheader.ejs') %>
+<body data-fx-mode="light">
+    <main class="wrapper sb-default">
+        <section class="auth-section anim">
+            <div class="fx-login-page">
+                <div class="container-fluid no-gutters">
+                    <div class="row">
+                        <div class="offset-lg-6 col-lg-6">
+                            <div class="content-detail">
+                                <div class="main-info">
+                                    <div class="hero-container">
+                                        <!-- OTP verification form -->
+                                        <form id="otpForm" class="forgot-form" method="post" action="/user/verify-otp">
+                                            <div class="imgcontainer">
+                                                <a href="index.html"><img src="assets/img/logo/full-logo.png" alt="logo" class="logo"></a>
+                                            </div>
+                                            <div class="input-control">
+                                                <h6>Verify Your Email</h6>
+                                                <p>Please enter the 6-digit code sent to <b id="emailAddress"></b></p>
+                                                <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+                                                
+                                                <div id="timer" class="timer">15</div>
+                                                <div id="resendOtp" class="resend-otp">
+                                                    <button type="button" id="resendButton" onclick="resendOtp()">Resend OTP</button>
+                                                </div>
+
+                                                <div class="login-btns">
+                                                    <button type="submit">Verify OTP</button>
+                                                </div>
+                                                
+                                                <div class="login-with-btns">
+                                                    <span class="already-acc">Return to <a href="signin.html" class="login-btn">Login</a></span>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include('../partials/authfooter.ejs') %>
+
+    <script>
+        // Timer countdown (15 seconds)
+        let countdown = 15;
+        const timerElement = document.getElementById('timer');
+        const resendButton = document.getElementById('resendButton');
+
+        const interval = setInterval(function() {
+            if (countdown > 0) {
+                countdown--;
+                timerElement.textContent = countdown;
+            } else {
+                clearInterval(interval);
+                resendButton.style.display = 'inline-block'; // Show resend OTP button after timer ends
+            }
+        }, 1000);
+
+        // Function to resend OTP
+        function resendOtp() {
+            // Call an API endpoint to resend the OTP (you'll need to implement this server-side)
+            fetch('/user/resend-otp', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('OTP has been resent to your email.');
+                        countdown = 15; // Reset timer
+                        resendButton.style.display = 'none'; // Hide resend button while waiting
+                        startTimer(); // Restart timer
+                    } else {
+                        alert('Failed to resend OTP.');
+                    }
+                })
+                .catch(err => {
+                    alert('Error resending OTP. Please try again.');
+                });
+        }
+
+        // Function to start the timer
+        function startTimer() {
+            const interval = setInterval(function() {
+                if (countdown > 0) {
+                    countdown--;
+                    timerElement.textContent = countdown;
+                } else {
+                    clearInterval(interval);
+                    resendButton.style.display = 'inline-block'; // Show resend OTP button after timer ends
+                }
+            }, 1000);
+        }
+
+        // Initialize the email address in the view (use a placeholder or server-side render it)
+        document.getElementById('emailAddress').textContent = '<%= email %>';
+    </script>
+</body>

@@ -1,0 +1,82 @@
+<%- include('../partials/authheader.ejs') %>
+<body data-fx-mode="light">
+	<main class="wrapper sb-default">
+		<section class="auth-section anim">
+			<div class="fx-login-page">
+				<div class="container-fluid no-gutters">
+					<div class="row">
+						<div class="offset-lg-6 col-lg-6">
+							<div class="content-detail">
+								<div class="main-info">
+									<div class="hero-container">
+										<!-- Login Form -->
+										<form class="login-form" method="post" action="/user/login">
+											<div class="imgcontainer text-center">
+												<a href="/"><img src="/assets1/img/logo/full-logo.png" alt="logo" class="logo"></a>
+											</div>
+
+											<!-- Display message if available -->
+											<% if (message) { %>
+												<div class="alert alert-success" role="alert">
+													<%= message %>
+												</div>
+											<% } %>
+
+											<div class="input-control">
+												<!-- Email input -->
+												<input type="text" placeholder="Enter Email" name="email" required>
+												<!-- Password input -->
+												<span class="password-field-show">
+													<input type="password" placeholder="Enter Password" name="password" class="password-field" required>
+													<span data-toggle=".password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+												</span>
+
+												<!-- Remember me checkbox -->
+												<label class="label-container">Remember me
+													<input type="checkbox">
+													<span class="checkmark"></span>
+												</label>
+
+												<!-- Forgot password -->
+												<span class="psw"><a href="/user/forgot" class="forgot-btn">Forgot password?</a></span>
+
+												<!-- Submit button -->
+												<div class="login-btns">
+													<button type="submit" class="btn btn-primary w-100">Login</button>
+												</div>
+
+												<!-- Divider -->
+												<div class="division-lines">
+													<p>or login with</p>
+												</div>
+
+												<!-- Social login buttons -->
+												<div class="login-with-btns">
+													<button type="button" class="google">
+														<i class="ri-google-fill"></i>
+													</button>
+													<button type="button" class="facebook">
+														<i class="ri-facebook-fill"></i>
+													</button>
+													<button type="button" class="twitter">
+														<i class="ri-twitter-fill"></i>
+													</button>
+													<button type="button" class="linkedin">
+														<i class="ri-linkedin-fill"></i>
+													</button>
+												</div>
+
+												<!-- Sign up link -->
+												<span class="already-acc">Not a member? <a href="/user/register" class="signup-btn">Sign up</a></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+<%- include('../partials/authfooter.ejs') %>

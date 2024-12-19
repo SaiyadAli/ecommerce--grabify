@@ -1,0 +1,138 @@
+<%- include('../partials/authheader.ejs') %>
+<main class="wrapper sb-default">
+    <section class="auth-section anim">
+        <div class="fx-login-page">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="offset-lg-6 col-lg-6">
+                        <div class="content-detail">
+                            <div class="main-info">
+                                <div class="hero-container">
+                                    <!-- Signup form -->
+                                    <form id="signupForm" class="signup-form" method="post" action="/user/register">
+                                        <div class="imgcontainer">
+                                            <a href="index.html"><img src="/assets/adminlogo.png" alt="logo" class="logo"></a>
+                                        </div>
+
+                                        <% if (message) { %>
+                                            <div class="alert alert-danger" role="alert">
+                                                <%= message %>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <div class="input-control">
+                                            <div class="row p-l-5 p-r-5">
+                                                <div class="col-md-12 p-l-10 p-r-10">
+                                                    <input id="username" type="text" placeholder="Enter Username" name="username" value="<%= typeof username !== 'undefined' ? username : '' %>" required>
+                                                </div>
+                                                <div class="col-md-12 p-l-10 p-r-10">
+                                                    <input id="email" type="email" placeholder="Enter Email" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+                                                </div>
+                                                <div class="col-md-12 p-l-10 p-r-10">
+                                                    <input id="password" type="password" placeholder="Enter Password" name="password" required>
+                                                </div>
+                                                <div class="col-md-12 p-l-10 p-r-10">
+                                                    <span class="password-field-show">
+                                                        <input id="confirmPassword" type="password" placeholder="Re-enter Password" name="confirmPassword" required>
+                                                        <span data-toggle=".password-field"
+                                                            class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="login-btns">
+                                                <button type="submit">Sign up</button>
+                                            </div>
+                                        </form>    
+                                            <div class="division-lines">
+                                                <p>or signup with</p>
+                                            </div>
+                                            <div class="login-with-btns">
+                                                <button type="button" class="google">
+                                                    <i class="ri-google-fill"></i>
+                                                </button>
+                                                <button type="button" class="facebook">
+                                                    <i class="ri-facebook-fill"></i>
+                                                </button>
+                                                <button type="button" class="twitter">
+                                                    <i class="ri-twitter-fill"></i>
+                                                </button>
+                                                <button type="button" class="linkedin">
+                                                    <i class="ri-linkedin-fill"></i>
+                                                </button>
+                                                <span class="already-acc">Already you have an account? <a
+                                                        href="/user/login" class="login-btn">Login</a></span>
+                                            </div>
+                                        </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Include SweetAlert JS library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>document.getElementById('signupForm').addEventListener('submit', function(event) {
+    let errorMessage = '';
+
+    // Fetch form values
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Password validation regex: at least 8 characters, one uppercase, one lowercase, one special character
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
+
+    // Validate inputs
+    if (!username || !email || !password || !confirmPassword) {
+        errorMessage = 'All fields are required.';
+    } else if (!validateEmail(email)) {
+        errorMessage = 'Invalid email format.';
+    } else if (!passwordRegex.test(password)) {
+        errorMessage = 'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one special character.';
+    } else if (password !== confirmPassword) {
+        errorMessage = 'Passwords do not match.';
+    }
+
+    // Show error message if any
+    if (errorMessage) {
+        event.preventDefault(); // Prevent form submission
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: errorMessage,
+        });
+        return;
+    }
+
+    // All validations passed
+    event.preventDefault(); // Temporarily prevent form submission for alert
+    Swal.fire({
+        icon: 'success',
+        title: 'Validation Passed',
+        text: 'Your details are valid. Submitting the form...',
+    }).then(() => {
+        // Submit form manually after alert
+        document.getElementById('signupForm').submit();
+    });
+});
+
+// Email validation function
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+</script>
+
+<%- include('../partials/authfooter.ejs') %>
+
+
+

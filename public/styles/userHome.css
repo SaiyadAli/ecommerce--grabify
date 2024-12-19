@@ -1,0 +1,86 @@
+/* Navbar styling */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+.navbar {
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    padding: 10px 20px; /* Add padding inside the navbar */
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.logout-btn {
+    padding: 10px 20px;
+    background-color: #ff6f00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #e65c00;
+}
+
+/* Background image styling */
+.hero {
+    background-image: url('https://via.placeholder.com/1920x1080'); /* Replace with your image URL */
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Card styling */
+.welcome-card {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+}
+
+.welcome-card h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #333;
+}
+
+.welcome-card p {
+    margin: 15px 0;
+    font-size: 18px;
+    color: #555;
+}
+
+.subscribe-btn {
+    padding: 10px 20px;
+    background-color: #ff6f00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.subscribe-btn:hover {
+    background-color: #e65c00;
+}

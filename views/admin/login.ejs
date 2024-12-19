@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- <meta name="keywords" content="admin, dashboard, crm, analytics, ecommerce, team, vendor, ai chat bot, backend, panel">
+    <meta name="description" content="Finx - Best multipurpose admin dashboard template.">
+    <meta name="author" content="Maraviya Infotech"> -->
+
+	<title>Admin login</title>
+
+	<!-- App favicon -->
+	<link rel="shortcut icon" href="/assets1/img/favicon/favicon.png">
+
+	<!-- Icon CSS -->
+	<link href="/assets1/css/vendor/materialdesignicons.min.css" rel="stylesheet">
+	<link href="/assets1/css/vendor/remixicon.css" rel="stylesheet">
+
+	<!-- Vendor CSS -->
+	<link href='/assets1/css/vendor/datatables.bootstrap5.min.css' rel='stylesheet'>
+	<link href='/assets1/css/vendor/responsive.datatables.min.css' rel='stylesheet'>
+	<link href='/assets1/css/vendor/daterangepicker.css' rel='stylesheet'>
+	<link href="/assets1/css/vendor/simplebar.css" rel="stylesheet">
+	<link href="/assets1/css/vendor/bootstrap.min.css" rel="stylesheet">
+	<link href="/assets1/css/vendor/apexcharts.css" rel="stylesheet">
+	<link href="/assets1/css/vendor/jquery-jvectormap-1.2.2.css" rel="stylesheet">
+
+	<!-- Main CSS -->
+	<link id="mainCss" href="/assets1/css/style.css" rel="stylesheet">
+	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+
+<body data-fx-mode="light">
+	<main class="wrapper sb-default">
+		<section class="auth-section anim">
+			<div class="fx-login-page">
+				<div class="container-fluid no-gutters">
+					<div class="row">
+						<div class="offset-lg-6 col-lg-6">
+							<div class="content-detail">
+								<div class="main-info">
+									<div class="hero-container">
+										
+										<!-- Login form -->
+										<form action="/admin/login" class="login-form" method="post">
+											<div class="imgcontainer">
+												<a href=#><img src="/assets/adminlogo.png" alt="logo" class="logo"></a>
+											</div>
+											<div class="input-control">
+												<input type="text" placeholder="Enter Email" name="email" required>
+												<span class="password-field-show">
+													<input type="password" placeholder="Enter Password" name="password" class="password-field" value="" required>
+													<span data-toggle=".password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+												</span>
+												<!-- <label class="label-container">Remember me
+													<input type="checkbox">
+													<span class="checkmark"></span>
+												</label> -->
+												<!-- <span class="psw"><a href="forgot.html" class="forgot-btn">Forgot password?</a></span> -->
+												<div class="login-btns">
+													<button type="submit" class="btn btn-dark">Login</button>
+												</div>
+												<!-- <div class="division-lines">
+													<p>or login with</p>
+												</div>
+												<div class="login-with-btns">
+													<button type="button" class="google">
+														<i class="ri-google-fill"></i>
+													</button>
+													<button type="button" class="facebook">
+														<i class="ri-facebook-fill"></i>
+													</button>
+													<button type="button" class="twitter">
+														<i class="ri-twitter-fill"></i>
+													</button>
+													<button type="button" class="linkedin">
+														<i class="ri-linkedin-fill"></i>
+													</button>
+													<span class="already-acc">Not a member? <a href="signup.html" class="signup-btn">Sign up</a></span> -->
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<!-- Vendor Custom -->
+	<script src="/assets1/js/vendor/jquery-3.6.4.min.js"></script>
+	<script src="/assets1/js/vendor/simplebar.min.js"></script>
+	<script src="/assets1/js/vendor/bootstrap.bundle.min.js"></script>
+	<script src="/assets1/js/vendor/apexcharts.min.js"></script>
+	<script src="/assets1/js/vendor/jquery-jvectormap-1.2.2.min.js"></script>
+	<script src="/assets1/js/vendor/jquery-jvectormap-world-mill-en.js"></script>
+	<!-- Data Tables -->
+	<script src='/assets1/js/vendor/jquery.datatables.min.js'></script>
+	<script src='/assets1/js/vendor/datatables.bootstrap5.min.js'></script>
+	<script src='/assets1/js/vendor/datatables.responsive.min.js'></script>
+	<!-- Calendar -->
+	<script src="/assets1/js/vendor/jquery.simple-calendar.js"></script>
+	<!-- Date Range Picker -->
+	<script src="/assets1/js/vendor/moment.min.js"></script>
+	<script src="/assets1/js/vendor/daterangepicker.js"></script>
+	<script src="/assets1/js/vendor/date-range.js"></script>
+
+	<!-- Main Custom -->
+	<script src="/assets1/js/main.js"></script>
+	<script> <% if (locals.message) { %>
+		swal('<%= message%>');
+		message=null
+		   <% } %>
+		   
+		  </script>
+
+		  <script>
+         document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', (e) => {
+        if (e.target.name === "email") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            e.target.setCustomValidity(emailRegex.test(e.target.value) ? "" : "Invalid email format");
+        }
+        if (e.target.name === "password") {
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            e.target.setCustomValidity(passwordRegex.test(e.target.value) ? "" : "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character");
+        }
+    });
+});
+          </script>
+
+</body>
+
+</html>
