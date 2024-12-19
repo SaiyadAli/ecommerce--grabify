@@ -7,7 +7,7 @@ const loadLogin = async (req, res) => {
     res.render('admin/login')
 
 }
-const loadCustomers = async (req, res) => {
+let loadCustomers = async (req, res) => {
     try {
 
         const admin = req.session.admin
