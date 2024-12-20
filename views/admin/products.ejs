@@ -165,53 +165,55 @@
 
     // Handle add product
     document.getElementById('addProductForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const formObject = Object.fromEntries(formData.entries());
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formObject = Object.fromEntries(formData.entries());
 
-        try {
-            const response = await fetch('/admin/products/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formObject),
-            });
+    try {
+        const response = await fetch('/admin/products/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formObject),
+        });
 
-            const result = await response.json();
+        const result = await response.json();
 
-            if (result.success) {
-                Swal.fire('Success!', 'Product added successfully!', 'success').then(() => location.reload());
-            } else {
-                Swal.fire('Error!', result.message || 'Failed to add product.', 'error');
-            }
-        } catch (error) {
-            Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+        if (result.success) {
+            Swal.fire('Success!', 'Product added successfully!', 'success').then(() => location.reload());
+        } else {
+            Swal.fire('Error!', result.message || 'Failed to add product.', 'error');
         }
-    });
+    } catch (error) {
+        Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+    }
+});
+
 
     // Handle edit product
     document.getElementById('editProductForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const formObject = Object.fromEntries(formData.entries());
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formObject = Object.fromEntries(formData.entries());
 
-        try {
-            const response = await fetch('/admin/products/edit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formObject),
-            });
+    try {
+        const response = await fetch('/admin/products/edit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formObject),
+        });
 
-            const result = await response.json();
+        const result = await response.json();
 
-            if (result.success) {
-                Swal.fire('Success!', 'Product updated successfully!', 'success').then(() => location.reload());
-            } else {
-                Swal.fire('Error!', result.message || 'Failed to update product.', 'error');
-            }
-        } catch (error) {
-            Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+        if (result.success) {
+            Swal.fire('Success!', 'Product updated successfully!', 'success').then(() => location.reload());
+        } else {
+            Swal.fire('Error!', result.message || 'Failed to update product.', 'error');
         }
-    });
+    } catch (error) {
+        Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+    }
+});
+
 
     // Handle toggle status
     document.querySelectorAll('.badge').forEach((badge) => {

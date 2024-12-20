@@ -58,6 +58,12 @@ const addProduct = async (req, res) => {
     try {
         const { name, description, categoryid, isListed } = req.body;
 
+        // Check if the product name already exists
+        const existingProduct = await productModel.findOne({ name });
+        if (existingProduct) {
+            return res.status(400).json({ success: false, message: 'Product name already exists. Please use a different name.' });
+        }
+
         // Create a new product
         const newProduct = new productModel({
             name,
@@ -69,17 +75,23 @@ const addProduct = async (req, res) => {
         // Save the product
         await newProduct.save();
 
-        // Respond with success
         res.json({ success: true, message: 'Product added successfully!' });
     } catch (error) {
         console.error('Error adding product:', error);
         res.status(500).json({ success: false, message: 'An error occurred while adding the product.' });
     }
 };
+
 // Edit a product
 const editProduct = async (req, res) => {
     try {
         const { productId, name, description, categoryid, isListed } = req.body;
+
+        // Check if the product name already exists (excluding the current product)
+        const existingProduct = await productModel.findOne({ name, _id: { $ne: productId } });
+        if (existingProduct) {
+            return res.status(400).json({ success: false, message: 'Product name already exists. Please use a different name.' });
+        }
 
         // Find the product by ID and update
         const updatedProduct = await productModel.findByIdAndUpdate(
@@ -103,6 +115,7 @@ const editProduct = async (req, res) => {
         res.status(500).json({ success: false, message: 'An error occurred while editing the product.' });
     }
 };
+
 
 
 
