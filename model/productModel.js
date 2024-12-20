@@ -1,19 +1,54 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const productSchema = new mongoose.Schema({
-  productName: { type: String, required: true },
-  parentCategory: { type: String, required: true },
-  productImage1: { type: String },
-  productImage2: { type: String },
-  productImage3: { type: String },
-  productPrice: { type: Number, required: true },
-  productStock: { type: Number, required: true },
-  productOfferId: { type: mongoose.Types.ObjectId, default: null },
-  productOfferPercentage: { type: Number, default: null },
-  priceBeforeOffer : { type: Number, default: null },
-  isListed: { type: Boolean, default: true },
+// Variant Schema
+const VariantSchema = new mongoose.Schema({
+  color: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  size: {
+    type: Map,
+    of: Number, // A map where key is size and value is stock count
+    required: true,
+  },
 });
 
-const productCollection = mongoose.model("products", productSchema);
+// Product Schema
+const ProductSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  categoryid: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'categories', // Reference to Category model
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },isListed: {
+    type: Boolean,
+    default: true
+},
+  variantid: [VariantSchema], // Array of VariantSchema
+});
 
-module.exports = productCollection;
+// Export the model
+
+const productCollection= mongoose.model('Product', ProductSchema);
+
+module.exports= productCollection

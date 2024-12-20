@@ -26,6 +26,7 @@ const loadCategories = async (req, res) => {
         res.status(500).send('An error occurred while fetching categories.');
     }
 };
+
 const toggleCategoryStatus = async (req, res) => {
     try {
         const categoryId = req.params.id;
