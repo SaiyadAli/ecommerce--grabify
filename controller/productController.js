@@ -27,7 +27,7 @@ const loadProducts = async (req, res) => {
     }
 };
 
-
+// Toggle product status
 const toggleProductStatus = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -53,13 +53,13 @@ const toggleProductStatus = async (req, res) => {
     }
 };
 
-
+// Add a product
 const addProduct = async (req, res) => {
     try {
         const { name, description, categoryid, isListed } = req.body;
 
-        // Check if the product name already exists
-        const existingProduct = await productModel.findOne({ name });
+        // Check if the product name already exists (case-insensitive)
+        const existingProduct = await productModel.findOne({ name: { $regex: new RegExp(name, 'i') } });
         if (existingProduct) {
             return res.status(400).json({ success: false, message: 'Product name already exists. Please use a different name.' });
         }
@@ -87,8 +87,8 @@ const editProduct = async (req, res) => {
     try {
         const { productId, name, description, categoryid, isListed } = req.body;
 
-        // Check if the product name already exists (excluding the current product)
-        const existingProduct = await productModel.findOne({ name, _id: { $ne: productId } });
+        // Check if the product name already exists (case-insensitive)
+        const existingProduct = await productModel.findOne({ name: { $regex: new RegExp(name, 'i') }, _id: { $ne: productId } });
         if (existingProduct) {
             return res.status(400).json({ success: false, message: 'Product name already exists. Please use a different name.' });
         }
@@ -116,9 +116,7 @@ const editProduct = async (req, res) => {
     }
 };
 
-
-
-
+// Delete a product
 const deleteProduct = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -142,7 +140,5 @@ module.exports = {
     addProduct,
     editProduct,
     toggleProductStatus,
-    deleteProduct, // Add this line
+    deleteProduct,
 };
-
-
