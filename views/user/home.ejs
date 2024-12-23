@@ -1,0 +1,268 @@
+<!doctype html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Shop | eCommers</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="/uassets/img/icon/favicon.png">
+
+    <!-- CSS here -->
+    <link rel="stylesheet" href="/uassets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/uassets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/uassets/css/slicknav.css">
+    <link rel="stylesheet" href="/uassets/css/flaticon.css">
+    <link rel="stylesheet" href="/uassets/css/animate.min.css">
+    <link rel="stylesheet" href="/uassets/css/price_rangs.css">
+    <link rel="stylesheet" href="/uassets/css/magnific-popup.css">
+    <link rel="stylesheet" href="/uassets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/uassets/css/themify-icons.css">
+    <link rel="stylesheet" href="/uassets/css/slick.css">
+    <link rel="stylesheet" href="/uassets/css/nice-select.css">
+    <link rel="stylesheet" href="/uassets/css/style.css">
+</head>
+<body>
+    <!--? Preloader Start -->
+    <div id="preloader-active">
+        <div class="preloader d-flex align-items-center justify-content-center">
+            <div class="preloader-inner position-relative">
+                <div class="preloader-circle"></div>
+                <div class="preloader-img pere-text">
+                    <img src="/assets/grabifylogo.png" alt="loader">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Preloader Start -->
+    <header style="width: 100%; position: relative; z-index: 1;">
+        <div class="header-area">
+            <!-- Removed header-top -->
+            <div class="header-mid" style="background-color: #f8f9fa; padding: 15px 0;">
+                <div class="container" style="display: flex; align-items: center; justify-content: space-between;">
+                    <!-- Logo -->
+                    <div class="logo">
+                        <a href="/user/">
+                            <img src="/assets/grabifylogo.png" alt="Logo" style="height: 50px;">
+                        </a>
+                    </div>
+    
+                    <!-- Header Right -->
+                    <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
+                        <% if (username) { %>
+                            <span style="font-size: 18px; color: #000; cursor: pointer;" id="logout"><%= username %></span>
+                        <% } %>
+                        <a href="/user/login" style="text-decoration: none; color: #000;">
+                            <span class="flaticon-user" style="font-size: 18px;"></span>
+                        </a>
+                        <a href="cart.html" style="text-decoration: none; color: #000;">
+                            <span class="flaticon-shopping-cart" style="font-size: 18px;"></span>
+                        </a>
+                    </div>
+                </div>
+    
+                <!-- Show Search Box -->
+                
+                <!-- Mobile Menu -->
+                <div class="mobile_menu" style="display: block; margin-top: 10px;">
+                    <!-- Mobile menu placeholder -->
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <!-- slider Area Start-->
+        <section class="slider-area">
+            <div class="slider-active">
+                <!-- Single Slider -->
+                <% products.forEach(product => { %>
+                <div class="single-slider slider-bg1 slider-height d-flex align-items-center">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-8 col-sm-10">
+                                <div class="hero-caption text-center">
+                                    <span><%= product.categoryid.categoryName %></span>
+                                    <h1 data-animation="bounceIn" data-delay="0.2s"><%= product.name %></h1>
+                                    <p data-animation="fadeInUp" data-delay="0.4s"><%= product.description %></p>
+                                    <a href="#" class="btn_1 hero-btn" data-animation="fadeInUp" data-delay="0.7s">Shop Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>          
+                </div>
+                <% }); %>
+            </div>
+        </section>
+        <!-- slider Area End-->
+
+
+        <!--category area start -->
+        <section class="items-product1 pt-30">
+            <div class="container">
+            <div class="row">
+                <div class="col-12">
+                <div class="section-title text-center mb-30">
+                    <h2>Categories</h2>
+                </div>
+                </div>
+            </div>
+            <div class="row">
+                <% categories.forEach(category => { %>
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                <div class="single-items mb-20">
+                    <div class="items-img">
+                    <img src="/uassets/img/gallery/items1.jpg" alt="">
+                   
+                    </div>
+                    <div class="items-details">
+                    <h4><a href="pro-details.html"><%= category.categoryName %></a></h4>
+                    <p><a href="pro-details.html"><%=category.categoryDescription %></a></p>
+                    <a href="pro-details.html" class="browse-btn">Shop Now</a>
+                    </div>
+                </div>
+                </div>
+                <% }); %>
+            </div>
+            </div>
+        </section>
+      <!--category area end -->
+        
+       
+    <div class="latest-items section-padding fix">
+        <!-- items Product  Start-->
+        <div class="container">
+            <!-- Section Title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="section-title text-center mb-30">
+                        <h2>Latest Trends</h2>
+                    </div>
+                </div>
+            </div>
+            <!-- Nav Card -->
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-one" role="tabpanel" aria-labelledby="nav-one-tab">
+                    <!-- Tab 1 -->  
+                    <div class="latest-items-active">
+                        <% products.slice(0, 6).forEach(product => { %>
+                        <div class="properties pb-30">
+                            <div class="properties-card">
+                                <div class="properties-img">
+                                    <a href="pro-details.html"><img src="<%= product.variantid[0]?.image || '/uassets/img/gallery/latest1.jpg' %>" alt=""></a>
+                                    <div class="socal_icon">
+                                        <a href="#"><i class="ti-shopping-cart"></i></a>
+                                        <a href="#"><i class="ti-heart"></i></a>
+                                        <a href="#"><i class="ti-zoom-in"></i></a>
+                                    </div>
+                                </div>
+                                <div class="properties-caption properties-caption2">
+                                    <h3><a href="pro-details.html"><%= product.name %></a></h3>
+                                    
+                                    <div class="properties-footer">
+                                        <div class="price">
+                                            <span>$<%= product.variantid[0]?.price || '98.00' %> <span>$120.00</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
+                <!-- Repeat similar structure for other tabs if needed -->
+            </div>
+        </div>
+    </div>
+</main>
+    
+    <footer>
+        <!-- footer-bottom area -->
+        <div class="footer-bottom-area" style="background-color: black; color: white; padding: 10px 0;">
+            <div class="container">
+                <div class="footer-border">
+                    <div class="row">
+                        <div class="col-xl-12 ">
+                            <div class="footer-copy-right text-center ">
+                                <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | Grabify </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>  
+    </footer>
+    
+    <!-- Scroll Up -->
+    <div id="back-top">
+        <a class="wrapper" title="Go to Top" href="#">
+            <div class="arrows-container">
+                <div class="arrow arrow-one"></div>
+                <div class="arrow arrow-two"></div>
+            </div>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('logout').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Do you want to logout?',
+                showCancelButton: true,
+                confirmButtonText: 'Logout',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/user/logout';
+                }
+            });
+        });
+    </script>
+
+
+    <!-- JS here -->
+    <!-- Jquery, Popper, Bootstrap -->
+    <script src="/uassets/js/vendor/modernizr-3.5.0.min.js"></script>
+    <script src="/uassets/js/vendor/jquery-1.12.4.min.js"></script>
+    <script src="/uassets/js/popper.min.js"></script>
+    <script src="/uassets/js/bootstrap.min.js"></script>
+
+    <!-- Slick-slider , Owl-Carousel ,slick-nav -->
+    <script src="/uassets/js/owl.carousel.min.js"></script>
+    <script src="/uassets/js/slick.min.js"></script>
+    <script src="/uassets/js/jquery.slicknav.min.js"></script>
+
+    <!--wow , counter , waypoint, Nice-select -->
+    <script src="/uassets/js/wow.min.js"></script>
+    <script src="/uassets/js/jquery.magnific-popup.js"></script>
+    <script src="/uassets/js/jquery.nice-select.min.js"></script>
+    <script src="/uassets/js/jquery.counterup.min.js"></script>
+    <script src="/uassets/js/waypoints.min.js"></script>
+    <script src="/uassets/js/price_rangs.js"></script>
+
+    <!-- contact js -->
+    <script src="/uassets/js/contact.js"></script>
+    <script src="/uassets/js/jquery.form.js"></script>
+    <script src="/uassets/js/jquery.validate.min.js"></script>
+    <script src="/uassets/js/mail-script.js"></script>
+    <script src="/uassets/js/jquery.ajaxchimp.min.js"></script>
+
+    <!--  Plugins, main-Jquery -->	
+    <script src="/uassets/js/plugins.js"></script>
+    <script src="/uassets/js/main.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-23581568-13');
+    </script>
+
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"8f65b494dbbb7f44","version":"2024.10.5","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"token":"cd0b4b3a733644fc843ef0b185f98241","b":1}' crossorigin="anonymous"></script>
+</body>
+</html>

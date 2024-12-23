@@ -1,14 +1,17 @@
-let express = require('express');
+const express = require('express');
 const router = express.Router();
+const homeController = require('../controller/homeController');
 const userController = require('../controller/userController');
 const auth = require('../middleware/auth');
 
-// Uncomment these routes as needed
-router.get('/login', auth.isLogin, userController.loadLogin);
-router.post('/login', userController.login);
-router.get('/register', auth.isLogin, userController.loadRegister);
+router.get('/home', homeController.getHomePage); // Allow access to home page without session check
+router.get('/login', auth.isLogin, userController.getLoginPage);
+router.post('/login', userController.loginUser);
+router.get('/register', userController.getRegisterPage); // Add this line for registration page
 router.post('/register', userController.registerUser);
-router.get('/home', auth.checkSession, userController.loadHome);
-router.get('/logout', auth.checkSession, userController.logout);
 
-module.exports = router; // Export router at the bottom after defining it
+
+
+router.get('/logout', userController.logoutUser); 
+
+module.exports = router;
