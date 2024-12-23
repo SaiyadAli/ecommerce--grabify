@@ -12,11 +12,16 @@
                                         <!-- OTP verification form -->
                                         <form id="otpForm" class="forgot-form" method="post" action="/user/verify-otp">
                                             <div class="imgcontainer">
-                                                <a href="index.html"><img src="assets/img/logo/full-logo.png" alt="logo" class="logo"></a>
+                                                <a href="index.html"><img src="/assets/grabifylogo.png" alt="logo" class="logo"></a>
                                             </div>
                                             <div class="input-control">
                                                 <h6>Verify Your Email</h6>
-                                                <p>Please enter the 6-digit code sent to <b id="emailAddress"></b></p>
+                                                <p>Please enter the 6-digit code sent to <b id="emailAddress"><%= email %></b></p>
+                                                <% if (message) { %>
+                                                    <div class="alert alert-danger" role="alert">
+                                                        <%= message %>
+                                                    </div>
+                                                <% } %>
                                                 <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
                                                 
                                                 <div id="timer" class="timer">15</div>
@@ -29,7 +34,7 @@
                                                 </div>
                                                 
                                                 <div class="login-with-btns">
-                                                    <span class="already-acc">Return to <a href="signin.html" class="login-btn">Login</a></span>
+                                                    <span class="already-acc">Return to <a href="/user/login" class="login-btn">Login</a></span>
                                                 </div>
                                             </div>
                                         </form>
@@ -63,7 +68,7 @@
 
         // Function to resend OTP
         function resendOtp() {
-            // Call an API endpoint to resend the OTP (you'll need to implement this server-side)
+            // Call an API endpoint to resend the OTP
             fetch('/user/resend-otp', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {

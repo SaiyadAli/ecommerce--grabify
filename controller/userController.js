@@ -122,7 +122,18 @@
 // filepath: src/controller/userController.js
 const userSchema = require('../model/userModel');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const saltround = 10;
+
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'grabify75@gmail.com',
+        pass: 'hjgi ftcx kbop nmyf'
+    }
+});
 
 const registerUser = async (req, res) => {
     try {
@@ -147,30 +158,111 @@ const registerUser = async (req, res) => {
             });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, saltround);
+        // Generate OTP
+        const otp = crypto.randomInt(100000, 999999).toString();
 
-        // Create a new user with the username and email
-        const newUser = new userSchema({
-            username,
-            email,
-            password: hashedPassword,
-        });
+        // Send OTP to user's email
+        const mailOptions = {
+            from: 'grabify75@gmail.com',
+            to: email,
+            subject: 'Email Verification OTP',
+            text: `Your OTP for email verification is ${otp}`
+        };
 
-        await newUser.save();
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending OTP email:', error);
+                return res.status(500).send('Error sending OTP email');
+            }
 
-        res.render('user/login', {
-            message: 'Registration successful. Please log in.',
+            // Store OTP and user details in session
+            req.session.otp = otp;
+            req.session.tempUser = { username, email, password };
+
+            res.render('user/verifyotp', { email, message: null }); // Ensure message is defined
         });
     } catch (error) {
+        console.error('Server Error:', error);
         res.status(500).send('Server Error');
     }
 };
-const getRegisterPage = (req, res) => {
-    res.render('user/register', { message: null });
+
+const verifyOtp = (req, res) => {
+    const { otp } = req.body;
+
+    if (otp === req.session.otp) {
+        // OTP is correct, proceed with registration
+        const { username, email, password } = req.session.tempUser;
+
+        // Hash the password
+        bcrypt.hash(password, saltround, async (err, hashedPassword) => {
+            if (err) {
+                return res.status(500).send('Server Error');
+            }
+
+            // Create a new user with the username and email
+            const newUser = new userSchema({
+                username,
+                email,
+                password: hashedPassword,
+            });
+
+            await newUser.save();
+
+            // Clear OTP and tempUser from session
+            req.session.otp = null;
+            req.session.tempUser = null;
+
+            res.render('user/login', {
+                message: 'Registration successful. Please log in.',
+            });
+        });
+    } else {
+        res.render('user/verifyotp', {
+            email: req.session.tempUser.email,
+            message: 'Invalid OTP. Please try again.',
+        });
+    }
 };
+
+const resendOtp = (req, res) => {
+    try {
+        const { email } = req.session.tempUser;
+
+        // Generate new OTP
+        const otp = crypto.randomInt(100000, 999999).toString();
+
+        // Send OTP to user's email
+        const mailOptions = {
+            from: 'grabify75@gmail.com',
+            to: email,
+            subject: 'Email Verification OTP',
+            text: `Your OTP for email verification is ${otp}`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending OTP email:', error);
+                return res.status(500).json({ success: false, message: 'Error sending OTP email' });
+            }
+
+            // Store new OTP in session
+            req.session.otp = otp;
+
+            res.status(200).json({ success: true, message: 'OTP has been resent to your email.' });
+        });
+    } catch (error) {
+        console.error('Server Error:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
 const getLoginPage = (req, res) => {
     res.render('user/login', { message: null });
+};
+
+const getRegisterPage = (req, res) => {
+    res.render('user/register', { message: null });
 };
 
 const loginUser = async (req, res) => {
@@ -215,7 +307,9 @@ const logoutUser = (req, res) => {
 module.exports = {
     registerUser,
     getLoginPage,
-    loginUser,
     getRegisterPage,
-    logoutUser, 
+    loginUser,
+    verifyOtp,
+    resendOtp, // Add this line
+    logoutUser,
 };
