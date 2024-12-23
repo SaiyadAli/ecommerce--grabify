@@ -2,20 +2,26 @@ const userModel = require('../model/userModel');
 
 const checkSession = async (req, res, next) => {
     if (req.session.user) {
-        // Check if the user exists in the database
-        const user = await userModel.findById(req.session.user);
-        if (!user) {
-            // Destroy the session if the user does not exist
-            req.session.destroy((err) => {
-                if (err) {
-                    console.error('Error destroying session:', err);
-                }
-                res.redirect('/user/login');
-            });
-        } else {
-            next();  // User exists, proceed with the request
+        try {
+            // Verify the user exists in the database
+            const user = await userModel.findById(req.session.user.id); // Use `id` if stored in session
+            if (!user) {
+                // User not found, destroy session and redirect
+                return req.session.destroy((err) => {
+                    if (err) {
+                        console.error('Error destroying session:', err);
+                    }
+                    res.clearCookie('connect.sid');
+                    return res.redirect('/user/login');
+                });
+            }
+            next(); // Proceed if user exists
+        } catch (err) {
+            console.error('Error checking session:', err);
+            res.redirect('/user/login'); // Redirect on error
         }
     } else {
+        // No session exists
         res.redirect('/user/login');
     }
 };
