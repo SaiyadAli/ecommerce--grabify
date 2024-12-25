@@ -1,0 +1,208 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbar.ejs') %>
+<%- include('../partials/topnavigation.ejs') %>
+<link href="/assets1/css/vendor/materialdesignicons.min.css" rel="stylesheet">
+<link href="/assets1/css/vendor/remixicon.css" rel="stylesheet">
+
+<!-- Vendor CSS -->
+<link href='/assets1/css/vendor/datatables.bootstrap5.min.css' rel='stylesheet'>
+<link href='/assets1/css/vendor/responsive.datatables.min.css' rel='stylesheet'>
+<link href='/assets1/css/vendor/daterangepicker.css' rel='stylesheet'>
+<link href="/assets1/css/vendor/simplebar.css" rel="stylesheet">
+<link href="/assets1/css/vendor/bootstrap.min.css" rel="stylesheet">
+<link href="/assets1/css/vendor/apexcharts.css" rel="stylesheet">
+<link href="/assets1/css/vendor/jquery-jvectormap-1.2.2.css" rel="stylesheet">
+
+<!-- Main CSS -->
+<link id="mainCss" href="/assets1/css/style.css" rel="stylesheet">
+
+<!-- SweetAlert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="fx-card card-default">
+                <div class="fx-card-content">
+                    <form class="row g-3" action="/admin/addvariant" method="post" enctype="multipart/form-data">
+                        <div class="row fx-product-uploads">
+                            <div class="col-lg-4 mb-991">
+                                <div class="fx-vendor-img-upload">
+                                    <div class="fx-vendor-main-img">
+                                        <div class="avatar-upload">
+                                            <div class="avatar-edit">
+                                                <input type='file' id="product_main" class="fx-image-upload" accept=".png, .jpg, .jpeg" name="images" required>
+                                                <label><i class="ri-pencil-line"></i></label>
+                                            </div>
+                                            <div class="avatar-preview fx-preview">
+                                                <div class="imagePreview fx-div-preview">
+                                                    <img class="fx-image-preview" src="/assets1/img/product/preview.jpg" alt="edit">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="thumb-upload-set colo-md-12">
+                                            <div class="thumb-upload">
+                                                <div class="thumb-edit">
+                                                    <input type='file' id="thumbUpload01" class="fx-image-upload" accept=".png, .jpg, .jpeg" name="images" required>
+                                                    <label><i class="ri-pencil-line"></i></label>
+                                                </div>
+                                                <div class="thumb-preview fx-preview">
+                                                    <div class="image-thumb-preview">
+                                                        <img class="image-thumb-preview fx-image-preview" src="/assets1/img/product/preview-2.jpg" alt="edit">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="thumb-upload">
+                                                <div class="thumb-edit">
+                                                    <input type='file' id="thumbUpload02" class="fx-image-upload" accept=".png, .jpg, .jpeg" name="images" required>
+                                                    <label><i class="ri-pencil-line"></i></label>
+                                                </div>
+                                                <div class="thumb-preview fx-preview">
+                                                    <div class="image-thumb-preview">
+                                                        <img class="image-thumb-preview fx-image-preview" src="/assets1/img/product/preview-2.jpg" alt="edit">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Add more thumb-upload divs as needed -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="fx-vendor-upload-detail">
+                                    <div class="col-md-6">
+                                        <label for="productId" class="form-label">Select Product</label>
+                                        <select class="form-control" id="productId" name="productId" required>
+                                            <% products.forEach(product => { %>
+                                                <option value="<%= product._id %>"><%= product.name %></option>
+                                            <% }); %>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="color" class="form-label">Color</label>
+                                        <input type="text" class="form-control" id="color" name="color" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="price" class="form-label">Price <span>(In USD)</span></label>
+                                        <input type="number" class="form-control" id="price" name="price" required>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label for="sizes" class="form-label">Sizes and Stock</label>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="sizeXS" name="sizes[XS]">
+                                                    <label class="form-check-label ms-2" for="sizeXS">XS</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="number" class="form-control form-control-sm" id="stockXS" name="stock[XS]" placeholder="Stock" style="display: none;">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="sizeS" name="sizes[S]">
+                                                    <label class="form-check-label ms-2" for="sizeS">S</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="number" class="form-control form-control-sm" id="stockS" name="stock[S]" placeholder="Stock" style="display: none;">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="sizeM" name="sizes[M]">
+                                                    <label class="form-check-label ms-2" for="sizeM">M</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="number" class="form-control form-control-sm" id="stockM" name="stock[M]" placeholder="Stock" style="display: none;">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="sizeL" name="sizes[L]">
+                                                    <label class="form-check-label ms-2" for="sizeL">L</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="number" class="form-control form-control-sm" id="stockL" name="stock[L]" placeholder="Stock" style="display: none;">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="sizeXL" name="sizes[XL]">
+                                                    <label class="form-check-label ms-2" for="sizeXL">XL</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="number" class="form-control form-control-sm" id="stockXL" name="stock[XL]" placeholder="Stock" style="display: none;">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="sizeXXL" name="sizes[XXL]">
+                                                    <label class="form-check-label ms-2" for="sizeXXL">XXL</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="number" class="form-control" id="stockXXL" name="stock[XXL]" placeholder="Stock" style="display: none;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn fx-btn-primary">Add Variant</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets1/js/vendor/jquery-3.6.4.min.js"></script>
+<script src="/assets1/js/vendor/simplebar.min.js"></script>
+<script src="/assets1/js/vendor/bootstrap.bundle.min.js"></script>
+<script src="/assets1/js/vendor/apexcharts.min.js"></script>
+<script src="/assets1/js/vendor/bootstrap-tagsinput.js"></script>
+<script src="/assets1/js/vendor/jquery-jvectormap-1.2.2.min.js"></script>
+<script src="/assets1/js/vendor/jquery-jvectormap-world-mill-en.js"></script>
+<!-- Data Tables -->
+<script src='/assets1/js/vendor/jquery.datatables.min.js'></script>
+<script src='/assets1/js/vendor/datatables.bootstrap5.min.js'></script>
+<script src='/assets1/js/vendor/datatables.responsive.min.js'></script>
+<!-- Calendar -->
+<script src="/assets1/js/vendor/jquery.simple-calendar.js"></script>
+<!-- Date Range Picker -->
+<script src="/assets1/js/vendor/moment.min.js"></script>
+<script src="/assets1/js/vendor/daterangepicker.js"></script>
+<script src="/assets1/js/vendor/date-range.js"></script>
+
+<!-- SweetAlert JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Main Custom -->
+<script src="/assets1/js/main.js"></script>
+
+<script>
+    // Show stock input when size checkbox is checked
+    document.querySelectorAll('.form-check-input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const stockInput = document.getElementById('stock' + this.id.replace('size', ''));
+            if (this.checked) {
+                stockInput.style.display = 'block';
+            } else {
+                stockInput.style.display = 'none';
+                stockInput.value = ''; // Clear the stock input value when unchecked
+            }
+        });
+    });
+
+    // Show success message if variant is added successfully
+    <% if (message) { %>
+        Swal.fire({
+            icon: 'error',
+            title: 'error',
+            text: '<%= message %>',
+        });
+    <% } %>
+    
+</script>

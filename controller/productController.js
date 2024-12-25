@@ -1,6 +1,7 @@
 const productModel = require('../model/productModel');
 const categoryModel = require('../model/categoryModel');
 
+
 // Load products page with categories
 const loadProducts = async (req, res) => {
     try {
@@ -135,10 +136,18 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+
+
+
+
 module.exports = {
     loadProducts,
     addProduct,
     editProduct,
     toggleProductStatus,
     deleteProduct,
+   
 };
+
+
+
