@@ -1,0 +1,48 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container mt-5">
+    <h1 class="mb-4">Edit Variant</h1>
+    <form action="/admin/editvariant/<%= variant._id %>" method="POST">
+        <div class="mb-3">
+            <label for="productId" class="form-label">Product</label>
+            <select class="form-control" id="productId" name="productId" disabled>
+                <% products.forEach(product => { %>
+                    <option value="<%= product._id %>" <%= product._id.toString() === variant.productId._id.toString() ? 'selected' : '' %>><%= product.name %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="color" class="form-label">Color</label>
+            <input type="text" class="form-control" id="color" name="color" value="<%= variant.color %>" required>
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Price</label>
+            <input type="number" class="form-control" id="price" name="price" value="<%= variant.price %>" required>
+        </div>
+        <div class="mb-3">
+            <label for="sizes" class="form-label">Sizes and Stock</label>
+            <% const allSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']; %>
+            <% allSizes.forEach(size => { %>
+                <div class="input-group mb-2">
+                    <span class="input-group-text"><%= size %></span>
+                    <input type="number" class="form-control" name="stock[<%= size %>]" value="<%= variant.size.get(size) || 0 %>">
+                </div>
+            <% }) %>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    <% if (message) { %>
+        Swal.fire({
+            icon: '<%= messageType === "danger" ? "error" : "success" %>',
+            title: '<%= messageType === "danger" ? "Error" : "Success" %>',
+            text: '<%= message %>',
+        });
+    <% } %>
+</script>

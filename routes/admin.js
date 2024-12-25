@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const variantController = require('../controller/variantController');
 const multer = require('multer');
+const sharp = require('sharp');
 const path = require('path');
 const adminController = require('../controller/adminController');
 const categoryController = require('../controller/categoryController');
@@ -33,21 +34,18 @@ router.post('/products/add', adminAuth.checkSession, productController.addProduc
 router.post('/products/edit', adminAuth.checkSession, productController.editProduct);
 router.delete('/products/delete/:id', adminAuth.checkSession, productController.deleteProduct);
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../public/assets/products'));
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
 router.get('/addvariant', adminAuth.checkSession, variantController.getAddVariantPage);
-router.post('/addvariant', adminAuth.checkSession, upload.array('images', 3), variantController.addVariant);
+router.post('/addvariant', adminAuth.checkSession, upload.array('images', 5), variantController.addVariant);
+
 router.get('/variant', adminAuth.checkSession, variantController.getVariantsPage);
 router.post('/variant/togglestatus/:id', adminAuth.checkSession, variantController.toggleVariantStatus); // Add this line for toggling status
 router.delete('/variant/:id', adminAuth.checkSession, variantController.deleteVariant);
+
+router.get('/editvariant/:id', adminAuth.checkSession, variantController.getEditVariantPage);
+router.post('/editvariant/:id', adminAuth.checkSession, variantController.editVariant);
 
 // Admin logout
 router.get('/logout', adminAuth.checkSession, adminController.logout);

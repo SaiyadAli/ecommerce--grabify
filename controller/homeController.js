@@ -1,13 +1,20 @@
-const CategoryModel = require('../model/categoryModel');
-const ProductModel = require('../model/productModel');
+const Product = require('../model/productModel');
+const Category = require('../model/categoryModel');
+const Variant = require('../model/variantModel'); // Import the Variant model
 
-exports.getHomePage = async (req, res) => {
+const loadHomePage = async (req, res) => {
     try {
-        const categories = await CategoryModel.find({ isListed: true });
-        const products = await ProductModel.find({ isListed: true }).populate('categoryid');
-        const username = req.session.user ? req.session.user.username : null; // Get username from session
-        res.render('user/home', { categories, products, username }); // Pass username to the view
+        const products = await Product.find().populate('categoryid');
+        const variants = await Variant.find().populate('productId'); // Populate productId
+        const categories = await Category.find();
+        const username = req.session.username || null; // Assuming you store the username in the session
+        res.render('user/home', { products, categories, variants, username });
     } catch (error) {
+        console.error('Error loading home page:', error);
         res.status(500).send('Server Error');
     }
+};
+
+module.exports = {
+    loadHomePage,
 };

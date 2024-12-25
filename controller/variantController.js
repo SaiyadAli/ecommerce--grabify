@@ -3,6 +3,7 @@ const Variant = require('../model/variantModel');
 const Category = require('../model/categoryModel');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 
 const getAddVariantPage = async (req, res) => {
     try {
@@ -39,12 +40,18 @@ const addVariant = async (req, res) => {
         }
 
         // Save the images to the specified directory
-        const imagePaths = images.map((image, index) => {
-            const imageName = `${product.name}_${color}_${index + 1}${path.extname(image.originalname)}`;
-            const imagePath = path.join(__dirname, '../public/assets/products', imageName);
-            fs.writeFileSync(imagePath, fs.readFileSync(image.path));
-            return `/assets/products/${imageName}`;
-        });
+        const imagePaths = [];
+        for (let i = 0; i < images.length; i++) {
+            const image = images[i];
+            const filename = `${product.name}_${color}_${i + 1}.jpg`;
+            const outputPath = path.join(__dirname, '../public/assets/products', filename);
+
+            await sharp(image.buffer)
+                .resize(350, 250)
+                .toFile(outputPath);
+
+            imagePaths.push(`/assets/products/${filename}`);
+        }
 
         // Create a new variant
         const newVariant = new Variant({
@@ -144,10 +151,69 @@ const deleteVariant = async (req, res) => {
     }
 };
 
+const getEditVariantPage = async (req, res) => {
+    try {
+        const variantId = req.params.id;
+        const variant = await Variant.findById(variantId).populate('productId');
+
+        if (!variant) {
+            return res.status(404).send('Variant not found');
+        }
+
+        const products = await Product.find({ isListed: true });
+
+        res.render('admin/editvariant', { variant, products, message: null, messageType: null });
+    } catch (error) {
+        console.error('Error loading variant:', error);
+        res.status(500).send('Server Error');
+    }
+};
+
+const editVariant = async (req, res) => {
+    try {
+        const variantId = req.params.id;
+        const { color, price, sizes, stock } = req.body;
+
+        const variant = await Variant.findById(variantId);
+
+        if (!variant) {
+            return res.status(404).send('Variant not found');
+        }
+
+        // Check for duplicate variant color
+        const existingVariant = await Variant.findOne({ productId: variant.productId, color, _id: { $ne: variantId } });
+        if (existingVariant) {
+            const products = await Product.find({ isListed: true });
+            return res.render('admin/editvariant', { variant, products, message: 'Variant with this color already exists.', messageType: 'danger' });
+        }
+
+        variant.color = color;
+        variant.price = price;
+
+        // Update sizes and stock
+        for (const size in sizes) {
+            if (sizes[size]) {
+                variant.size.set(size, stock[size]);
+            } else {
+                variant.size.delete(size);
+            }
+        }
+
+        await variant.save();
+
+        res.redirect('/admin/variant');
+    } catch (error) {
+        console.error('Error editing variant:', error);
+        res.status(500).send('Server Error');
+    }
+};
+
 module.exports = {
     getAddVariantPage,
     addVariant,
     getVariantsPage,
     toggleVariantStatus,
     deleteVariant,
+    getEditVariantPage,
+    editVariant,
 };

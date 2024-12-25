@@ -49,6 +49,9 @@
                             </span>
                         </td>
                         <td>
+                            <a href="/admin/editvariant/<%= variant._id %>" class="btn btn-sm btn-link text-dark px-2">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
                             <button class="btn btn-sm btn-link text-danger px-2 delete-variant-btn" 
                                 data-variant-id="<%= variant._id %>">
                                 <i class="bi bi-trash"></i>
@@ -60,9 +63,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Add Variant Modal -->
- 
 </div>
 <%- include('../partials/footer.ejs') %>
 

@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 // Product Schema
 const ProductSchema = new mongoose.Schema({
   name: {
@@ -17,6 +16,10 @@ const ProductSchema = new mongoose.Schema({
     ref: 'categories', // Reference to Category model
     required: true,
   },
+  // variants: [{
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'Variant'
+  // }],
   createdAt: {
     type: Date,
     default: Date.now,
