@@ -4,7 +4,7 @@ const homeController = require('../controller/homeController');
 const userController = require('../controller/userController');
 const auth = require('../middleware/auth');
 
-router.get('/home', homeController.loadHomePage);
+router.get('/home', userController.loadHome);
 router.get('/', homeController.loadHomePage);
 router.get('/login', auth.isLogin, userController.getLoginPage);
 router.post('/login', userController.loginUser);

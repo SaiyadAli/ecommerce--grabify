@@ -1,130 +1,11 @@
-// const userSchema = require('../model/userModel');
-// const bcrypt = require('bcrypt');
-// const saltround = 10;
-
-// const registerUser = async (req, res) => {
-//     try {
-//         const { username, email, password, confirmPassword } = req.body;
-
-//         // Check if user already exists
-//         const user = await userSchema.findOne({ email });
-//         if (user) {
-//             return res.render('user/register', {
-//                 message: 'User already exists',
-//                 username,
-//                 email,
-//             });
-//         }
-
-//         // Check if password matches confirmPassword
-//         if (password !== confirmPassword) {
-//             return res.render('user/register', {
-//                 message: 'Passwords do not match',
-//                 username,
-//                 email,
-//             });
-//         }
-
-//         // Hash the password
-//         const hashedPassword = await bcrypt.hash(password, saltround);
-
-//         // Create a new user with the username and email
-//         const newUser = new userSchema({
-//             username,
-//             email,
-//             password: hashedPassword,
-//         });
-
-//         // Save the user to the database
-//         await newUser.save();
-
-//         // Redirect to login page after successful registration
-//         res.render('user/login', { message: 'User created successfully' });
-
-//     } catch (error) {
-//         // Handle any errors
-//         res.render('user/register', {
-//             message: 'Something went wrong. Please try again.',
-//             username,
-//             email,
-//         });
-//     }
-// };
-
-// const login = async (req, res) => {
-//     try {
-//         const { email, password } = req.body;
-
-//         // Check if the user exists
-//         const user = await userSchema.findOne({ email });
-//         if (!user) {
-//             return res.render('user/login', {
-//                 message: 'User does not exist',
-//                 email,
-//             });
-//         }
-
-//         // Compare the entered password with the stored password
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (!isMatch) {
-//             return res.render('user/login', {
-//                 message: 'Incorrect password',
-//                 email,
-//             });
-//         }
-
-//         // Set the session for the logged-in user
-//         req.session.user = { id: user._id, username: user.username };
-
-//         // Redirect to the user's home page
-//         res.render('user/userHome', {
-//             message: 'Login successful',
-//             username: user.username,
-//         });
-
-//     } catch (error) {
-//         res.render('user/login', {
-//             message: 'Something went wrong. Please try again.',
-//             email,
-//         });
-//     }
-// };
-
-// const logout = (req, res) => {
-//     req.session.user = null;
-//     res.redirect('/user/login');
-// };
-
-// const loadRegister = (req, res) => {
-//     res.render('user/register', { message: '', username: '', email: '' });
-// };
-
-// const loadLogin = (req, res) => {
-//     res.render('user/login', { message: '', email: '' });
-// };
-
-// const loadHome = (req, res) => {
-//     if (!req.session.user) {
-//         return res.redirect('/user/login');
-//     }
-//     res.render('user/userHome', { username: req.session.user.username });
-// };
-
-// module.exports = {
-//     registerUser,
-//     loadRegister,
-//     loadLogin,
-//     login,
-//     loadHome,
-//     logout,
-// };
-
-// filepath: src/controller/userController.js
 const userSchema = require('../model/userModel');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const saltround = 10;
+const Product = require('../model/productModel'); // Add this line to import the Product model
+const Category = require('../model/categoryModel'); // Add this line to import the Category model
+const Variant = require('../model/variantModel'); // Add this line to import the Variant model
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -294,13 +175,26 @@ const loginUser = async (req, res) => {
     }
 };
 
+const loadHome = async (req, res) => {
+    try {
+        const products = await Product.find({ isListed: true }).populate('categoryid');
+        const categories = await Category.find();
+        const variants = await Variant.find().populate('productId');
+        const username = req.session.user ? req.session.user.username : null;
+        res.render('user/home', { username, products, categories, variants });
+    } catch (error) {
+        console.error('Error loading products, categories, and variants:', error);
+        res.status(500).send('Server Error');
+    }
+};
+
 const logoutUser = (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error('Error destroying session:', err);
         }
         res.clearCookie('connect.sid');
-        res.redirect('/user/home');
+        res.redirect('/user/home'); // Change this line to redirect to /user/home
     });
 };
 
@@ -310,6 +204,7 @@ module.exports = {
     getRegisterPage,
     loginUser,
     verifyOtp,
-    resendOtp, // Add this line
+    resendOtp,
+    loadHome,
     logoutUser,
 };

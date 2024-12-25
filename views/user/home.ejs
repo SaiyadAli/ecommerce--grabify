@@ -51,10 +51,11 @@
                     <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
                         <% if (username) { %>
                             <span style="font-size: 18px; color: #000; cursor: pointer;" id="logout"><%= username %></span>
+                        <% } else { %>
+                            <a href="/user/login" style="text-decoration: none; color: #000;">
+                                <span class="flaticon-user" style="font-size: 18px;"></span>
+                            </a>
                         <% } %>
-                        <a href="/user/login" style="text-decoration: none; color: #000;">
-                            <span class="flaticon-user" style="font-size: 18px;"></span>
-                        </a>
                         <a href="cart.html" style="text-decoration: none; color: #000;">
                             <span class="flaticon-shopping-cart" style="font-size: 18px;"></span>
                         </a>
