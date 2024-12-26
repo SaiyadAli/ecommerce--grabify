@@ -25,12 +25,9 @@
                                                 <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
                                                 
                                                 <div id="timer" class="timer">15</div>
-                                                <div id="resendOtp" class="resend-otp">
-                                                    <button type="button" id="resendButton" onclick="resendOtp()">Resend OTP</button>
-                                                </div>
-
-                                                <div class="login-btns">
-                                                    <button type="submit">Verify OTP</button>
+                                                <div id="resendOtp" class="resend-otp" style="display: flex; justify-content: space-between; align-items: center;">
+                                                    <button type="button" id="resendButton" class="btn btn-primary" onclick="resendOtp()" style="display: none;">Resend OTP</button>
+                                                    <button type="submit" class="btn btn-primary">Verify OTP</button>
                                                 </div>
                                                 
                                                 <div class="login-with-btns">

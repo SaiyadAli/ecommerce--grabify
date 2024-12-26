@@ -11,8 +11,8 @@ const Variant = require('../model/variantModel'); // Add this line to import the
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-        user: 'grabify75@gmail.com',
-        pass: 'hjgi ftcx kbop nmyf'
+        user: process.env.EMAIL_ADDRESS,
+        pass: process.env.APP_PASSWORD
     }
 });
 

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.name %></title>
+    <link rel="stylesheet" href="/uassets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/uassets/css/style.css">
+    <style>
+        .product-details {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .product-details h1, .product-details h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .product-details img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 10px;
+        }
+        .product-details ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .product-details ul li {
+            margin-bottom: 10px;
+        }
+        .product-details .variant-images img {
+            width: 100px;
+            height: 100px;
+            margin-right: 10px;
+        }
+        .product-details .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="product-details">
+            <h1><%= product.name %></h1>
+            <p><%= product.description %></p>
+            <p>Category: <%= category ? category.categoryName : 'N/A' %></p>
+            <h2>Selected Variant</h2>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <p>Variant Name: <%= variant.color %></p>
+                    <p>Price: $<%= variant.price %></p>
+                    <p>Images:</p>
+                    <div class="variant-images d-flex">
+                        <% variant.images.forEach(image => { %>
+                            <img src="<%= image %>" alt="Variant Image" class="img-thumbnail">
+                        <% }); %>
+                    </div>
+                    <p>Sizes and Stock:</p>
+                    <ul class="list-group">
+                        <% for (let [size, stock] of variant.size.entries()) { %>
+                            <li class="list-group-item">Size: <%= size %>, Stock: <%= stock %></li>
+                        <% } %>
+                    </ul>
+                </li>
+            </ul>
+            <h2>Other Variants</h2>
+            <ul class="list-group">
+                <% variants.filter(otherVariant => otherVariant.isListed && otherVariant.productId.isListed).forEach(otherVariant => { %>
+                    <% if (otherVariant._id.toString() !== variant._id.toString()) { %>
+                        <li class="list-group-item">
+                            <p>Variant Name: <%= otherVariant.color %></p>
+                            <p>Price: $<%= otherVariant.price %></p>
+                            <p>Images:</p>
+                            <div class="variant-images d-flex">
+                                <% otherVariant.images.forEach(image => { %>
+                                    <img src="<%= image %>" alt="Variant Image" class="img-thumbnail">
+                                <% }); %>
+                            </div>
+                            <p>Sizes and Stock:</p>
+                            <ul class="list-group">
+                                <% for (let [size, stock] of otherVariant.size.entries()) { %>
+                                    <li class="list-group-item">Size: <%= size %>, Stock: <%= stock %></li>
+                                <% } %>
+                            </ul>
+                        </li>
+                    <% } %>
+                <% }); %>
+            </ul>
+            <a href="/user/home" class="btn btn-primary back-link">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

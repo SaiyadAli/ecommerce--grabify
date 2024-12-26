@@ -8,10 +8,11 @@ const adminRoutes= require('./routes/admin');
 const connectDB = require('./db/connectDB');
 const session = require('express-session');
 const nocache = require('nocache')
-
+const passport = require('passport');
+require('./config/passport'); // Import Passport configuration
 
 app.use(nocache())
-app.use(session({secret:'mysecretKey',
+app.use(session({secret: process.env.SESSION_SECRET || 'your_secret_key',
     resave:false,
     saveUninitialized:true,
     cookie:{
@@ -19,7 +20,8 @@ app.use(session({secret:'mysecretKey',
     }
 }))
 
-
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine','ejs')
