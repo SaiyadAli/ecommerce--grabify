@@ -12,12 +12,19 @@ passport.use(new GoogleStrategy({
     try {
       let user = await User.findOne({ googleId: profile.id });
       if (!user) {
-        user = new User({
-          googleId: profile.id,
-          username: profile.displayName,
-          email: profile.emails[0].value
-        });
-        await user.save();
+        user = await User.findOne({ email: profile.emails[0].value });
+        if (user) {
+          user.googleId = profile.id;
+          user.username = profile.displayName;
+          await user.save();
+        } else {
+          user = new User({
+            googleId: profile.id,
+            username: profile.displayName,
+            email: profile.emails[0].value
+          });
+          await user.save();
+        }
       }
       done(null, user);
     } catch (error) {

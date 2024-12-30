@@ -1,0 +1,100 @@
+<!doctype html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Grabify-home page</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/grabifylogo.png">
+
+    
+
+    <!-- CSS here -->
+    <link rel="stylesheet" href="/uassets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/uassets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/uassets/css/slicknav.css">
+    <link rel="stylesheet" href="/uassets/css/flaticon.css">
+    <link rel="stylesheet" href="/uassets/css/animate.min.css">
+    <link rel="stylesheet" href="/uassets/css/price_rangs.css">
+    <link rel="stylesheet" href="/uassets/css/magnific-popup.css">
+    <link rel="stylesheet" href="/uassets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/uassets/css/themify-icons.css">
+    <link rel="stylesheet" href="/uassets/css/slick.css">
+    <link rel="stylesheet" href="/uassets/css/nice-select.css">
+    <link rel="stylesheet" href="/uassets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <!--? Preloader Start -->
+    <div id="preloader-active">
+        <div class="preloader d-flex align-items-center justify-content-center">
+            <div class="preloader-inner position-relative">
+                <div class="preloader-circle"></div>
+                <div class="preloader-img pere-text">
+                    <img src="/assets/grabifylogo.png" alt="loader">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Preloader Start -->
+    <header style="width: 100%; position: relative; z-index: 1;">
+        <div class="header-area">
+            <!-- Removed header-top -->
+            <div class="header-mid" style="background-color: #f8f9fa; padding: 15px 0;">
+                <div class="container" style="display: flex; align-items: center; justify-content: space-between;">
+                    <!-- Logo -->
+                    <div class="logo">
+                        <a href="/user/">
+                            <img src="/assets/grabifylogo.png" alt="Logo" style="height: 50px;">
+                        </a>
+                    </div>
+    
+                    <!-- Header Right -->
+                    <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
+                        <% if (username) { %>
+                            <div class="dropdown">
+                                <span style="font-size: 18px; color: #000; cursor: pointer;" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"><%= username.split(' ')[0] %></span>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="/user/myaccount">
+                                            <i class="bi bi-person-lines-fill me-2"></i>
+                                            <span>Profile</span>
+                                        </a>
+                                    </li>
+                                    <!-- <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bi bi-gear me-2"></i>
+                                            <span>Settings</span>
+                                        </a>
+                                    </li> -->
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="/user/logout">
+                                            <i class="bi bi-box-arrow-right me-2"></i>
+                                            <span>Logout</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } else { %>
+                            <a href="/user/login" style="text-decoration: none; color: #000;">
+                                <span class="flaticon-user" style="font-size: 18px;"></span>
+                            </a>
+                        <% } %>
+                        <a href="cart.html" style="text-decoration: none; color: #000;">
+                            <span class="flaticon-shopping-cart" style="font-size: 18px;"></span>
+                        </a>
+                    </div>
+                </div>
+    
+                <!-- Show Search Box -->
+                
+                <!-- Mobile Menu -->
+                <div class="mobile_menu" style="display: block; margin-top: 10px;">
+                    <!-- Mobile menu placeholder -->
+                </div>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

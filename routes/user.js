@@ -4,6 +4,7 @@ const passport = require('passport');
 const homeController = require('../controller/homeController');
 const userController = require('../controller/userController');
 const userProductController = require('../controller/userProductController'); // Import the userProductController
+const accountController = require('../controller/accountController'); // Import the accountController
 const auth = require('../middleware/auth');
 
 router.get('/home', userController.loadHome);
@@ -29,5 +30,8 @@ router.get('/auth/google/callback',
 
 // Route for displaying product details
 router.get('/product/:id', userProductController.displayProduct);
+
+// Route for displaying my account page
+router.get('/myaccount', auth.checkSession, accountController.getMyAccount);
 
 module.exports = router;

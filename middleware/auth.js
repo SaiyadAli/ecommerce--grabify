@@ -15,6 +15,7 @@ const checkSession = async (req, res, next) => {
                     return res.redirect('/user/login');
                 });
             }
+            req.user = user; // Attach user to request
             next(); // Proceed if user exists
         } catch (err) {
             console.error('Error checking session:', err);
@@ -34,4 +35,11 @@ const isLogin = (req, res, next) => {
     }
 };
 
-module.exports = { checkSession, isLogin };
+const isAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/user/login');
+};
+
+module.exports = { checkSession, isLogin, isAuthenticated };

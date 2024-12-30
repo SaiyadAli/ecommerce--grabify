@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= product.name %></title>
+
+    
     <link rel="stylesheet" href="/uassets/css/bootstrap.min.css">
     <link rel="stylesheet" href="/uassets/css/style.css">
     <style>
@@ -69,29 +71,7 @@
                     </ul>
                 </li>
             </ul>
-            <h2>Other Variants</h2>
-            <ul class="list-group">
-                <% variants.filter(otherVariant => otherVariant.isListed && otherVariant.productId.isListed).forEach(otherVariant => { %>
-                    <% if (otherVariant._id.toString() !== variant._id.toString()) { %>
-                        <li class="list-group-item">
-                            <p>Variant Name: <%= otherVariant.color %></p>
-                            <p>Price: $<%= otherVariant.price %></p>
-                            <p>Images:</p>
-                            <div class="variant-images d-flex">
-                                <% otherVariant.images.forEach(image => { %>
-                                    <img src="<%= image %>" alt="Variant Image" class="img-thumbnail">
-                                <% }); %>
-                            </div>
-                            <p>Sizes and Stock:</p>
-                            <ul class="list-group">
-                                <% for (let [size, stock] of otherVariant.size.entries()) { %>
-                                    <li class="list-group-item">Size: <%= size %>, Stock: <%= stock %></li>
-                                <% } %>
-                            </ul>
-                        </li>
-                    <% } %>
-                <% }); %>
-            </ul>
+            
             <a href="/user/home" class="btn btn-primary back-link">Back to Home</a>
         </div>
     </div>

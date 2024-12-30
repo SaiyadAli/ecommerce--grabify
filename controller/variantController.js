@@ -47,7 +47,7 @@ const addVariant = async (req, res) => {
             const outputPath = path.join(__dirname, '../public/assets/products', filename);
 
             await sharp(image.buffer)
-                .resize(350, 250)
+                .resize(312, 350)
                 .toFile(outputPath);
 
             imagePaths.push(`/assets/products/${filename}`);
