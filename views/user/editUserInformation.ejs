@@ -1,0 +1,123 @@
+<%- include('../partials/grabifyheader.ejs', { username: username }) %>
+
+<div class="container main-container headerOffset">
+    <div class="row">
+        <div class="breadcrumbDiv col-lg-12">
+            <ul class="breadcrumb">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="account.html">My Account</a></li>
+                <li class="active"> Edit My Information</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-9 col-md-9 col-sm-7">
+            <h1 class="section-title-inner"><span><i class="glyphicon glyphicon-user"></i> Edit My Personal Information </span></h1>
+
+            <div class="row userInfo">
+                <div class="col-lg-12">
+                    <h2 class="block-title-2"> Please update your personal information below. </h2>
+
+                    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                        <div class="alert alert-danger">
+                            <ul>
+                                <% errors.forEach(function(error) { %>
+                                    <li><%= error %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    <% } %>
+
+                    <form action="/user/updateUserInformation" method="post">
+                        <div class="col-xs-12 col-sm-6">
+                            <div class="form-group required">
+                                <label for="InputUsername">Username <sup>*</sup> </label>
+                                <input required type="text" class="form-control" id="InputUsername" name="username" placeholder="Username" value="<%= user.username %>">
+                            </div>
+                            <div class="form-group required">
+                                <label for="InputEmail">Email <sup>*</sup> </label>
+                                <input readonly type="email" class="form-control" id="InputEmail" name="email" placeholder="Email" value="<%= user.email %>">
+                            </div>
+                            <div class="form-group required">
+                                <label for="InputPhoneNumber">Phone Number <sup>*</sup> </label>
+                                <input required type="text" class="form-control" id="InputPhoneNumber" name="phone" placeholder="Phone Number" value="<%= user.phone %>">
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <div class="form-group required">
+                                <label for="InputPasswordCurrent">Current Password <sup>*</sup> </label>
+                                <input type="password" name="InputPasswordCurrent" class="form-control" id="InputPasswordCurrent" <%= user.password ? '' : 'readonly value="Set new password"' %>>
+                            </div>
+                            <div class="form-group required">
+                                <label for="InputPasswordNew">New Password <sup>*</sup> </label>
+                                <input type="password" name="InputPasswordNew" class="form-control" id="InputPasswordNew">
+                            </div>
+                            <div class="form-group required">
+                                <label for="InputPasswordNewConfirm">Confirm New Password <sup>*</sup> </label>
+                                <input type="password" name="InputPasswordNewConfirm" class="form-control" id="InputPasswordNewConfirm">
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-group required">
+                                <label for="InputOTP">OTP <sup>*</sup> </label>
+                                <input type="text" name="InputOTP" class="form-control" id="InputOTP" placeholder="Enter OTP">
+                                <button type="button" class="btn btn-primary" id="sendOTP">Send OTP</button>
+                                <span id="otpTimer">00:00</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> &nbsp; Save</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-12 clearfix">
+                    <ul class="pager">
+                        <li class="previous pull-right"><a href="index.html"> <i class="fa fa-home"></i> Go to Shop </a></li>
+                        <li class="next pull-left"><a href="account.html"> &larr; Back to My Account</a></li>
+                    </ul>
+                </div>
+            </div>
+            <!--/row end-->
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-5"></div>
+    </div>
+    <!--/row-->
+
+    <div style="clear:both"></div>
+</div>
+<!-- /main-container -->
+
+<div class="gap"></div>
+<%- include('../partials/grabifyfooter.ejs') %>
+
+<script>
+    document.getElementById('sendOTP').addEventListener('click', function() {
+        fetch('/user/sendOTP', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                startOTPTimer();
+            } else {
+                alert('Error sending OTP');
+            }
+        });
+    });
+
+    function startOTPTimer() {
+        let timer = 30;
+        const otpTimer = document.getElementById('otpTimer');
+        otpTimer.textContent = `00:${timer}`;
+        const interval = setInterval(() => {
+            timer--;
+            otpTimer.textContent = `00:${timer < 10 ? '0' + timer : timer}`;
+            if (timer <= 0) {
+                clearInterval(interval);
+                document.getElementById('sendOTP').disabled = false;
+            }
+        }, 1000);
+        document.getElementById('sendOTP').disabled = true;
+    }
+</script>

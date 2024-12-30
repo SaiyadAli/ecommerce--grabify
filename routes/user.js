@@ -52,4 +52,16 @@ router.post('/editAddress/:addressId', auth.checkSession, accountController.post
 // Route for handling address deletion
 router.post('/deleteAddress/:addressId', auth.checkSession, accountController.deleteAddress);
 
+// Route for displaying user information
+router.get('/userInformation', auth.checkSession, accountController.userInformation);
+
+// Route for displaying edit user information page
+router.get('/editUserInformation', auth.checkSession, accountController.editUserInformation);
+
+// Route for updating user information
+router.post('/updateUserInformation', auth.checkSession, accountController.updateUserInformation);
+
+// Route for sending OTP
+router.post('/sendOTP', auth.checkSession, accountController.sendOTP);
+
 module.exports = router;

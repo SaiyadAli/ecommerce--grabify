@@ -1,4 +1,10 @@
 const User = require('../model/userModel');
+const mongoose = require('mongoose');
+
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const saltround = 10;
 
 // ...existing code...
 
@@ -150,6 +156,117 @@ const deleteAddress = async (req, res) => {
     }
 };
 
+
+const userInformation = (req, res) => {
+    if (req.user) {
+        res.render('user/userInformation', {
+            title: 'User Information',
+            user: req.user,
+            username: req.user.username // Pass the username to the view
+        });
+    } else {
+        res.redirect('/user/login');
+    }
+};
+
+const editUserInformation = (req, res) => {
+    if (req.user) {
+        res.render('user/editUserInformation', {
+            title: 'Edit User Information',
+            user: req.user,
+            username: req.user.username // Pass the username to the view
+        });
+    } else {
+        res.redirect('/user/login');
+    }
+};
+
+const updateUserInformation = async (req, res) => {
+    if (req.user) {
+        const { username, phone, InputPasswordCurrent, InputPasswordNew, InputPasswordNewConfirm, InputOTP } = req.body;
+        let errors = [];
+
+        if (InputPasswordNew !== InputPasswordNewConfirm) {
+            errors.push('New password and confirm password do not match.');
+        }
+
+        try {
+            const user = await User.findById(req.user._id);
+
+            if (user.password) {
+                const isMatch = await bcrypt.compare(InputPasswordCurrent, user.password);
+                if (!isMatch) {
+                    errors.push('Current password is incorrect.');
+                }
+            } else if (InputPasswordCurrent !== 'Set new password') {
+                errors.push('Current password is incorrect.');
+            }
+
+            if (InputOTP !== req.session.otp) {
+                errors.push('Invalid OTP.');
+            }
+
+            if (errors.length > 0) {
+                return res.render('user/editUserInformation', {
+                    title: 'Edit User Information',
+                    user: req.user,
+                    username: req.user.username,
+                    errors
+                });
+            }
+
+            user.username = username;
+            user.phoneNumber = phone; // Ensure phone number is updated
+
+            if (InputPasswordNew) {
+                user.password = await bcrypt.hash(InputPasswordNew, 10);
+            }
+
+            await user.save();
+            res.redirect('/user/userInformation');
+        } catch (err) {
+            console.error('Error updating user information:', err);
+            res.redirect('/user/editUserInformation');
+        }
+    } else {
+        res.redirect('/user/login');
+    }
+};
+const sendOTP = (req, res) => {
+    if (req.user) {
+        const otp = crypto.randomInt(100000, 999999).toString(); // Generate OTP using crypto
+        req.session.otp = otp;
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_ADDRESS,
+                pass: process.env.APP_PASSWORD
+            }
+        });
+
+        const mailOptions = {
+            from: 'your-email@gmail.com',
+            to: req.user.email,
+            subject: 'Your OTP Code',
+            text: `Your OTP code is ${otp}`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending OTP:', error);
+                res.status(500).send('Error sending OTP');
+            } else {
+                res.status(200).send('OTP sent successfully');
+            }
+        });
+    } else {
+        res.redirect('/user/login');
+    }
+};
+
+
+
 module.exports = {
     getMyAccount,
     getMyAddress,
@@ -158,4 +275,8 @@ module.exports = {
     getEditAddress,
     postEditAddress,
     deleteAddress,
+    userInformation,
+    editUserInformation,
+    updateUserInformation,
+    sendOTP,
 };
