@@ -34,4 +34,7 @@ router.get('/product/:id', userProductController.displayProduct);
 // Route for displaying my account page
 router.get('/myaccount', auth.checkSession, accountController.getMyAccount);
 
+// Route for displaying my address page
+router.get('/myAddress', auth.checkSession, accountController.getMyAddress);
+
 module.exports = router;
