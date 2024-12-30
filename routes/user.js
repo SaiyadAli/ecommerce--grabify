@@ -37,4 +37,10 @@ router.get('/myaccount', auth.checkSession, accountController.getMyAccount);
 // Route for displaying my address page
 router.get('/myAddress', auth.checkSession, accountController.getMyAddress);
 
+// Route for displaying add address page
+router.get('/addAddress', auth.checkSession, accountController.getAddAddress);
+
+// Route for handling add address form submission
+router.post('/addAddress', auth.checkSession, accountController.postAddAddress);
+
 module.exports = router;
