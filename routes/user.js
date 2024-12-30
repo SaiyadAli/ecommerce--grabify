@@ -43,4 +43,13 @@ router.get('/addAddress', auth.checkSession, accountController.getAddAddress);
 // Route for handling add address form submission
 router.post('/addAddress', auth.checkSession, accountController.postAddAddress);
 
+// Route for displaying edit address page
+router.get('/editAddress/:addressId', auth.checkSession, accountController.getEditAddress);
+
+// Route for handling edit address form submission
+router.post('/editAddress/:addressId', auth.checkSession, accountController.postEditAddress);
+
+// Route for handling address deletion
+router.post('/deleteAddress/:addressId', auth.checkSession, accountController.deleteAddress);
+
 module.exports = router;
