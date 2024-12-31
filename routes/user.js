@@ -5,6 +5,7 @@ const homeController = require('../controller/homeController');
 const userController = require('../controller/userController');
 const userProductController = require('../controller/userProductController'); // Import the userProductController
 const accountController = require('../controller/accountController'); // Import the accountController
+const userCategoryController = require('../controller/userCategoryController'); // Import the userCategoryController
 const auth = require('../middleware/auth');
 
 router.get('/home', userController.loadHome);
@@ -63,5 +64,8 @@ router.post('/updateUserInformation', auth.checkSession, accountController.updat
 
 // Route for sending OTP
 router.post('/sendOTP', auth.checkSession, accountController.sendOTP);
+
+// Route for displaying category products
+router.get('/category/:categoryId', userCategoryController.getCategoryProducts);
 
 module.exports = router;
