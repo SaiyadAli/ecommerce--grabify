@@ -14,7 +14,9 @@ const displayProduct = async (req, res) => {
             return res.status(404).send('Product not found');
         }
 
-        res.render('user/userproduct', { product, variants, category, variant });
+        const username = req.user ? req.user.username : null; // Assuming you have user information in req.user
+
+        res.render('user/userproduct', { product, variants, category, variant, username });
     } catch (error) {
         console.error('Error displaying product:', error);
         res.status(500).send('Server Error');
