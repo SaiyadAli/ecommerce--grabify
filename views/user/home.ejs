@@ -21,15 +21,22 @@
                         </div>
                         <a href="/user/product/<%= variant._id %>"><img src="<%= variant.images[0] || '/uassets/img/gallery/latest1.jpg' %>" alt="img" class="img-responsive"></a>
 
-                        <div class="promotion"><span class="new-product"> NEW</span> <span class="discount">15% OFF</span></div>
+                        <!-- <div class="promotion"><span class="new-product"> NEW</span> <span class="discount">15% OFF</span></div> -->
                     </div>
                     <div class="description">
                         <h4><a href="/user/product/<%= variant._id %>"><%= variant.productId.name %> (<%= variant.color %>)</a></h4>
 
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
-                        <span class="size">XL / XXL / S </span></div>
+                        <p><%= variant.productId.description %></p> <!-- Added product description here -->
+                        <div class="sizes">
+                            <% for (let [size, stock] of variant.size.entries()) { %>
+                                <% if (stock > 0) { %>
+                                    <span class="size"><%=' / '+size %></span>
+                                <% } %>
+                            <% } %>
+                        </div>
+                    </div>
                     <div class="price"><span>$<%= variant.price %></span></div>
-                    <div class="action-control"><a class="btn btn-primary"> <span class="add2cart"><i class="glyphicon glyphicon-shopping-cart"> </i> Add to cart </span> </a></div>
+                    <div class="action-control"><a class="btn btn-primary"> <span class="add2cart"><i class="glyphicon glyphicon-shopping-cart"> </i> Buy Now </span> </a></div>
                 </div>
             </div>
             <% }); %>
@@ -71,11 +78,9 @@
         <div class="container">
             <div class="row xsResponse categoryProduct">
                 <% categories.forEach(category => { %>
-                <div class="item itemauto col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                <div class="item itemauto col-lg-4 col-md-4 col-sm-6 col-xs-6">
                     <div class="product">
-                        <a class="add-fav tooltipHere" data-toggle="tooltip" data-original-title="Add to Wishlist" data-placement="left">
-                            <i class="glyphicon glyphicon-heart"></i>
-                        </a>
+                        
 
                         <div class="imageHover">
                             <a href="pro-details.html">
@@ -86,7 +91,7 @@
                         <div class="description">
                             <h4><a href="pro-details.html"><%= category.categoryName %></a></h4>
                             <p><a href="pro-details.html"><%= category.categoryDescription %></a></p>
-                            <a href="pro-details.html" class="browse-btn">Shop Now</a>
+                            <div class="action-control"><a class="btn btn-primary"> <span class="add2cart"><i class="glyphicon glyphicon-shopping-cart"> </i> Shop Now </span> </a></div>
                         </div>
                     </div>
                 </div>
