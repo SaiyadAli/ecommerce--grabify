@@ -177,11 +177,23 @@ const loginUser = async (req, res) => {
 
 const loadHome = async (req, res) => {
     try {
-        const products = await Product.find({ isListed: true }).populate('categoryid');
-        const categories = await Category.find();
-        const variants = await Variant.find().populate('productId');
+        const products = await Product.find({ isListed: true }).populate({
+            path: 'categoryid',
+            match: { isListed: true }
+        });
+        const categories = await Category.find({ isListed: true });
+        const variants = await Variant.find({ isListed: true }).populate({
+            path: 'productId',
+            match: { isListed: true },
+            populate: {
+                path: 'categoryid',
+                model: 'categories', // Ensure this matches the registered model name
+                match: { isListed: true }
+            }
+        });
+        const filteredVariants = variants.filter(variant => variant.productId && variant.productId.isListed && variant.productId.categoryid && variant.productId.categoryid.isListed);
         const username = req.session.user ? req.session.user.username : null;
-        res.render('user/home', { username, products, categories, variants });
+        res.render('user/home', { username, products, categories, variants:filteredVariants });
     } catch (error) {
         console.error('Error loading products, categories, and variants:', error);
         res.status(500).send('Server Error');
