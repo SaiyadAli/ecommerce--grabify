@@ -48,8 +48,8 @@
                                     </td>
                                     <td>
                                         <div class="CartDescription">
-                                            <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %></a></h4>
-                                            <span class="size"><%= item.variantId.name %></span>
+                                            <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %>(<%= item.variantId.color %>)</a></h4>
+                                            <span class="size"><%= item.size %></span>
                                             <div class="price"><span>$<%= item.variantId.price %></span></div>
                                         </div>
                                     </td>
@@ -148,7 +148,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    
     document.querySelectorAll('.delete a').forEach(link => {
         link.addEventListener('click', function(event) {
             event.preventDefault();
@@ -172,10 +171,14 @@
 
     document.getElementById('update-cart-btn').addEventListener('click', function() {
         const inputs = document.querySelectorAll('.quanitySniper');
-        inputs.forEach(input => {
+        let stopRequests = false;
+
+        const updateCart = (input) => {
             const itemId = input.dataset.id;
             const quantity = input.value;
             const size = input.dataset.size;
+            const productName = input.closest('tr').querySelector('.CartDescription h4 a').innerText;
+           
 
             fetch(`/user/cart/update-quantity/${itemId}`, {
                 method: 'POST',
@@ -187,19 +190,29 @@
             .then(response => response.json())
             .then(data => {
                 if (data.message === 'Insufficient quantity available') {
+                    stopRequests = true;
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
-                        text: data.message,
+                        text: `${data.message} for ${productName} `,
                         allowOutsideClick: false
+                    }).then(() => {
+                        stopRequests = false;
+                        input.value = input.defaultValue; // Reset to initial value
                     });
-                } else {
+                } else if (!stopRequests) {
                     location.reload();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
             });
+        };
+
+        inputs.forEach(input => {
+            if (!stopRequests) {
+                updateCart(input);
+            }
         });
     });
 </script>
