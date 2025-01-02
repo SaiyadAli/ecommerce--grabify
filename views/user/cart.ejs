@@ -3,8 +3,8 @@
     <div class="row">
         <div class="breadcrumbDiv col-lg-12">
             <ul class="breadcrumb">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="category.html">Category</a></li>
+                <li><a href="/user/home">Home</a></li>
+                
                 <li class="active">Cart</li>
             </ul>
         </div>
@@ -35,71 +35,28 @@
                                 <td style="width:40%">Details</td>
                                 <td style="width:10%" class="delete">&nbsp;</td>
                                 <td style="width:10%">QNT</td>
-                                <td style="width:10%">Discount</td>
+                                <td style="width:10%">Size</td>
                                 <td style="width:15%">Total</td>
                             </tr>
 
+                            <% cartItems.forEach(item => { %>
                             <tr class="CartProduct">
                                 <td class="CartProductThumb">
-                                    <div><a href="product-details.html"><img src="/images/product/a1.jpg" alt="img"></a>
-                                    </div>
+                                    <div><a href="<%= item.variantId.images[0]  %>"><img src="<%= item.variantId.images[0]%>" alt="img"></a></div>
                                 </td>
                                 <td>
                                     <div class="CartDescription">
-                                        <h4><a href="product-details.html">Denim T shirt Black </a></h4>
-                                        <span class="size">12 x 1.5 L</span>
-
-                                        <div class="price"><span>$8.80</span></div>
+                                        <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %></a></h4>
+                                        <span class="size"><%= item.variantId.name %></span>
+                                        <div class="price"><span>$<%= item.variantId.price %></span></div>
                                     </div>
                                 </td>
-                                <td class="delete"><a title="Delete"> <i
-                                        class="glyphicon glyphicon-trash fa-2x"></i></a></td>
-                                <td><input class="quanitySniper" type="text" value="2" name="quanitySniper"></td>
-                                <td>0</td>
-                                <td class="price">$300</td>
+                                <td class="delete"><a href="/cart/delete/<%= item._id %>" title="Delete"><i class="glyphicon glyphicon-trash fa-2x"></i></a></td>
+                                <td><input class="quanitySniper" type="text" value="<%= item.quantity %>" name="quanitySniper"></td>
+                                <td><%= item.size %></td>
+                                <td class="price">$<%= item.variantId.price * item.quantity %></td>
                             </tr>
-
-                            <tr class="CartProduct">
-                                <td class="CartProductThumb">
-                                    <div><a href="product-details.html"><img src="/images/product/a2.jpg" alt="img"></a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="CartDescription">
-                                        <h4><a href="product-details.html">Denim T shirt Red </a></h4>
-                                        <span class="size">12 x 1.5 L</span>
-
-                                        <div class="price"><span>$30</span></div>
-                                    </div>
-                                </td>
-                                <td class="delete"><a title="Delete"> <i
-                                        class="glyphicon glyphicon-trash fa-2x"></i></a></td>
-                                <td><input class="quanitySniper" type="text" value="2" name="quanitySniper"></td>
-                                <td>0</td>
-                                <td class="price">$60</td>
-                            </tr>
-
-                            <tr class="CartProduct">
-                                <td class="CartProductThumb">
-                                    <div>
-                                        <a href="product-details.html"><img src="/images/product/a5.jpg" alt="img"></a>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <div class="CartDescription">
-                                        <h4><a href="product-details.html">Denim T shirt Blue </a></h4>
-                                        <span class="size">12 x 1.5 L</span>
-
-                                        <div class="price"><span>$8.80</span></div>
-                                    </div>
-                                </td>
-                                <td class="delete"><a title="Delete"> <i
-                                        class="glyphicon glyphicon-trash fa-2x"></i></a></td>
-                                <td><input class="quanitySniper" type="text" value="2" name="quanitySniper"></td>
-                                <td>0</td>
-                                <td class="price">$60</td>
-                            </tr>
+                            <% }) %>
                             </tbody>
                         </table>
                     </div>

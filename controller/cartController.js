@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Cart = require('../model/cartModel');
+const Product = require('../model/productModel');
 const Variant = require('../model/variantModel'); // Import the Variant model
 
 const addToCart = async (req, res) => {
@@ -60,6 +61,19 @@ const viewCart = async (req, res) => {
         }
     } else {
         res.redirect('/user/login');
+    }
+};
+
+exports.getCart = async (req, res) => {
+    try {
+        const cartItems = await Cart.find({ userId: req.user._id })
+            .populate('productId')
+            .populate('variantId')
+            .exec();
+        res.render('user/cart', { cartItems });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
     }
 };
 
