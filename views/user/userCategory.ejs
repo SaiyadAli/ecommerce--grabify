@@ -1,10 +1,9 @@
 <%- include('../partials/grabifyheader.ejs', { username: username }) %>
 
- <div class="container main-container headerOffset">
+<div class="container main-container headerOffset">
 
     <!-- Main component call to action -->
 
-   
     <div class="row">
         <div class="breadcrumbDiv col-lg-12">
             <ul class="breadcrumb">
@@ -13,8 +12,6 @@
             </ul>
         </div>
     </div>
-
-    
 
     <div class="row">
         <!-- Sidebar for sorting options -->
@@ -48,14 +45,14 @@
                     </div>
                     <div id="collapsePrice" class="panel-collapse collapse in">
                         <div class="panel-body priceFilterBody">
-                            <form method="GET" action="">
+                            <form id="priceForm">
                                 <label>
-                                    <input type="radio" name="sortBy" value="price" <%= sortBy === 'price' && sortOrder === 1 ? 'checked' : '' %> onchange="this.form.submit()"/>
+                                    <input type="radio" name="sortBy" value="priceAsc"/>
                                     Price: Low to High
                                 </label>
                                 <br>
                                 <label>
-                                    <input type="radio" name="sortBy" value="price" <%= sortBy === 'price' && sortOrder === -1 ? 'checked' : '' %> onchange="this.form.submit()"/>
+                                    <input type="radio" name="sortBy" value="priceDesc"/>
                                     Price: High to Low
                                 </label>
                             </form>
@@ -72,27 +69,32 @@
                     </div>
                     <div id="collapseColor" class="panel-collapse collapse in">
                         <div class="panel-body smoothscroll maxheight300 color-filter">
-                            <form method="GET" action="">
-                                <% colors.forEach(color => { %>
-                                    <div class="block-element">
-                                        <label>
-                                            <input type="radio" name="sortBy" value="color" <%= sortBy === 'color' && sortOrder === 1 && selectedColor === color ? 'checked' : '' %> onchange="this.form.submit()"/>
-                                            <small style="background-color:<%= color %>"></small> <%= color %>
-                                        </label>
-                                    </div>
-                                <% }); %>
+                            <form id="colorForm">
+                                <div>
+                                    <label>Colors:</label>
+                                    <% colors.forEach(color => { %>
+                                        <input type="checkbox" name="colorPattern" value="<%= color %>"> <%= color %>
+                                    <% }); %>
+                                </div>
                             </form>
                         </div>
                     </div>
                 </div>
                 <!--/ Color end -->
+
+                <!-- Apply Filters Button -->
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                    </div>
+                </div>
             </div>
         </div>
         <!--/ Sidebar end -->
 
         <!-- Main content -->
         <div class="col-lg-9 col-md-9 col-sm-12">
-            <div class="row featuredPostContainer globalPadding style2">
+            <div id="productContainer" class="row featuredPostContainer globalPadding style2">
                 <% if (variants.length > 0) { %>
                     <% variants.forEach(variant => { %>
                     <div class="item col-lg-4 col-md-4 col-sm-6 col-xs-12">
@@ -109,8 +111,9 @@
                             <div class="description">
                                 <h4><a href="/user/product/<%= variant._id %>"><%= variant.productId.name %> (<%= variant.color %>)</a></h4>
                                 <p><%= variant.productId.description %></p>
+                               
                                 <div class="sizes">
-                                    <% for (let [size, stock] of variant.size.entries()) { %>
+                                    <% for (let [size, stock] of Object.entries(variant.size)) { %>
                                         <% if (stock > 0) { %>
                                             <span class="size"><%=' / '+size %></span>
                                         <% } %>
@@ -132,5 +135,70 @@
         <!--/ Main content end -->
     </div>
 </div>
+
+<script>
+    let allVariants = <%- JSON.stringify(variants) %>;
+
+    function applyFilters() {
+        const selectedColors = Array.from(document.querySelectorAll('input[name="colorPattern"]:checked')).map(input => input.value);
+        const sortBy = document.querySelector('input[name="sortBy"]:checked') ? document.querySelector('input[name="sortBy"]:checked').value : null;
+
+        let filteredVariants = allVariants;
+
+        if (selectedColors.length > 0) {
+            filteredVariants = filteredVariants.filter(variant => selectedColors.includes(variant.color));
+        }
+
+        if (sortBy) {
+            if (sortBy === 'priceAsc') {
+                filteredVariants.sort((a, b) => a.price - b.price);
+            } else if (sortBy === 'priceDesc') {
+                filteredVariants.sort((a, b) => b.price - a.price);
+            }
+        }
+
+        const productContainer = document.getElementById('productContainer');
+        productContainer.innerHTML = '';
+
+        if (filteredVariants.length > 0) {
+            filteredVariants.forEach(variant => {
+                const productHtml = `
+                    <div class="item col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="product">
+                            <a class="add-fav tooltipHere" data-toggle="tooltip" data-original-title="Add to Wishlist" data-placement="left">
+                                <i class="glyphicon glyphicon-heart"></i>
+                            </a>
+                            <div class="image">
+                                <a href="/user/product/${variant._id}">
+                                    <img src="${variant.images[0]}" alt="img" class="img-responsive">
+                                </a>
+                            </div>
+                            <div class="description">
+                                <h4><a href="/user/product/${variant._id}">${variant.productId.name} (${variant.color})</a></h4>
+                                <p>${variant.productId.description}</p>
+                                <div class="sizes">
+                                    ${Object.entries(variant.size).map(([size, stock]) => stock > 0 ? `<span class="size"> / ${size}</span>` : '').join('')}
+                                </div>
+                            </div>
+                            <div class="price"><span>$${variant.price}</span></div>
+                            <div class="action-control"><a class="btn btn-primary" href="/user/product/${variant._id}"> <span class="add2cart"><i class="glyphicon glyphicon-shopping-cart"> </i> Buy Now </span> </a></div>
+                        </div>
+                    </div>
+                `;
+                productContainer.insertAdjacentHTML('beforeend', productHtml);
+            });
+        } else {
+            productContainer.innerHTML = '<div class="col-lg-12"><p class="text-center">No products found in this category.</p></div>';
+        }
+    }
+
+    document.querySelectorAll('input[name="colorPattern"]').forEach(checkbox => {
+        checkbox.addEventListener('change', applyFilters);
+    });
+
+    document.querySelectorAll('input[name="sortBy"]').forEach(radio => {
+        radio.addEventListener('change', applyFilters);
+    });
+</script>
 
 <%- include('../partials/grabifyfooter.ejs') %>
