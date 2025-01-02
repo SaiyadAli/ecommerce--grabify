@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Cart = require('../model/cartModel');
 const Variant = require('../model/variantModel'); // Import the Variant model
 
-exports.addToCart = async (req, res) => {
+const addToCart = async (req, res) => {
     try {
         const { userId, productId, variantId, quantity, size } = req.body;
         console.log('Received data:', { userId, productId, variantId, quantity, size }); // Debugging line
@@ -45,3 +45,24 @@ exports.addToCart = async (req, res) => {
         res.status(500).json({ message: 'Error adding product to cart', error });
     }
 };
+
+const viewCart = async (req, res) => {
+    if (req.user) {
+        try {
+            const cartItems = await Cart.find({ userId: req.user._id }).populate('productId variantId');
+            res.render('user/cart', {
+                username: req.user.username,
+                cartItems
+            });
+        } catch (error) {
+            console.error('Error fetching cart items:', error);
+            res.status(500).json({ message: 'Error fetching cart items', error });
+        }
+    } else {
+        res.redirect('/user/login');
+    }
+};
+
+module.exports = 
+     {viewCart,
+     addToCart};

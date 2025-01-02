@@ -72,4 +72,7 @@ router.get('/category/:categoryId', userCategoryController.getCategoryProducts);
 // Route for handling add-to-cart request
 router.post('/add-to-cart',auth.checkSession, cartController.addToCart);
 
+// Route for displaying cart page
+router.get('/cart', auth.checkSession, cartController.viewCart);
+
 module.exports = router;
