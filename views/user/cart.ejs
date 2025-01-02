@@ -1,11 +1,4 @@
 <%- include('../partials/grabifyheader.ejs') %>
-<style>
-    .quanitySniper {
-        width: 50px; /* Adjust the width as needed */
-        height: 30px; /* Adjust the height as needed */
-        font-size: 16px; /* Adjust the font size as needed */
-    }
-</style>
 <div class="container main-container headerOffset">
     <div class="row">
         <div class="breadcrumbDiv col-lg-12">
@@ -155,37 +148,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.querySelectorAll('.quanitySniper').forEach(input => {
-        input.addEventListener('change', function() {
-            const itemId = this.dataset.id;
-            const quantity = this.value;
-
-            fetch(`/user/cart/update-quantity/${itemId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ quantity })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'Insufficient quantity available') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: data.message,
-                        allowOutsideClick: true
-                    });
-                } else {
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-
+    
     document.querySelectorAll('.delete a').forEach(link => {
         link.addEventListener('click', function(event) {
             event.preventDefault();
@@ -207,7 +170,7 @@
         });
     });
 
-    document.getElementById('update-cart-btn').addEventListener('click', function() {
+    
         const inputs = document.querySelectorAll('.quanitySniper');
         inputs.forEach(input => {
             const itemId = input.dataset.id;

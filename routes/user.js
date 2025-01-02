@@ -75,8 +75,6 @@ router.post('/add-to-cart',auth.checkSession, cartController.addToCart);
 // Route for displaying cart page
 router.get('/cart', auth.checkSession, cartController.viewCart);
 
-// Route for updating cart item quantity
-router.post('/cart/update-quantity/:id', auth.checkSession, cartController.updateQuantity);
 
 // Route for deleting cart item
 router.get('/cart/delete/:id', auth.checkSession, cartController.deleteItem);
