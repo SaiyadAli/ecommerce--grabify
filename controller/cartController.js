@@ -64,19 +64,57 @@ const viewCart = async (req, res) => {
     }
 };
 
-exports.getCart = async (req, res) => {
+const deleteItem = async (req, res) => {
     try {
-        const cartItems = await Cart.find({ userId: req.user._id })
-            .populate('productId')
-            .populate('variantId')
-            .exec();
-        res.render('user/cart', { cartItems });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
+        const itemId = req.params.id;
+        await Cart.findByIdAndDelete(itemId);
+        res.redirect('/user/cart');
+    } catch (error) {
+        console.error('Error deleting cart item:', error);
+        res.status(500).json({ message: 'Error deleting cart item', error });
     }
 };
 
-module.exports = 
-     {viewCart,
-     addToCart};
+const updateQuantity = async (req, res) => {
+    try {
+        const { itemId, quantity } = req.body;
+        const cartItem = await Cart.findById(itemId);
+
+        if (!cartItem) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+
+        const product = await Product.findById(cartItem.productId).populate('variants');
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        console.log('Product:', product); // Debugging line
+        console.log('Variants:', product.variants); // Debugging line
+
+        const variant = product.variants.id(cartItem.variantId);
+        if (!variant) {
+            return res.status(404).json({ message: 'Variant not found' });
+        }
+
+        if (quantity > variant.stock) {
+            return res.status(400).json({ message: 'Insufficient quantity available' });
+        }
+
+        cartItem.quantity = quantity;
+        await cartItem.save();
+
+        console.log('Quantity updated successfully');
+        res.status(200).json({ message: 'Quantity updated successfully', cartItem });
+    } catch (error) {
+        console.error('Error updating quantity:', error);
+        res.status(500).json({ message: 'Error updating quantity', error });
+    }
+};
+
+module.exports = {
+    viewCart,
+    addToCart,
+    deleteItem,
+    updateQuantity
+};
