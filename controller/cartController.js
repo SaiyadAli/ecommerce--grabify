@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Cart = require('../model/cartModel');
 const Product = require('../model/productModel');
 const Variant = require('../model/variantModel'); // Import the Variant model
+const User = require('../model/userModel'); // Import the User model
 
 const addToCart = async (req, res) => {
     try {
@@ -96,12 +97,18 @@ const updateCartQuantity = async (req, res) => {
     }
 };
 
-
-
-const checkout = (req, res) => {
-    res.render('user/checkout', {
-        username: req.user.username
-    });
+const checkout = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate('addresses');
+        res.render('user/checkout', {
+            username: req.user.username,
+            addressData: user.addresses,
+            grandTotal: req.session.cartTotal ?? 0 // Assuming you store the cart total in the session
+        });
+    } catch (error) {
+        console.error('Error fetching user addresses:', error);
+        res.status(500).json({ message: 'Error fetching user addresses', error });
+    }
 };
 
 module.exports = {
