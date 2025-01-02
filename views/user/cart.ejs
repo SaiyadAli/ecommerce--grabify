@@ -54,7 +54,7 @@
                                         </div>
                                     </td>
                                     <td class="delete"><a href="/user/cart/delete/<%= item._id %>" title="Delete"><i class="glyphicon glyphicon-trash fa-2x"></i></a></td>
-                                    <td><input class="quanitySniper" type="number" value="<%= item.quantity %>" name="quanitySniper" style="width:min-content" data-id="<%= item._id %>"></td>
+                                    <td><input class="quanitySniper" type="number" value="<%= item.quantity %>" name="quanitySniper" style="width:min-content" data-id="<%= item._id %>" data-size="<%= item.size %>"></td>
                                     <td><%= item.size %></td>
                                     <td class="price">$<%= item.variantId.price * item.quantity %></td>
                                     <% sum+=item.variantId.price * item.quantity %>
@@ -170,18 +170,19 @@
         });
     });
 
-    
+    document.getElementById('update-cart-btn').addEventListener('click', function() {
         const inputs = document.querySelectorAll('.quanitySniper');
         inputs.forEach(input => {
             const itemId = input.dataset.id;
             const quantity = input.value;
+            const size = input.dataset.size;
 
             fetch(`/user/cart/update-quantity/${itemId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ quantity })
+                body: JSON.stringify({ quantity, size })
             })
             .then(response => response.json())
             .then(data => {

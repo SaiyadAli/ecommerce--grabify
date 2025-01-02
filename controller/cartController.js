@@ -75,10 +75,31 @@ const deleteItem = async (req, res) => {
     }
 };
 
+const updateCartQuantity = async (req, res) => {
+    const { quantity, size } = req.body;
+    const { id } = req.params;
+
+    try {
+        const cartItem = await Cart.findById(id).populate('variantId');
+        const variant = await Variant.findById(cartItem.variantId._id);
+
+        if (variant.size.get(size) < quantity) {
+            return res.status(400).json({ message: 'Insufficient quantity available' });
+        }
+
+        cartItem.quantity = quantity;
+        await cartItem.save();
+
+        res.status(200).json({ message: 'Cart updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
 module.exports = {
     viewCart,
     addToCart,
     deleteItem,
+    updateCartQuantity,
     
 };

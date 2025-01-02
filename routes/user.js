@@ -75,8 +75,10 @@ router.post('/add-to-cart',auth.checkSession, cartController.addToCart);
 // Route for displaying cart page
 router.get('/cart', auth.checkSession, cartController.viewCart);
 
-
 // Route for deleting cart item
 router.get('/cart/delete/:id', auth.checkSession, cartController.deleteItem);
+
+// Route for updating cart quantity
+router.post('/cart/update-quantity/:id', auth.checkSession, cartController.updateCartQuantity);
 
 module.exports = router;
