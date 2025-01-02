@@ -73,7 +73,11 @@
                                 <div>
                                     <label>Colors:</label>
                                     <% colors.forEach(color => { %>
-                                        <input type="checkbox" name="colorPattern" value="<%= color %>"> <%= color %>
+                                        <div class="block-element" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                            <input type="checkbox" name="colorPattern" value="<%= color %>">
+                                            <span style="display:inline-block; width:15px; height:15px; background-color:<%= color %>; border:1px solid black; margin-left:5px;"></span>
+                                            <span style="margin-left: 5px;"><%= color %></span>
+                                        </div>
                                     <% }); %>
                                 </div>
                             </form>
