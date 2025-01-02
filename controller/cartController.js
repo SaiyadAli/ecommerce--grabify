@@ -96,10 +96,18 @@ const updateCartQuantity = async (req, res) => {
     }
 };
 
+
+
+const checkout = (req, res) => {
+    res.render('user/checkout', {
+        username: req.user.username
+    });
+};
+
 module.exports = {
     viewCart,
     addToCart,
     deleteItem,
     updateCartQuantity,
-    
+    checkout
 };
