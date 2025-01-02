@@ -39,7 +39,8 @@
                                 <td style="width:15%">Total</td>
                             </tr>
 
-                            <% cartItems.forEach(item => { %>
+                            <% let sum=0;
+                             cartItems.forEach(item => { %>
                             <tr class="CartProduct">
                                 <td class="CartProductThumb">
                                     <div><a href="<%= item.variantId.images[0]  %>"><img src="<%= item.variantId.images[0]%>" alt="img"></a></div>
@@ -55,6 +56,7 @@
                                 <td><input class="quanitySniper" type="text" value="<%= item.quantity %>" name="quanitySniper"></td>
                                 <td><%= item.size %></td>
                                 <td class="price">$<%= item.variantId.price * item.quantity %></td>
+                                <% sum+=item.variantId.price * item.quantity %>
                             </tr>
                             <% }) %>
                             </tbody>
@@ -92,14 +94,14 @@
                             <table id="cart-summary" class="std table">
                                 <tbody>
                                 <tr>
-                                    <td>Total products</td>
-                                    <td class="price">$216.51</td>
+                                    <td>Total price </td>
+                                    <td class="price">$<%= sum%></td>
                                 </tr>
                                 <tr style="">
                                     <td>Shipping</td>
                                     <td class="price"><span class="success">Free shipping!</span></td>
                                 </tr>
-                                <tr class="cart-total-price ">
+                                <!-- <tr class="cart-total-price ">
                                     <td>Total (tax excl.)</td>
                                     <td class="price">$216.51</td>
                                 </tr>
@@ -107,11 +109,11 @@
                                     <td>Total tax</td>
                                     <td class="price" id="total-tax">$0.00</td>
                                 </tr>
-                                <tr>
+                                <tr> -->
                                     <td> Total</td>
-                                    <td class=" site-color" id="total-price">$216.51</td>
+                                    <td class=" site-color" id="total-price">$<%= sum%></td>
                                 </tr>
-                                <tr>
+                                <!-- <tr>
                                     <td colspan="2">
                                         <div class="input-append couponForm">
                                             <input class="col-lg-8" id="appendedInputButton" type="text"
@@ -119,10 +121,9 @@
                                             <button class="col-lg-4 btn btn-success" type="button">Apply!</button>
                                         </div>
                                     </td>
-                                </tr>
+                                </tr> -->
                                 </tbody>
-                                <tbody>
-                                </tbody>
+                               
                             </table>
                         </div>
                     </div>
