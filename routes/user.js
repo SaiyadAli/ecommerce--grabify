@@ -7,6 +7,7 @@ const userProductController = require('../controller/userProductController'); //
 const accountController = require('../controller/accountController'); // Import the accountController
 const userCategoryController = require('../controller/userCategoryController'); // Import the userCategoryController
 const auth = require('../middleware/auth');
+const cartController = require('../controller/cartController'); // Import the cartController
 
 router.get('/home', userController.loadHome);
 router.get('/', homeController.loadHomePage);
@@ -30,7 +31,7 @@ router.get('/auth/google/callback',
 );
 
 // Route for displaying product details
-router.get('/product/:id', userProductController.displayProduct);
+router.get('/product/:id', auth.checkSession,userProductController.displayProduct);
 
 // Route for displaying my account page
 router.get('/myaccount', auth.checkSession, accountController.getMyAccount);
@@ -67,5 +68,8 @@ router.post('/sendOTP', auth.checkSession, accountController.sendOTP);
 
 // Route for displaying category products
 router.get('/category/:categoryId', userCategoryController.getCategoryProducts);
+
+// Route for handling add-to-cart request
+router.post('/add-to-cart',auth.checkSession, cartController.addToCart);
 
 module.exports = router;

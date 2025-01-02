@@ -25,7 +25,7 @@ const displayProduct = async (req, res) => {
 
         const username = req.user ? req.user.username : null; // Assuming you have user information in req.user
 
-        res.render('user/userproduct', { product, variants, category, variant, username });
+        res.render('user/userproduct', { product, variants, category, variant, username, user: req.user });
     } catch (error) {
         console.error('Error displaying product:', error);
         res.status(500).send('Server Error');

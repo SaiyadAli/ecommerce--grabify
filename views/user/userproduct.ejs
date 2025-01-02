@@ -18,7 +18,7 @@
         <div class="breadcrumbDiv col-lg-12">
             <ul class="breadcrumb">
                 <li><a href="/user/">Home</a></li>
-                <li><a href="/category/<%= category._id %>"><%= category.categoryName %></a></li>
+                <li><a href="/user/category/<%= category._id %>"><%= category.categoryName %></a></li>
                 <li class="active"><%= product.name %></li>
             </ul>
         </div>
@@ -73,43 +73,48 @@
                     <% }); %>
                 </ul>
             </div>
-            <div class="size-details"><span class="selected-size"><strong>AVAILABE SIZE</strong></span>
-                <ul class="swatches Size">
-                    <% for (const [size, stock] of variant.size.entries()) { %>
-                        <% if (stock > 0) { %>
-                            <li>
-                                <a href="#" style="background-color: white; color: black"><%= size %></a>
-                            </li>
-                       
+            <% let totalStock = 0; %>
+            <% for (const stock of variant.size.values()) { %>
+                <% totalStock += stock; %>
+            <% } %>
+            <% if (totalStock > 0) { %>
+                <div class="size-details"><span class="selected-size"><strong>AVAILABLE SIZE</strong></span>
+                    <ul class="swatches Size">
+                        <% for (const [size, stock] of variant.size.entries()) { %>
+                            <% if (stock > 0) { %>
+                                <li>
+                                    <a href="#" class="size-option" style="background-color: white; color: black"><%= size %></a>
+                                </li>
+                            <% } %>
                         <% } %>
-                    <% } %>
-                </ul>
-            </div>
-            <div class="cart-actions">
-                <form id="productAddToCartForm">
-                    <input type="hidden" name="variantId" value="<%= variant._id %>">
-                    <div class="addto row">
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <button onclick="productAddToCartForm.submit(this);"
-                                    class="button btn-block btn-cart cart first" title="Add to Cart" type="button">Add
-                                to Cart
-                            </button>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12"><a class="link-wishlist wishlist btn-block ">Add
-                            to Wishlist</a></div>
+                    </ul>
+                </div>
+                <!-- Quantity input box -->
+                <form id="productAddToCartForm"> <!-- Move form tag here -->
+                    <div class="quantity-details">
+                        <label for="quantity"><strong>QUANTITY</strong></label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1" style="width: 60px; margin-left: 10px;">
                     </div>
-                </form>
-                <div style="clear:both"></div>
-                <% let totalStock = 0; %>
-                <% for (const stock of variant.size.values()) { %>
-                    <% totalStock += stock; %>
-                <% } %>
-                <% if (totalStock > 0) { %>
-                    <h3 class="incaps"><i class="fa fa fa-check-circle-o color-in"></i> In stock</h3>
-                <% } else { %>
-                    <h3 class="incaps"><i class="fa fa-minus-circle color-out"></i> Out of stock</h3>
-                <% } %>
-            </div>
+                    <input type="hidden" name="variantId" value="<%= variant._id %>">
+                    <input type="hidden" name="productId" value="<%= variant.productId._id %>">
+                    <input type="hidden" name="userId" value="<%= user._id %>">
+                    <input type="hidden" name="size" id="selectedSize" value="">
+                    <div class="cart-actions">
+                        <div class="addto row">
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                <button onclick="addToCart(event);" class="button btn-block btn-cart cart first" title="Add to Cart" type="button">Add to Cart</button>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12"><a class="link-wishlist wishlist btn-block ">Add to Wishlist</a></div>
+                        </div>
+                    </div>
+                </form> <!-- Close form tag here -->
+            <% } %>
+            <div style="clear:both"></div>
+            <% if (totalStock > 0) { %>
+                <h3 class="incaps"><i class="fa fa fa-check-circle-o color-in"></i> In stock</h3>
+            <% } else { %>
+                <h3 class="incaps"><i class="fa fa-minus-circle color-out"></i> Out of stock</h3>
+            <% } %>
             <!--/.cart-actions-->
         </div>
         <!--/ right column end -->
@@ -121,7 +126,7 @@
 
         <div id="SimilarProductSlider">
             <% variants.forEach(v => { %>
-                <% if (v._id !== variant._id) { %>
+                <% if (v._id.toString() !== variant._id.toString()) { %>
                     <div class="item">
                         <div class="product">
                             <a class="product-image" href="/user/product/<%= v._id %>">
@@ -236,6 +241,10 @@
 <!-- include smoothproducts // product zoom plugin  -->
 <script type="text/javascript" src="/tassets/plugins/smoothproducts-master/js/smoothproducts.min.js"></script>
 
+<!-- Include SweetAlert library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css" rel="stylesheet">
+
 <script type="text/javascript">
     /* wait for images to load */
     $(window).load(function() {
@@ -252,6 +261,66 @@
             img.css('transform', 'scale(' + zoomLevel + ')');
             img.data('zoom', zoomLevel);
         });
+
+        // Change color of selected size
+        $('.size-option').on('click', function(event) {
+            event.preventDefault();
+            $('.size-option').removeClass('selected').css('color', 'black'); // Reset color of all size options
+            $(this).addClass('selected').css('color', 'red'); // Change color of selected size
+        });
+    });
+
+    function addToCart(event) {
+        event.preventDefault();
+        const form = $('#productAddToCartForm');
+        const size = $('.size-option.selected').text();
+        const quantity = $('#quantity').val();
+        console.log('Selected size:', size); // Debugging line
+        console.log('Selected quantity:', quantity); // Debugging line
+        if (!size) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Please select a size before adding to cart.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            return;
+        }
+        $('#selectedSize').val(size);
+        console.log('Form data:', form.serialize()); // Debugging line
+
+        $.ajax({
+            url: '/user/add-to-cart',
+            method: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            },
+            error: function(error) {
+                const errorMessage = error.responseJSON && error.responseJSON.error ? error.responseJSON.error : 'There was an error adding the product to the cart.';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+    }
+
+    // Change color of selected size
+    $('.size-option').on('click', function(event) {
+        event.preventDefault();
+        $('.size-option').removeClass('selected').css('color', 'black'); // Reset color of all size options
+        $(this).addClass('selected').css('color', 'red'); // Change color of selected size
     });
 </script>
 
@@ -295,3 +364,4 @@
 
 
 </body>
+</html>
