@@ -3,6 +3,7 @@ const Cart = require('../model/cartModel');
 const Product = require('../model/productModel');
 const Variant = require('../model/variantModel'); // Import the Variant model
 const User = require('../model/userModel'); // Import the User model
+const Order = require('../model/orderModel'); // Import the Order model
 
 const addToCart = async (req, res) => {
     try {
@@ -100,14 +101,18 @@ const updateCartQuantity = async (req, res) => {
 const checkout = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).populate('addresses');
+        const cartItems = await Cart.find({ userId: req.user._id }).populate('productId variantId');
+        const grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+
         res.render('user/checkout', {
             username: req.user.username,
             addressData: user.addresses,
-            grandTotal: req.session.cartTotal ?? 0 // Assuming you store the cart total in the session
+            cartItems,
+            grandTotal
         });
     } catch (error) {
-        console.error('Error fetching user addresses:', error);
-        res.status(500).json({ message: 'Error fetching user addresses', error });
+        console.error('Error fetching user addresses or cart items:', error);
+        res.status(500).json({ message: 'Error fetching user addresses or cart items', error });
     }
 };
 

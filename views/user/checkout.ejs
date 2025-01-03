@@ -13,7 +13,7 @@
 
     <div class="row">
         <div class="col-lg-9 col-md-9 col-sm-7">
-            <h1 class="section-title-inner"><span><i class="glyphicon glyphicon-shopping-cart"></i> ONEPAGE CHECKOUT</span></h1>
+            <h1 class="section-title-inner"><span><i class="glyphicon glyphicon-shopping-cart"></i>CHECKOUT</span></h1>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-5 rightSidebar">
             <h4 class="caps"><a href="/user/home"><i class="fa fa-chevron-left"></i> Back to shopping </a></h4>
@@ -59,12 +59,6 @@
                                                                         <li><span> <strong>Mobile</strong> : <%= address.number %></span></li>
                                                                     </ul>
                                                                 </div>
-                                                                <!-- <div class="panel-footer panel-footer-address">
-                                                                    <a href="/user/editAddress/<%= address._id %>" class="btn btn-sm btn-success"> <i class="fa fa-edit"> </i> Edit </a>
-                                                                    <form action="/user/deleteAddress/<%= address._id %>" method="POST" style="display:inline;">
-                                                                        <button type="submit" class="btn btn-sm btn-danger"> <i class="fa fa-minus-circle"></i> Delete </button>
-                                                                    </form>
-                                                                </div>                                                                                                                 -->
                                                             </div>
                                                         </div>
                                                         <% }) %>
@@ -101,11 +95,6 @@
                                                                 <div class="card-paynemt-box payment-method">
                                                                     <label class="radio-inline" for="CashOnDelivery" aria-controls="CashOnDeliveryCollapse">
                                                                         <input name="radios" id="COD" value="COD" type="radio">Cash On Delivery
-                                                                    </label>
-                                                                </div>
-                                                                <div class="card-paynemt-box payment-method">
-                                                                    <label class="radio-inline" for="wallet" aria-controls="CashOnDeliveryCollapse">
-                                                                        <input name="radios" id="wallet" value="wallet" type="radio">Wallet
                                                                     </label>
                                                                 </div>
                                                                 <div class="card-paynemt-box payment-method">
@@ -146,15 +135,15 @@
                             <td>Shipping</td>
                             <td class="price">Free shipping!</td>
                         </tr>
-                        <tr>
+                        <!-- <tr>
                             <td>Total Discount</td>
                             <td class="price" id="totalDiscount">₹0</td>
-                        </tr>
+                        </tr> -->
                         <tr>
                             <td>Grand Total</td>
                             <td class="site-color" id="total-price">₹<span id="grandTotal"><%= grandTotal %></span></td>
                         </tr>
-                        <tr>
+                        <!-- <tr>
                             <td colspan="2">
                                 <div class="input-append couponForm">
                                     <form id="couponApplyForm">
@@ -163,10 +152,40 @@
                                     </form>
                                 </div>
                             </td>
-                        </tr>
+                        </tr> -->
                     </tbody>
                 </table>
             </div>
+                <div class="cartContent w100">
+                    <table class="cartTable table-responsive" style="width:100%">
+                        <tbody>
+                            <tr class="CartProduct cartTableHeader">
+                                <td style="width:25%"> Product</td>
+                                <td style="width:60%; text-align: center;">Details</td>
+                                <!-- <td style="width:10%">QNT</td>
+                                <td style="width:10%">Size</td> -->
+                                <td style="width:15%">Total</td>
+                            </tr>
+                            <% cartItems.forEach(item => { %>
+                            <tr class="CartProduct">
+                                <td class="CartProductThumb">
+                                    <div><a href="<%= item.variantId.images[0] %>"><img src="<%= item.variantId.images[0] %>" alt="img"></a></div>
+                                </td>
+                                <td>
+                                    <div class="CartDescription">
+                                        <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %>(<%= item.variantId.color %>)</a></h4>
+                                        <div class="price"><span>$<%= item.variantId.price %></span></div>
+                                    </div>
+                                </td>
+                                <!-- <td><%= item.quantity %></td>
+                                <td><%= item.size %></td> -->
+                                <td class="price">$<%= item.variantId.price * item.quantity %></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            
             <!--  /cartMiniTable-->
         </div>
         <!--/rightSidebar-->
