@@ -90,4 +90,10 @@ router.post('/create-order', auth.checkSession, cartController.createOrder);
 // Route for displaying order history
 router.get('/order', auth.checkSession, cartController.viewOrders);
 
+// Route for viewing order status
+router.get('/orderStatus/:orderId', auth.checkSession, cartController.viewOrderStatus);
+
+// Route for cancelling order
+router.post('/cancel-order/:orderId', auth.checkSession, cartController.cancelOrder);
+
 module.exports = router;

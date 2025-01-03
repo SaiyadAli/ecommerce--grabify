@@ -129,7 +129,8 @@ const createOrder = async (req, res) => {
             variantColor: item.variantId.color,
             quantity: item.quantity,
             size: item.size,
-            price: item.variantId.price
+            price: item.variantId.price,
+            variantId: item.variantId._id
         }));
 
         // Subtract stock count for each item
@@ -189,6 +190,71 @@ const viewOrders = async (req, res) => {
     }
 };
 
+const viewOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        const order = await Order.findById(orderId).populate('cartData.variantId');
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const user = await User.findById(order.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const address = user.addresses.id(order.addressChosen);
+        if (!address) {
+            return res.status(404).json({ message: 'Address not found' });
+        }
+
+        res.render('user/orderStatus', {
+            username: req.user.username,
+            order,
+            address
+        });
+    } catch (error) {
+        console.error('Error fetching order status:', error);
+        res.status(500).json({ message: 'Error fetching order status', error });
+    }
+};
+
+const cancelOrder = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        console.log(`Fetching order with ID: ${orderId}`);
+        const order = await Order.findById(orderId);
+        if (!order) {
+            console.log('Order not found');
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        console.log('Order found, adding stock count back to variant');
+        // Add stock count back to variant
+        for (const item of order.cartData) {
+            const variant = await Variant.findById(item.variantId);
+            if (variant.size.has(item.size)) {
+                const currentStock = variant.size.get(item.size);
+                variant.size.set(item.size, currentStock + item.quantity);
+                await variant.save();
+                console.log(`Updated stock for size ${item.size}: ${variant.size.get(item.size)}`);
+            }
+        }
+
+        console.log('Updating order status to Cancelled');
+        order.orderStatus = 'Cancelled';
+        await order.save();
+
+        console.log('Order cancelled successfully');
+        res.redirect(`/user/orderStatus/${orderId}`);
+    } catch (error) {
+        console.error('Error cancelling order:', error);
+        res.status(500).json({ message: 'Error cancelling order', error });
+    }
+};
+
 module.exports = {
     viewCart,
     addToCart,
@@ -196,5 +262,7 @@ module.exports = {
     updateCartQuantity,
     checkout,
     createOrder,
-    viewOrders
+    viewOrders,
+    viewOrderStatus,
+    cancelOrder
 };
