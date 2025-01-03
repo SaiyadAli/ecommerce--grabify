@@ -167,11 +167,34 @@ const createOrder = async (req, res) => {
     }
 };
 
+const viewOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({ userId: req.user._id }).populate({
+            path: 'addressChosen',
+            model: 'User',
+            select: 'addresses',
+            populate: {
+                path: 'addresses',
+                model: 'User',
+                match: { _id: req.user._id }
+            }
+        });
+        res.render('user/order', {
+            username: req.user.username,
+            orders
+        });
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ message: 'Error fetching orders', error });
+    }
+};
+
 module.exports = {
     viewCart,
     addToCart,
     deleteItem,
     updateCartQuantity,
     checkout,
-    createOrder
+    createOrder,
+    viewOrders
 };

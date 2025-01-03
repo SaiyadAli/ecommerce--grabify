@@ -87,4 +87,7 @@ router.get('/checkout',auth.checkSession, cartController.checkout);
 // Route for handling order creation
 router.post('/create-order', auth.checkSession, cartController.createOrder);
 
+// Route for displaying order history
+router.get('/order', auth.checkSession, cartController.viewOrders);
+
 module.exports = router;
