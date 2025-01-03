@@ -116,10 +116,46 @@ const checkout = async (req, res) => {
     }
 };
 
+const createOrder = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { chosenAddress, paymentType } = req.body;
+
+        const cartItems = await Cart.find({ userId }).populate('productId variantId');
+        const grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+
+        const orderData = cartItems.map(item => ({
+            productName: item.productId.name,
+            variantColor: item.variantId.color,
+            quantity: item.quantity,
+            size: item.size,
+            price: item.variantId.price
+        }));
+
+        const newOrder = new Order({
+            userId,
+            orderNumber: Date.now(), // Use current timestamp as order number
+            paymentType,
+            addressChosen: chosenAddress,
+            cartData: orderData,
+            grandTotalCost: grandTotal
+        });
+
+        await newOrder.save();
+        await Cart.deleteMany({ userId }); // Clear the cart after order is placed
+
+        res.json({ success: true, message: 'Order created successfully!' });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ success: false, message: 'Error creating order', error });
+    }
+};
+
 module.exports = {
     viewCart,
     addToCart,
     deleteItem,
     updateCartQuantity,
-    checkout
+    checkout,
+    createOrder
 };

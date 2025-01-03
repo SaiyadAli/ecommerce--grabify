@@ -84,4 +84,7 @@ router.post('/cart/update-quantity/:id', auth.checkSession, cartController.updat
 // Route for displaying checkout page
 router.get('/checkout',auth.checkSession, cartController.checkout);
 
+// Route for handling order creation
+router.post('/create-order', auth.checkSession, cartController.createOrder);
+
 module.exports = router;
