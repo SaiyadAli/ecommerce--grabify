@@ -132,6 +132,22 @@ const createOrder = async (req, res) => {
             price: item.variantId.price
         }));
 
+        // Subtract stock count for each item
+        for (const item of cartItems) {
+            const variant = item.variantId;
+            if (variant.size.has(item.size)) {
+                const currentStock = variant.size.get(item.size);
+                if (currentStock >= item.quantity) {
+                    variant.size.set(item.size, currentStock - item.quantity);
+                    await variant.save();
+                } else {
+                    return res.status(400).json({ success: false, message: `Insufficient stock for ${item.productId.name} (${item.variantId.color})` });
+                }
+            } else {
+                return res.status(400).json({ success: false, message: `Size ${item.size} not available for ${item.productId.name} (${item.variantId.color})` });
+            }
+        }
+
         const newOrder = new Order({
             userId,
             orderNumber: Date.now(), // Use current timestamp as order number
