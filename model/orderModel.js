@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema({
     orderDate: { type: Date, required: true, default: Date.now },
     paymentType: { type: String, default: 'toBeChosen' },
     orderStatus: { type: String, default: 'Pending' },
-    addressChosen: { type: mongoose.Types.ObjectId, required: true, ref: 'User.addresses' },
+    addressChosen: { type: mongoose.Types.ObjectId, required: true },
     cartData: [{
         productName: { type: String, required: true },
         variantColor: { type: String, required: true },
@@ -17,6 +17,13 @@ const orderSchema = new mongoose.Schema({
     }],
     grandTotalCost: { type: Number },
     paymentId: { type: String }
+});
+
+orderSchema.virtual('address', {
+    ref: 'User',
+    localField: 'addressChosen',
+    foreignField: 'addresses._id',
+    justOne: true
 });
 
 const orderCollection = mongoose.model('Order', orderSchema);

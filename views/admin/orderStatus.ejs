@@ -1,5 +1,4 @@
-
-    <%- include('../partials/header.ejs') %>
+<%- include('../partials/header.ejs') %>
     <%- include('../partials/navbar.ejs') %>
     <%- include('../partials/topnavigation.ejs') %>
 
@@ -47,13 +46,13 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><%= order.addressChosen.firstName %> <%= order.addressChosen.lastName %></td>
-                                    <td><%= order.addressChosen.street %></td>
-                                    <td><%= order.addressChosen.city %></td>
-                                    <td><%= order.addressChosen.state %></td>
-                                    <td><%= order.addressChosen.country %></td>
-                                    <td><%= order.addressChosen.pincode %></td>
-                                    <td><%= order.addressChosen.number %></td>
+                                    <td><%= address.firstName %> <%= address.lastName %></td>
+                                    <td><%= address.street %></td>
+                                    <td><%= address.city %></td>
+                                    <td><%= address.state %></td>
+                                    <td><%= address.country %></td>
+                                    <td><%= address.pincode %></td>
+                                    <td><%= address.number %></td>
                                 </tr>
                             </tbody>
                         </table>
