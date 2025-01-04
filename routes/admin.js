@@ -37,7 +37,7 @@ router.delete('/products/delete/:id', adminAuth.checkSession, productController.
 
 // Order management routes
 router.get('/orders', adminAuth.checkSession, orderController.listOrders);
-
+router.get('/orders/:id/status', orderController.viewOrderStatus);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ...existing code... -->
+    <title>Order Status</title>
+    <link rel="stylesheet" href="/path/to/your/css/file.css">
+    <!-- ...existing code... -->
+</head>
+<body>
+    <%- include('../partials/header.ejs') %>
+    <%- include('../partials/navbar.ejs') %>
+    <%- include('../partials/topnavigation.ejs') %>
+
+    <div class="container-fluid">
+        <!-- Title -->
+        <div class="d-flex justify-content-between align-items-center py-3">
+            <h2 class="h5">Order Status</h2>
+        </div>
+
+        <!-- Order Details -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>Order Number: #<%= order.orderNumber %></h5>
+                <p>User Name: <%= order.userId.username %></p>
+                <p>Items: <%= order.cartData.length %> item(s)</p>
+                <p>Payment Type: <%= order.paymentType %></p>
+                <p>Total Cost: $<%= order.grandTotalCost %></p>
+                <p>Order Date: <%= order.orderDate.toLocaleDateString() %></p>
+                <p>Status: <span class="label label-<%= order.orderStatus === 'Pending' ? 'primary' : order.orderStatus === 'Done' ? 'success' : 'danger' %>"><%= order.orderStatus %></span></p>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+</body>
+</html>
