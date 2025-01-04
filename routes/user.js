@@ -10,7 +10,7 @@ const auth = require('../middleware/auth');
 const cartController = require('../controller/cartController'); // Import the cartController
 
 router.get('/home', userController.loadHome);
-router.get('/', homeController.loadHomePage);
+// router.get('/', homeController.loadHomePage);
 router.get('/login', auth.isLogin, userController.getLoginPage);
 router.post('/login', userController.loginUser);
 router.get('/register', userController.getRegisterPage);
