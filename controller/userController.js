@@ -106,9 +106,9 @@ const verifyOtp = (req, res) => {
     }
 };
 
-const resendOtp = (req, res) => {
+const resendOtp = async (req, res) => {
     try {
-        const { email } = req.session.tempUser;
+        const { email } = req.body;
 
         // Generate new OTP
         const otp = crypto.randomInt(100000, 999999).toString();
@@ -117,8 +117,8 @@ const resendOtp = (req, res) => {
         const mailOptions = {
             from: 'grabify75@gmail.com',
             to: email,
-            subject: 'Email Verification OTP',
-            text: `Your OTP for email verification is ${otp}`
+            subject: 'Password Reset OTP',
+            text: `Your OTP for password reset is ${otp}`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -210,6 +210,58 @@ const logoutUser = (req, res) => {
     });
 };
 
+const forgotPassword = (req, res) => {
+    res.render('user/forgotpassword', { message: null });
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { email, newPassword, confirmPassword, otp } = req.body;
+
+        // Check if passwords match
+        if (newPassword !== confirmPassword) {
+            return res.render('user/forgotpassword', {
+                message: 'Passwords do not match',
+                email
+            });
+        }
+
+        // Check if OTP is correct
+        if (otp !== req.session.otp) {
+            return res.render('user/forgotpassword', {
+                message: 'Invalid OTP. Please try again.',
+                email
+            });
+        }
+
+        // Find user by email
+        const user = await userSchema.findOne({ email });
+        if (!user) {
+            return res.render('user/forgotpassword', {
+                message: 'User not found',
+                email
+            });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, saltround);
+
+        // Update user's password
+        user.password = hashedPassword;
+        await user.save();
+
+        // Clear OTP from session
+        req.session.otp = null;
+
+        res.render('user/login', {
+            message: 'Password reset successful. Please log in.'
+        });
+    } catch (error) {
+        console.error('Server Error:', error);
+        res.status(500).send('Server Error');
+    }
+};
+
 module.exports = {
     registerUser,
     getLoginPage,
@@ -219,4 +271,6 @@ module.exports = {
     resendOtp,
     loadHome,
     logoutUser,
+    forgotPassword,
+    resetPassword,
 };
