@@ -7,6 +7,7 @@ const path = require('path');
 const adminController = require('../controller/adminController');
 const categoryController = require('../controller/categoryController');
 const productController = require('../controller/productController');
+const orderController = require('../controller/orderController');
 
 const adminAuth = require('../middleware/adminAuth');
 
@@ -33,6 +34,10 @@ router.get('/products/toggle-status/:id', adminAuth.checkSession, productControl
 router.post('/products/add', adminAuth.checkSession, productController.addProduct);
 router.post('/products/edit', adminAuth.checkSession, productController.editProduct);
 router.delete('/products/delete/:id', adminAuth.checkSession, productController.deleteProduct);
+
+// Order management routes
+router.get('/orders', adminAuth.checkSession, orderController.listOrders);
+
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
