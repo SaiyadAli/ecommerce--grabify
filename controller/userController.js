@@ -110,12 +110,18 @@ const resendOtp = async (req, res) => {
     try {
         const { email } = req.body;
 
+        // Check if user exists
+        const user = await userSchema.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
         // Generate new OTP
         const otp = crypto.randomInt(100000, 999999).toString();
 
         // Send OTP to user's email
         const mailOptions = {
-            from: 'grabify75@gmail.com',
+            from: process.env.EMAIL_ADDRESS,
             to: email,
             subject: 'Password Reset OTP',
             text: `Your OTP for password reset is ${otp}`
@@ -220,27 +226,18 @@ const resetPassword = async (req, res) => {
 
         // Check if passwords match
         if (newPassword !== confirmPassword) {
-            return res.render('user/forgotpassword', {
-                message: 'Passwords do not match',
-                email
-            });
+            return res.status(400).json({ success: false, message: 'Passwords do not match' });
         }
 
         // Check if OTP is correct
         if (otp !== req.session.otp) {
-            return res.render('user/forgotpassword', {
-                message: 'Invalid OTP. Please try again.',
-                email
-            });
+            return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
         }
 
         // Find user by email
         const user = await userSchema.findOne({ email });
         if (!user) {
-            return res.render('user/forgotpassword', {
-                message: 'User not found',
-                email
-            });
+            return res.status(400).json({ success: false, message: 'User not found' });
         }
 
         // Hash the new password
@@ -253,12 +250,10 @@ const resetPassword = async (req, res) => {
         // Clear OTP from session
         req.session.otp = null;
 
-        res.render('user/login', {
-            message: 'Password reset successful. Please log in.'
-        });
+        res.status(200).json({ success: true, message: 'Password reset successful. Please log in.' });
     } catch (error) {
         console.error('Server Error:', error);
-        res.status(500).send('Server Error');
+        res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
 
