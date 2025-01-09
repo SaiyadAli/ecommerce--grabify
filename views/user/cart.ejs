@@ -54,7 +54,7 @@
                                         </div>
                                     </td>
                                     <td class="delete"><a href="/user/cart/delete/<%= item._id %>" title="Delete"><i class="glyphicon glyphicon-trash fa-2x"></i></a></td>
-                                    <td><input class="quanitySniper" type="number" value="<%= item.quantity %>" name="quanitySniper" style="width:min-content" data-id="<%= item._id %>" data-size="<%= item.size %>"></td>
+                                    <td><input class="quanitySniper" type="number" value="<%= item.quantity %>" name="quanitySniper" style="width: 50px;" data-id="<%= item._id %>" data-size="<%= item.size %>"></td>
                                     <td><%= item.size %></td>
                                     <td class="price">$<%= item.variantId.price * item.quantity %></td>
                                     <% sum+=item.variantId.price * item.quantity %>
