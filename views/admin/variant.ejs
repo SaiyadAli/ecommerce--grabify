@@ -34,11 +34,11 @@
                 <tbody>
                     <% variants.forEach(variant => { %>
                     <tr>
-                        <td><%= variant.productId.name %></td>
-                        <td><%= variant.color %></td>
-                        <td><%= variant.price %></td>
+                        <td><%= variant.productId?.name %></td>
+                        <td><%= variant?.color %></td>
+                        <td><%= variant?.price %></td>
                         <td><%= Array.from(variant.size.values()).reduce((a, b) => a + b, 0) %></td>
-                        <td><%= categories.find(category => category._id.toString() === variant.productId.categoryid.toString()).categoryName %></td>
+                        <td><%= categories.find(category => category._id.toString() === variant.productId?.categoryid?.toString())?.categoryName %></td>
                         <td>
                             <span 
                                 class="badge rounded-pill <%= variant.isListed ? 'bg-success' : 'bg-danger' %>" 

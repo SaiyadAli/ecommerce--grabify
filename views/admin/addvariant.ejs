@@ -25,7 +25,7 @@
         <div class="col-md-12">
             <div class="fx-card card-default">
                 <div class="fx-card-content">
-                    <form class="row g-3" action="/admin/addvariant" method="post" enctype="multipart/form-data">
+                    <form id="addVariantForm" class="row g-3" action="/admin/addvariant" method="post" enctype="multipart/form-data">
                         <div class="row fx-product-uploads">
                             <div class="col-lg-4 mb-991">
                                 <div class="fx-vendor-img-upload">
@@ -197,6 +197,45 @@
         });
     });
 
+    // Form validation
+    document.getElementById('addVariantForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const color = document.getElementById('color').value;
+        const price = document.getElementById('price').value;
+        const images = document.querySelectorAll('.fx-image-upload');
+        const colorRegex = /^[A-Za-z\s]+$/;
+        const priceRegex = /^[0-9]+$/;
+
+        if (!colorRegex.test(color)) {
+            Swal.fire('Error', 'Color should contain only alphabets and spaces.', 'error');
+            return;
+        }
+        if (!priceRegex.test(price)) {
+            Swal.fire('Error', 'Price should be a number.', 'error');
+            return;
+        }
+
+        for (let i = 0; i < images.length; i++) {
+            const file = images[i].files[0];
+            if (file && !['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+                Swal.fire('Error', 'Only JPG, JPEG, and PNG files are allowed for images.', 'error');
+                return;
+            }
+        }
+
+        Swal.fire({
+            title: 'Success',
+            text: 'Variant has been added successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+
     // Show success message if variant is added successfully
     <% if (message) { %>
         Swal.fire({
@@ -205,5 +244,4 @@
             text: '<%= message %>',
         });
     <% } %>
-    
 </script>
