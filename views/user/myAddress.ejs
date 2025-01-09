@@ -16,8 +16,8 @@
         <div class="col-lg-9 col-md-9 col-sm-7">
             <h1 class="section-title-inner"><span><i class="fa fa-map-marker"></i> My addresses </span></h1>
 
-            <p>Please configure your default billing and delivery addresses when placing an order. You may also add
-                additional addresses, which can be useful for sending gifts or receiving an order at your office.</p>
+            <!-- <p>Please configure your default billing and delivery addresses when placing an order. You may also add
+                additional addresses, which can be useful for sending gifts or receiving an order at your office.</p> -->
 
             <div class="row userInfo">
                 <div class="col-lg-12">
@@ -98,6 +98,24 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('a[href^="/user/editAddress"]').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to edit this address?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, edit it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = link.href;
                 }
             });
         });
