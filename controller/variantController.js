@@ -173,6 +173,7 @@ const editVariant = async (req, res) => {
     try {
         const variantId = req.params.id;
         const { color, price, sizes, stock } = req.body;
+        const images = req.files;
 
         const variant = await Variant.findById(variantId);
 
@@ -199,9 +200,8 @@ const editVariant = async (req, res) => {
             }
         }
 
-        if (req.files && req.files.images) {
-            const images = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
-            const imagePaths = [];
+        if (images && images.length > 0) {
+            const imagePaths = [...variant.images]; // Copy existing images
 
             for (let i = 0; i < images.length; i++) {
                 const image = images[i];
@@ -212,16 +212,15 @@ const editVariant = async (req, res) => {
                     .resize(312, 350)
                     .toFile(outputPath);
 
-                imagePaths.push(`/assets/products/${filename}`);
-            }
-
-            // Delete old images
-            variant.images.forEach(image => {
-                const oldImagePath = path.join(__dirname, '..', 'public', image);
-                if (fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath);
+                // Replace the corresponding image in the array
+                if (imagePaths[i]) {
+                    const oldImagePath = path.join(__dirname, '..', 'public', imagePaths[i]);
+                    if (fs.existsSync(oldImagePath)) {
+                        fs.unlinkSync(oldImagePath);
+                    }
                 }
-            });
+                imagePaths[i] = `/assets/products/${filename}`;
+            }
 
             variant.images = imagePaths;
         }
