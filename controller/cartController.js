@@ -204,9 +204,9 @@ const viewOrderStatus = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const address = user.addresses.id(order.addressChosen);
-        if (!address) {
-            return res.status(404).json({ message: 'Address not found' });
+        let address = null;
+        if (order.addressChosen) {
+            address = user.addresses.id(order.addressChosen) || null;
         }
 
         res.render('user/orderStatus', {
