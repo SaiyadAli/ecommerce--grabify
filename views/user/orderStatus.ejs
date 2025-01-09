@@ -26,6 +26,7 @@
                                 <th>Payment Type</th>
                                 <th>Order Status</th>
                                 <th>Grand Total</th>
+                                <th>Delivery Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -35,35 +36,38 @@
                                 <td><%= order.paymentType %></td>
                                 <td><%= order.orderStatus %></td>
                                 <td>$<%= order.grandTotalCost %></td>
+                                <td><%= order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'N/A' %></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <h2 class="block-title-2"> Billing Address </h2>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Street</th>
-                                <th>City</th>
-                                <th>State</th>
-                                <th>Country</th>
-                                <th>Pincode</th>
-                                <th>Mobile</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><%= address.firstName %> <%= address.lastName %></td>
-                                <td><%= address.street %></td>
-                                <td><%= address.city %></td>
-                                <td><%= address.state %></td>
-                                <td><%= address.country %></td>
-                                <td><%= address.pincode %></td>
-                                <td><%= address.number %></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <% if (address) { %>
+                        <h2 class="block-title-2"> Billing Address </h2>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Street</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Country</th>
+                                    <th>Pincode</th>
+                                    <th>Mobile</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><%= address?.firstName %> <%= address?.lastName %></td>
+                                    <td><%= address?.street %></td>
+                                    <td><%= address?.city %></td>
+                                    <td><%= address?.state %></td>
+                                    <td><%= address?.country %></td>
+                                    <td><%= address?.pincode %></td>
+                                    <td><%= address?.number %></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    <% } %>
 
                     <h2 class="block-title-2"> Products </h2>
                     <table class="table table-bordered">
@@ -90,8 +94,8 @@
                     </table>
 
                     <% if (order.orderStatus !== 'Cancelled') { %>
-                        <form action="/user/cancel-order/<%= order._id %>" method="POST">
-                            <button type="submit" class="btn btn-danger">Cancel Order</button>
+                        <form id="cancelOrderForm" action="/user/cancel-order/<%= order._id %>" method="POST">
+                            <button type="button" id="cancelOrderButton" class="btn btn-danger">Cancel Order</button>
                         </form>
                     <% } %>
                 </div>
@@ -107,5 +111,24 @@
 <!-- /main-container -->
 
 <div class="gap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('cancelOrderButton').addEventListener('click', function() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to cancel this order?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('cancelOrderForm').submit();
+            }
+        });
+    });
+</script>
 
 <%- include('../partials/grabifyfooter.ejs') %>
