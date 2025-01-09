@@ -183,36 +183,22 @@ const editUserInformation = (req, res) => {
 
 const updateUserInformation = async (req, res) => {
     if (req.user) {
-        const { username, phone, InputPasswordCurrent, InputPasswordNew, InputPasswordNewConfirm, InputOTP } = req.body;
+        const { username, phone,  InputPasswordNew, InputPasswordNewConfirm, InputOTP } = req.body;
         let errors = [];
 
-        if (InputPasswordNew !== InputPasswordNewConfirm) {
-            errors.push('New password and confirm password do not match.');
-        }
+       
 
         try {
             const user = await User.findById(req.user._id);
 
-            if (user.password) {
-                const isMatch = await bcrypt.compare(InputPasswordCurrent, user.password);
-                if (!isMatch) {
-                    errors.push('Current password is incorrect.');
-                }
-            } else if (InputPasswordCurrent !== 'Set new password') {
-                errors.push('Current password is incorrect.');
-            }
+          
 
             if (InputOTP !== req.session.otp) {
                 errors.push('Invalid OTP.');
             }
 
             if (errors.length > 0) {
-                return res.render('user/editUserInformation', {
-                    title: 'Edit User Information',
-                    user: req.user,
-                    username: req.user.username,
-                    errors
-                });
+                return res.status(400).json({ errors });
             }
 
             user.username = username;
@@ -223,10 +209,11 @@ const updateUserInformation = async (req, res) => {
             }
 
             await user.save();
-            res.redirect('/user/userInformation');
+            req.session.otp = null; // Clear the OTP after successful verification
+            res.status(200).json({ message: 'Your details have been updated successfully!' });
         } catch (err) {
             console.error('Error updating user information:', err);
-            res.redirect('/user/editUserInformation');
+            res.status(500).json({ message: 'Error updating user information' });
         }
     } else {
         res.redirect('/user/login');

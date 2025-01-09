@@ -28,7 +28,7 @@
                         </div>
                     <% } %>
 
-                    <form action="/user/updateUserInformation" method="post">
+                    <form id="editUserInfoForm" action="/user/updateUserInformation" method="post">
                         <div class="col-xs-12 col-sm-6">
                             <div class="form-group required">
                                 <label for="InputUsername">Username <sup>*</sup> </label>
@@ -44,10 +44,7 @@
                             </div>
                         </div>
                         <div class="col-xs-12 col-sm-6">
-                            <div class="form-group required">
-                                <label for="InputPasswordCurrent">Current Password <sup>*</sup> </label>
-                                <input type="password" name="InputPasswordCurrent" class="form-control" id="InputPasswordCurrent" <%= user.password ? '' : 'readonly value="Set new password"' %>>
-                            </div>
+                            
                             <div class="form-group required">
                                 <label for="InputPasswordNew">New Password <sup>*</sup> </label>
                                 <input type="password" name="InputPasswordNew" class="form-control" id="InputPasswordNew">
@@ -60,7 +57,7 @@
                         <div class="col-lg-2">
                             <div class="form-group required">
                                 <label for="InputOTP">OTP <sup>*</sup> </label>
-                                <input type="text" name="InputOTP" class="form-control" id="InputOTP" placeholder="Enter OTP">
+                                <input required type="text" name="InputOTP" class="form-control" id="InputOTP" placeholder="Enter OTP">
                                 <button type="button" class="btn btn-primary" id="sendOTP">Send OTP</button>
                                 <span id="otpTimer">00:00</span>
                             </div>
@@ -90,6 +87,7 @@
 <div class="gap"></div>
 <%- include('../partials/grabifyfooter.ejs') %>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('sendOTP').addEventListener('click', function() {
         fetch('/user/sendOTP', {
@@ -99,9 +97,10 @@
             }
         }).then(response => {
             if (response.ok) {
+                Swal.fire('Success', 'OTP sent successfully!', 'success');
                 startOTPTimer();
             } else {
-                alert('Error sending OTP');
+                Swal.fire('Error', 'Error sending OTP', 'error');
             }
         });
     });
@@ -120,4 +119,66 @@
         }, 1000);
         document.getElementById('sendOTP').disabled = true;
     }
+
+    document.getElementById('editUserInfoForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('InputUsername').value;
+        const phoneNumber = document.getElementById('InputPhoneNumber').value;
+        const newPassword = document.getElementById('InputPasswordNew').value;
+        const confirmPassword = document.getElementById('InputPasswordNewConfirm').value;
+        const otp = document.getElementById('InputOTP').value;
+
+        const usernameRegex = /^[A-Za-z\s]+$/;
+        const phoneNumberRegex = /^[0-9]+$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        if (!usernameRegex.test(username)) {
+            Swal.fire('Error', 'Username should contain only alphabets and spaces.', 'error');
+            return;
+        }
+        if (!phoneNumberRegex.test(phoneNumber)) {
+            Swal.fire('Error', 'Phone Number should contain only numbers.', 'error');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            Swal.fire('Error', 'New Password and Confirm Password should match.', 'error');
+            return;
+        }
+        if (!passwordRegex.test(newPassword)) {
+            Swal.fire('Error', 'Password should be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.', 'error');
+            return;
+        }
+        if (otp.trim() === '') {
+            Swal.fire('Error', 'OTP is required.', 'error');
+            return;
+        }
+
+        fetch('/user/updateUserInformation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, phone: phoneNumber, InputPasswordNew: newPassword, InputPasswordNewConfirm: confirmPassword, InputOTP: otp })
+        }).then(response => response.json())
+        .then(data => {
+            if (data.errors) {
+                Swal.fire('Error', data.errors.join('<br>'), 'error');
+            } else {
+                Swal.fire({
+                    title: 'Success',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/user/userInformation';
+                    }
+                });
+            }
+        }).catch(error => {
+            Swal.fire('Error', 'An error occurred while updating your information.', 'error');
+        });
+    });
 </script>
+<%- include('../partials/grabifyfooter.ejs') %>
