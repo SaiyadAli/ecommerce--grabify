@@ -137,12 +137,22 @@ const deleteVariant = async (req, res) => {
     try {
         const variantId = req.params.id;
 
-        // Delete the variant by ID
-        const deletedVariant = await Variant.findByIdAndDelete(variantId);
-         
-        if (!deletedVariant) {
+        // Find the variant by ID
+        const variant = await Variant.findById(variantId);
+        if (!variant) {
             return res.status(404).json({ success: false, message: 'Variant not found.' });
         }
+
+        // Delete the images from the file system
+        for (const image of variant.images) {
+            const imagePath = path.join(__dirname, '../public', image);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+
+        // Delete the variant by ID
+        await Variant.findByIdAndDelete(variantId);
 
         res.json({ success: true, message: 'Variant deleted successfully!' });
     } catch (error) {
