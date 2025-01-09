@@ -50,7 +50,7 @@ router.post('/variant/togglestatus/:id', adminAuth.checkSession, variantControll
 router.delete('/variant/:id', adminAuth.checkSession, variantController.deleteVariant);
 
 router.get('/editvariant/:id', adminAuth.checkSession, variantController.getEditVariantPage);
-router.post('/editvariant/:id', adminAuth.checkSession, variantController.editVariant);
+router.post('/editvariant/:id', adminAuth.checkSession, upload.array('images', 5), variantController.editVariant); // Ensure multer is used for file uploads
 
 // Admin logout
 router.get('/logout', adminAuth.checkSession, adminController.logout);

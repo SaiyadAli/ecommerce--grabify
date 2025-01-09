@@ -187,8 +187,8 @@ const editVariant = async (req, res) => {
             return res.render('admin/editvariant', { variant, products, message: 'Variant with this color already exists.', messageType: 'danger' });
         }
 
-        variant.color = color;
-        variant.price = price;
+        variant.color = color || variant.color;
+        variant.price = price || variant.price;
 
         // Update sizes and stock
         for (const size in sizes) {
@@ -197,6 +197,33 @@ const editVariant = async (req, res) => {
             } else {
                 variant.size.delete(size);
             }
+        }
+
+        if (req.files && req.files.images) {
+            const images = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+            const imagePaths = [];
+
+            for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+                const filename = `${variant.productId}_${variant.color}_${i + 1}.jpg`;
+                const outputPath = path.join(__dirname, '../public/assets/products', filename);
+
+                await sharp(image.buffer)
+                    .resize(312, 350)
+                    .toFile(outputPath);
+
+                imagePaths.push(`/assets/products/${filename}`);
+            }
+
+            // Delete old images
+            variant.images.forEach(image => {
+                const oldImagePath = path.join(__dirname, '..', 'public', image);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            });
+
+            variant.images = imagePaths;
         }
 
         await variant.save();
