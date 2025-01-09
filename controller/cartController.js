@@ -92,7 +92,11 @@ const updateCartQuantity = async (req, res) => {
         cartItem.quantity = quantity;
         await cartItem.save();
 
-        res.status(200).json({ message: 'Cart updated successfully' });
+        const cartItems = await Cart.find({ userId: req.user._id }).populate('variantId');
+        const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+        const totalItem = cartItem.variantId.price * cartItem.quantity;
+
+        res.status(200).json({ message: 'Cart updated successfully', total, totalItem });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }

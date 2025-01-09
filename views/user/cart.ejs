@@ -54,9 +54,13 @@
                                         </div>
                                     </td>
                                     <td class="delete"><a href="/user/cart/delete/<%= item._id %>" title="Delete"><i class="glyphicon glyphicon-trash fa-2x"></i></a></td>
-                                    <td><input class="quanitySniper" type="number" value="<%= item.quantity %>" name="quanitySniper" style="width: 50px;" data-id="<%= item._id %>" data-size="<%= item.size %>"></td>
+                                    <td>
+                                        <input class="quanitySniper" type="number" value="<%= item.quantity %>" name="quanitySniper" style="width: 50px;" data-id="<%= item._id %>" data-size="<%= item.size %>">
+                                        <button type="button" class="btn btn-sm btn-primary increase-qty" data-id="<%= item._id %>" data-size="<%= item.size %>">+</button>
+                                        <button type="button" class="btn btn-sm btn-primary decrease-qty" data-id="<%= item._id %>" data-size="<%= item.size %>">-</button>
+                                    </td>
                                     <td><%= item.size %></td>
-                                    <td class="price">$<%= item.variantId.price * item.quantity %></td>
+                                    <td class="price" id="total-item-<%= item._id %>">$<%= item.variantId.price * item.quantity %></td>
                                     <% sum+=item.variantId.price * item.quantity %>
                                 </tr>
                                 <% }) %>
@@ -97,33 +101,16 @@
                                 <tbody>
                                 <tr>
                                     <td>Total price </td>
-                                    <td class="price">$<%= sum%></td>
+                                    <td class="price" id="total-price">$<%= sum%></td>
                                 </tr>
                                 <tr style="">
                                     <td>Shipping</td>
                                     <td class="price"><span class="success">Free shipping!</span></td>
                                 </tr>
-                                <!-- <tr class="cart-total-price ">
-                                    <td>Total (tax excl.)</td>
-                                    <td class="price">$216.51</td>
-                                </tr>
                                 <tr>
-                                    <td>Total tax</td>
-                                    <td class="price" id="total-tax">$0.00</td>
-                                </tr>
-                                <tr> -->
                                     <td> Total</td>
                                     <td class=" site-color" id="total-price">$<%= sum%></td>
                                 </tr>
-                                <!-- <tr>
-                                    <td colspan="2">
-                                        <div class="input-append couponForm">
-                                            <input class="col-lg-8" id="appendedInputButton" type="text"
-                                                   placeholder="Coupon code">
-                                            <button class="col-lg-4 btn btn-success" type="button">Apply!</button>
-                                        </div>
-                                    </td>
-                                </tr> -->
                                 </tbody>
                                
                             </table>
@@ -169,49 +156,53 @@
         });
     });
 
-    document.getElementById('update-cart-btn').addEventListener('click', function() {
-        const inputs = document.querySelectorAll('.quanitySniper');
-        let stopRequests = false;
+    const updateCart = (itemId, quantity, size) => {
+        fetch(`/user/cart/update-quantity/${itemId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity, size })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Insufficient quantity available') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.message,
+                    allowOutsideClick: false
+                });
+            } else {
+                document.getElementById('total-price').innerText = `$${data.total}`;
+                document.querySelectorAll('#total-price')[1].innerText = `$${data.total}`;
+                document.getElementById(`total-item-${itemId}`).innerText = `$${data.totalItem}`;
+                document.querySelector(`input[data-id="${itemId}"]`).value = quantity;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    };
 
-        const updateCart = (input) => {
-            const itemId = input.dataset.id;
-            const quantity = input.value;
-            const size = input.dataset.size;
-            const productName = input.closest('tr').querySelector('.CartDescription h4 a').innerText;
-           
+    document.querySelectorAll('.increase-qty').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.id;
+            const size = this.dataset.size;
+            const input = document.querySelector(`input[data-id="${itemId}"]`);
+            const quantity = parseInt(input.value) + 1;
+            updateCart(itemId, quantity, size);
+        });
+    });
 
-            fetch(`/user/cart/update-quantity/${itemId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ quantity, size })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'Insufficient quantity available') {
-                    stopRequests = true;
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: `${data.message} for ${productName} `,
-                        allowOutsideClick: false
-                    }).then(() => {
-                        stopRequests = false;
-                        input.value = input.defaultValue; // Reset to initial value
-                    });
-                } else if (!stopRequests) {
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        };
-
-        inputs.forEach(input => {
-            if (!stopRequests) {
-                updateCart(input);
+    document.querySelectorAll('.decrease-qty').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.id;
+            const size = this.dataset.size;
+            const input = document.querySelector(`input[data-id="${itemId}"]`);
+            const quantity = parseInt(input.value) - 1;
+            if (quantity > 0) {
+                updateCart(itemId, quantity, size);
             }
         });
     });
