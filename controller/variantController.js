@@ -43,7 +43,7 @@ const addVariant = async (req, res) => {
         const imagePaths = [];
         for (let i = 0; i < images.length; i++) {
             const image = images[i];
-            const filename = `${product.name}_${color}_${i + 1}.jpg`;
+            const filename = `${product._id}_${color}_${i + 1}.jpg`;
             const outputPath = path.join(__dirname, '../public/assets/products', filename);
 
             await sharp(image.buffer)
@@ -182,7 +182,7 @@ const getEditVariantPage = async (req, res) => {
 const editVariant = async (req, res) => {
     try {
         const variantId = req.params.id;
-        const { color, price, sizes, stock } = req.body;
+        const { color, price, sizes, stock, imageIndexes } = req.body;
         const images = req.files;
 
         const variant = await Variant.findById(variantId);
@@ -212,10 +212,12 @@ const editVariant = async (req, res) => {
 
         if (images && images.length > 0) {
             const imagePaths = [...variant.images]; // Copy existing images
+            const indexes = imageIndexes.split(',').map(Number);
 
             for (let i = 0; i < images.length; i++) {
                 const image = images[i];
-                const filename = `${variant.productId}_${variant.color}_${i + 1}.jpg`;
+                const index = indexes[i];
+                const filename = `${variant.productId}_${variant.color}_${index + 1}_${Date.now()}.jpg`; // Generate unique filename
                 const outputPath = path.join(__dirname, '../public/assets/products', filename);
 
                 await sharp(image.buffer)
@@ -223,13 +225,13 @@ const editVariant = async (req, res) => {
                     .toFile(outputPath);
 
                 // Replace the corresponding image in the array
-                if (imagePaths[i]) {
-                    const oldImagePath = path.join(__dirname, '..', 'public', imagePaths[i]);
+                if (imagePaths[index]) {
+                    const oldImagePath = path.join(__dirname, '..', 'public', imagePaths[index]);
                     if (fs.existsSync(oldImagePath)) {
                         fs.unlinkSync(oldImagePath);
                     }
                 }
-                imagePaths[i] = `/assets/products/${filename}`;
+                imagePaths[index] = `/assets/products/${filename}`;
             }
 
             variant.images = imagePaths;

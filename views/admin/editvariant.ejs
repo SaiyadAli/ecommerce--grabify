@@ -26,13 +26,14 @@
             <div class="fx-card card-default">
                 <div class="fx-card-content">
                     <form id="editVariantForm" class="row g-3" action="/admin/editvariant/<%= variant._id %>" method="post" enctype="multipart/form-data">
+                        <input type="hidden" id="imageIndexes" name="imageIndexes" value="">
                         <div class="row fx-product-uploads">
                             <div class="col-lg-4 mb-991">
                                 <div class="fx-vendor-img-upload">
                                     <div class="fx-vendor-main-img">
                                         <div class="avatar-upload">
                                             <div class="avatar-edit">
-                                                <input type='file' id="product_main" class="fx-image-upload" accept=".png, .jpg, .jpeg" name="images">
+                                                <input type='file' id="product_main_<%= variant._id %>" class="fx-image-upload" accept=".png, .jpg, .jpeg" name="images" data-index="0">
                                                 <label><i class="ri-pencil-line"></i></label>
                                             </div>
                                             <div class="avatar-preview fx-preview">
@@ -45,7 +46,7 @@
                                             <% for (let i = 1; i < variant.images.length; i++) { %>
                                                 <div class="thumb-upload">
                                                     <div class="thumb-edit">
-                                                        <input type='file' id="thumbUpload<%= i %>" class="fx-image-upload" accept=".png, .jpg, .jpeg" name="images">
+                                                        <input type='file' id="thumbUpload_<%= variant._id %>_<%= i %>" class="fx-image-upload" accept=".png, .jpg, .jpeg" name="images" data-index="<%= i %>">
                                                         <label><i class="ri-pencil-line"></i></label>
                                                     </div>
                                                     <div class="thumb-preview fx-preview">
@@ -155,6 +156,7 @@
         const images = document.querySelectorAll('.fx-image-upload');
         const colorRegex = /^[A-Za-z\s]+$/;
         const priceRegex = /^[0-9]+$/;
+        const imageIndexes = [];
 
         if (!colorRegex.test(color)) {
             Swal.fire('Error', 'Color should contain only alphabets and spaces.', 'error');
@@ -171,7 +173,12 @@
                 Swal.fire('Error', 'Only JPG, JPEG, and PNG files are allowed for images.', 'error');
                 return;
             }
+            if (file) {
+                imageIndexes.push(images[i].dataset.index);
+            }
         }
+
+        document.getElementById('imageIndexes').value = imageIndexes.join(',');
 
         Swal.fire({
             title: 'Success',
