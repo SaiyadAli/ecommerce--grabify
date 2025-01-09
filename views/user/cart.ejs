@@ -55,9 +55,9 @@
                                     </td>
                                     <td class="delete"><a href="/user/cart/delete/<%= item._id %>" title="Delete"><i class="glyphicon glyphicon-trash fa-2x"></i></a></td>
                                     <td>
-                                        <input class="quanitySniper" type="number" value="<%= item.quantity %>" name="quanitySniper" style="width: 50px;" data-id="<%= item._id %>" data-size="<%= item.size %>">
-                                        <button type="button" class="btn btn-sm btn-primary increase-qty" data-id="<%= item._id %>" data-size="<%= item.size %>">+</button>
-                                        <button type="button" class="btn btn-sm btn-primary decrease-qty" data-id="<%= item._id %>" data-size="<%= item.size %>">-</button>
+                                        <input class="quanitySniper" type="text" value="<%= item.quantity %>" name="quanitySniper" style="width: 50px;margin-left: 12px;" data-id="<%= item._id %>" data-size="<%= item.size %>" readonly>
+                                        <button type="button" class="btn btn-sm btn-primary increase-qty" data-id="<%= item._id %>" data-size="<%= item.size %>" style="margin-top: 10px;">+</button>
+                                        <button type="button" class="btn btn-sm btn-primary decrease-qty" data-id="<%= item._id %>" data-size="<%= item.size %>" style="margin-top: 10px;">-</button>
                                     </td>
                                     <td><%= item.size %></td>
                                     <td class="price" id="total-item-<%= item._id %>">$<%= item.variantId.price * item.quantity %></td>
