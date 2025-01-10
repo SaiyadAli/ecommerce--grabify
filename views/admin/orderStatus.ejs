@@ -18,6 +18,7 @@
                                     <th>Payment Type</th>
                                     <th>Order Status</th>
                                     <th>Grand Total</th>
+                                    <th>Delivery Date</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -27,35 +28,40 @@
                                     <td><%= order.paymentType %></td>
                                     <td><%= order.orderStatus %></td>
                                     <td>$<%= order.grandTotalCost %></td>
+                                    <td><%= order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'N/A' %></td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <h2 class="block-title-2"> Billing Address </h2>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Street</th>
-                                    <th>City</th>
-                                    <th>State</th>
-                                    <th>Country</th>
-                                    <th>Pincode</th>
-                                    <th>Mobile</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><%= address.firstName %> <%= address.lastName %></td>
-                                    <td><%= address.street %></td>
-                                    <td><%= address.city %></td>
-                                    <td><%= address.state %></td>
-                                    <td><%= address.country %></td>
-                                    <td><%= address.pincode %></td>
-                                    <td><%= address.number %></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        
+
+                        <% if (address) { %>
+                            <h2 class="block-title-2"> Billing Address </h2>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Street</th>
+                                        <th>City</th>
+                                        <th>State</th>
+                                        <th>Country</th>
+                                        <th>Pincode</th>
+                                        <th>Mobile</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><%= address.firstName %> <%= address.lastName %></td>
+                                        <td><%= address.street %></td>
+                                        <td><%= address.city %></td>
+                                        <td><%= address.state %></td>
+                                        <td><%= address.country %></td>
+                                        <td><%= address.pincode %></td>
+                                        <td><%= address.number %></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        <% } %>
 
                         <h2 class="block-title-2"> Products </h2>
                         <table class="table table-bordered">
@@ -66,6 +72,7 @@
                                     <th>Quantity</th>
                                     <th>Size</th>
                                     <th>Price</th>
+                                    <th>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,16 +83,33 @@
                                         <td><%= item.quantity %></td>
                                         <td><%= item.size %></td>
                                         <td>$<%= item.price %></td>
+                                        <td>$<%= item.price * item.quantity %></td>
                                     </tr>
                                 <% }) %>
                             </tbody>
                         </table>
 
-                        <% if (order.orderStatus !== 'Cancelled') { %>
-                            <form action="/user/cancel-order/<%= order._id %>" method="POST">
-                                <button type="submit" class="btn btn-danger">Cancel Order</button>
+
+
+                        <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered') { %>
+                            <form id="cancel-order-form" action="/admin/cancel-order/<%= order._id %>" method="POST" style="display:inline-block;">
+                                <button type="button" class="btn btn-danger" id="cancel-order-btn" style="width: 150px;">Cancel Order</button>
                             </form>
                         <% } %>
+
+                        <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Shipped') { %>
+                            <form id="ship-order-form" action="/admin/ship-order/<%= order._id %>" method="POST" style="display:inline-block;">
+                                <input type="hidden" name="deliveryDate" id="delivery-date-input">
+                                <button type="button" class="btn btn-success" id="ship-order-btn" style="width: 150px;">Ship Order</button>
+                            </form>
+                        <% } %>
+
+                        <% if (order.orderStatus === 'Shipped') { %>
+                            <form id="deliver-order-form" action="/admin/deliver-order/<%= order._id %>" method="POST" style="display:inline-block;">
+                                <button type="submit" class="btn btn-primary" id="deliver-order-btn" style="width: 150px;">Deliver Order</button>
+                            </form>
+                        <% } %>
+                        
                     </div>
                 </div>
                 <!--/row end-->
@@ -95,4 +119,52 @@
     </div>
 
     <%- include('../partials/footer.ejs') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('cancel-order-btn').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to cancel this order?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, cancel it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('cancel-order-form').submit();
+                }
+            });
+        });
+
+        document.getElementById('ship-order-btn').addEventListener('click', function() {
+            const orderDate = new Date('<%= order.orderDate.toISOString() %>');
+            const minDate = orderDate.toISOString().split('T')[0];
+
+            Swal.fire({
+                title: 'Enter Delivery Date',
+                input: 'date',
+                inputLabel: 'Delivery Date',
+                inputPlaceholder: 'Enter delivery date',
+                inputAttributes: {
+                    min: minDate,
+                    style: 'width: 200px; margin: 0 auto;'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Ship Order',
+                preConfirm: (deliveryDate) => {
+                    if (!deliveryDate) {
+                        Swal.showValidationMessage('Delivery date is required');
+                    }
+                    return deliveryDate;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delivery-date-input').value = result.value;
+                    document.getElementById('ship-order-form').submit();
+                }
+            });
+        });
+    </script>
 

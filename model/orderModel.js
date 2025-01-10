@@ -16,7 +16,8 @@ const orderSchema = new mongoose.Schema({
         variantId: { type: mongoose.Types.ObjectId, required: true, ref: 'Variant' }
     }],
     grandTotalCost: { type: Number },
-    paymentId: { type: String }
+    paymentId: { type: String },
+    deliveryDate: { type: Date, default: null }
 });
 
 orderSchema.virtual('address', {

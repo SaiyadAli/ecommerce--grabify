@@ -32,12 +32,15 @@ router.delete('/categories/delete/:id', adminAuth.checkSession, categoryControll
 router.get('/products', adminAuth.checkSession, productController.loadProducts);
 router.get('/products/toggle-status/:id', adminAuth.checkSession, productController.toggleProductStatus);
 router.post('/products/add', adminAuth.checkSession, productController.addProduct);
-router.post('/products/edit', adminAuth.checkSession, productController.editProduct);
+router.post('/products/edit', adminAuth.checkSession, adminAuth.checkSession, productController.editProduct);
 router.delete('/products/delete/:id', adminAuth.checkSession, productController.deleteProduct);
 
 // Order management routes
 router.get('/orders', adminAuth.checkSession, orderController.listOrders);
-router.get('/orders/:id/status', orderController.viewOrderStatus);
+router.get('/orders/:id/status', adminAuth.checkSession, orderController.viewOrderStatus);
+router.post('/cancel-order/:id', adminAuth.checkSession, orderController.cancelOrder);
+router.post('/ship-order/:id', adminAuth.checkSession, orderController.shipOrder);
+router.post('/deliver-order/:id', adminAuth.checkSession, orderController.deliverOrder);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
