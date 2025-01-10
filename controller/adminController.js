@@ -1,6 +1,8 @@
-const adminModel = require('../model/adminModel')
+const adminModel = require('../model/adminModel');
 const bcrypt = require('bcrypt');
-const userModel = require('../model/userModel')
+const userModel = require('../model/userModel');
+const cartModel = require('../model/cartModel');
+const orderModel = require('../model/orderModel');
 
 const loadLogin = async (req, res) => {
 
@@ -107,21 +109,27 @@ const loadDashboard = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
-      const { id } = req.params;
-  
-      const user = await userModel.findOneAndDelete({ _id: id });
-  
-      if (user) {
-        
-        return res.status(200).json({ message: 'User deleted successfully.' });
-      } else {
-        return res.status(404).json({ message: 'User not found.' });
-      }
+        const { id } = req.params;
+
+        // Delete the user
+        const user = await userModel.findOneAndDelete({ _id: id });
+
+        if (user) {
+            // Delete the cart associated with the user
+            await cartModel.deleteMany({ userId: id });
+
+            // Delete the orders associated with the user
+            await orderModel.deleteMany({ userId: id });
+
+            return res.status(200).json({ message: 'User and associated data deleted successfully.' });
+        } else {
+            return res.status(404).json({ message: 'User not found.' });
+        }
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error.' });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
-  };
+};
 
 
   const editUserStatus = async (req, res) => {
@@ -182,8 +190,6 @@ const logout = async (req, res) => {
     res.redirect('/admin/login')
 }
    
-
-
 
 
 
