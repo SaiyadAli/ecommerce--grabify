@@ -97,7 +97,7 @@
                             </form>
                         <% } %>
 
-                        <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Shipped') { %>
+                        <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Shipped' && order.orderStatus !== 'Delivered') { %>
                             <form id="ship-order-form" action="/admin/ship-order/<%= order._id %>" method="POST" style="display:inline-block;">
                                 <input type="hidden" name="deliveryDate" id="delivery-date-input">
                                 <button type="button" class="btn btn-success" id="ship-order-btn" style="width: 150px;">Ship Order</button>
@@ -106,7 +106,7 @@
 
                         <% if (order.orderStatus === 'Shipped') { %>
                             <form id="deliver-order-form" action="/admin/deliver-order/<%= order._id %>" method="POST" style="display:inline-block;">
-                                <button type="submit" class="btn btn-primary" id="deliver-order-btn" style="width: 150px;">Deliver Order</button>
+                                <button type="button" class="btn btn-primary" id="deliver-order-btn" style="width: 150px;">Deliver Order</button>
                             </form>
                         <% } %>
                         
@@ -163,6 +163,28 @@
                 if (result.isConfirmed) {
                     document.getElementById('delivery-date-input').value = result.value;
                     document.getElementById('ship-order-form').submit();
+                }
+            });
+        });
+
+      
+    </script>
+
+    <script>
+
+
+document.getElementById('deliver-order-btn').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to mark this order as delivered?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, deliver it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deliver-order-form').submit();
                 }
             });
         });
