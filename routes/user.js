@@ -8,6 +8,7 @@ const accountController = require('../controller/accountController'); // Import 
 const userCategoryController = require('../controller/userCategoryController'); // Import the userCategoryController
 const auth = require('../middleware/auth');
 const cartController = require('../controller/cartController'); // Import the cartController
+const shopController = require('../controller/shopController'); // Import the shopController
 
 router.get('/home', userController.loadHome);
 // router.get('/', homeController.loadHomePage);
@@ -102,5 +103,8 @@ router.post('/cancel-order/:orderId', auth.checkSession, cartController.cancelOr
 // Route for handling forgot password request
 router.get('/forgot', userController.forgotPassword);
 router.post('/reset-password', userController.resetPassword);
+
+// Route for displaying shop page
+router.get('/shop', shopController.getShopPage);
 
 module.exports = router;
