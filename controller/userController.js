@@ -158,7 +158,7 @@ const loginUser = async (req, res) => {
 
         // Check if user exists
         const user = await userSchema.findOne({ email });
-        if (!user) {
+        if (!user || !user.password) {
             return res.render('user/login', {
                 message: 'Invalid email or password',
             });
