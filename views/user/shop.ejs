@@ -1,16 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- ...existing code from userCategory.ejs... -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .filter-selected {
-            font-weight: bold;
-            color: red;
-        }
-    </style>
-</head>
-<body>
+
     <%- include('../partials/grabifyheader.ejs', { username: username }) %>
 
     <div class="container main-container headerOffset">
@@ -162,9 +150,17 @@
                     <% } %>
                 </div>
             </div>
+
+
+            
+
             <!--/ Main content end -->
         </div>
     </div>
+    <div class="gap"></div>
+            <div class="gap"></div>
+
+    <%- include('../partials/grabifyfooter.ejs') %>
 
     <script>
         let allVariants = <%- JSON.stringify(variants) %>;
@@ -250,6 +246,5 @@
         });
     </script>
 
-    <%- include('../partials/grabifyfooter.ejs') %>
-</body>
-</html>
+ 
+
