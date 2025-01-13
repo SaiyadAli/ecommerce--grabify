@@ -207,7 +207,7 @@
         const form = this;
 
         if (form.paymentType.value === 'razorpay') {
-            fetch('/user/create-order', {
+            fetch('/user/create-and-verify-order-razorpay', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -220,6 +220,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    console.log('Razorpay Order ID:', data.orderId); // Debugging line
                     const options = {
                         key: 'rzp_test_3TZZC2O6tszKWO', // Replace with your Razorpay key
                         amount: data.amount, // Amount in paise
@@ -228,7 +229,7 @@
                         description: 'Order Payment',
                         order_id: data.orderId, // Order ID from Razorpay
                         handler: function (response) {
-                            fetch('/user/verify-payment', {
+                            fetch('/user/create-and-verify-order-razorpay', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -295,7 +296,7 @@
                 });
             });
         } else {
-            fetch('/user/create-order', {
+            fetch('/user/create-order-cod', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

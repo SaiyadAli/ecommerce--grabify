@@ -89,11 +89,11 @@ router.post('/cart/update-quantity/:id', auth.checkSession, cartController.updat
 // Route for displaying checkout page
 router.get('/checkout',auth.checkSession, cartController.checkout);
 
-// Route for handling order creation
-router.post('/create-order', auth.checkSession, cartController.createOrder);
+// Route for handling order creation with COD
+router.post('/create-order-cod', auth.checkSession, cartController.createOrderCOD);
 
-// Route for verifying payment
-router.post('/verify-payment', auth.checkSession, cartController.verifyPayment);
+// Route for handling order creation and verification with Razorpay
+router.post('/create-and-verify-order-razorpay', auth.checkSession, cartController.createAndVerifyOrderRazorpay);
 
 // Route for displaying order history
 router.get('/order', auth.checkSession, cartController.viewOrders);

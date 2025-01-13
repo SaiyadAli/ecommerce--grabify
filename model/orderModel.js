@@ -6,6 +6,8 @@ const orderSchema = new mongoose.Schema({
     orderDate: { type: Date, required: true, default: Date.now },
     paymentType: { type: String, default: 'toBeChosen' },
     orderStatus: { type: String, default: 'Pending' },
+    paymentStatus: { type: String, default: 'Pending' }, // Add paymentStatus field
+    razorpayOrderId: { type: String }, // Make razorpayOrderId optional
     addressChosen: { type: mongoose.Types.ObjectId, required: true },
     cartData: [{
         productName: { type: String, required: true },
