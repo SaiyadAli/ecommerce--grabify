@@ -1,6 +1,7 @@
 const Order = require('../model/orderModel');
 const User = require('../model/userModel');
 const Product = require('../model/productModel');
+const Wallet = require('../model/walletModel'); // Import the Wallet model
 
 // List all orders
 const listOrders = async (req, res) => {
@@ -64,6 +65,33 @@ const cancelOrder = async (req, res) => {
         // Update order status
         order.orderStatus = 'Cancelled';
         await order.save();
+
+        // If payment status is 'Paid', add the money back to the user's wallet
+        if (order.paymentStatus === 'Paid') {
+            const wallet = await Wallet.findOne({ userId: order.userId });
+            if (wallet) {
+                wallet.walletBalance += order.grandTotalCost;
+                wallet.walletTransaction.push({
+                    transactionDate: new Date(),
+                    transactionAmount: order.grandTotalCost,
+                    transactionType: 'Refund'
+                });
+                await wallet.save();
+                console.log('Money added to wallet:', wallet);
+            } else {
+                const newWallet = new Wallet({
+                    userId: order.userId,
+                    walletBalance: order.grandTotalCost,
+                    walletTransaction: [{
+                        transactionDate: new Date(),
+                        transactionAmount: order.grandTotalCost,
+                        transactionType: 'Refund'
+                    }]
+                });
+                await newWallet.save();
+                console.log('New wallet created and money added:', newWallet);
+            }
+        }
 
         res.redirect(`/admin/orders/${orderId}/status`);
     } catch (error) {
