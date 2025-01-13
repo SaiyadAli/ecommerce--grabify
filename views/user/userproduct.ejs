@@ -104,7 +104,9 @@
                             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                 <button onclick="addToCart(event);" class="button btn-block btn-cart cart first" title="Add to Cart" type="button">Add to Cart</button>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12"><a class="link-wishlist wishlist btn-block ">Add to Wishlist</a></div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                <a class="link-wishlist wishlist btn-block" onclick="addToWishlist(event);">Add to Wishlist</a>
+                            </div>
                         </div>
                     </div>
                 </form> <!-- Close form tag here -->
@@ -305,6 +307,37 @@
             },
             error: function(error) {
                 const errorMessage = error.responseJSON && error.responseJSON.error ? error.responseJSON.error : 'There was an error adding the product to the cart.';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+    }
+
+    function addToWishlist(event) {
+        event.preventDefault();
+        const productId = '<%= variant.productId._id %>';
+        const variantId = '<%= variant._id %>';
+
+        $.ajax({
+            url: '/user/wishlist/add',
+            method: 'POST',
+            data: { productId, variantId },
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            },
+            error: function(error) {
+                const errorMessage = error.responseJSON && error.responseJSON.message ? error.responseJSON.message : 'There was an error adding the product to the wishlist.';
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',

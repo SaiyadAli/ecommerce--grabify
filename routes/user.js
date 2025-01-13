@@ -9,6 +9,7 @@ const userCategoryController = require('../controller/userCategoryController'); 
 const auth = require('../middleware/auth');
 const cartController = require('../controller/cartController'); // Import the cartController
 const shopController = require('../controller/shopController'); // Import the shopController
+const wishlistController = require('../controller/wishlistController'); // Import the wishlistController
 
 router.get('/home', userController.loadHome);
 // router.get('/', homeController.loadHomePage);
@@ -106,5 +107,9 @@ router.post('/reset-password', userController.resetPassword);
 
 // Route for displaying shop page
 router.get('/shop', shopController.getShopPage);
+
+// Route for displaying wishlist
+router.get('/wishlist',auth.checkSession, wishlistController.getWishlist);
+router.post('/wishlist/add', auth.checkSession, wishlistController.addToWishlist);
 
 module.exports = router;
