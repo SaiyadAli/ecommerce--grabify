@@ -221,7 +221,8 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
             };
             const razorpayOrder = await razorpay.orders.create(options);
 
-            const newOrder = new Order({
+            // Store order details temporarily in session or cache
+            req.session.tempOrder = {
                 userId,
                 orderNumber: Date.now(), // Use current timestamp as order number
                 paymentType: 'razorpay',
@@ -230,12 +231,10 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                 grandTotalCost: grandTotal,
                 razorpayOrderId: razorpayOrder.id, // Store Razorpay order ID
                 paymentStatus: 'Pending' // Set initial payment status
-            });
+            };
 
-            await newOrder.save();
-
-            console.log('Order created:', newOrder); // Debugging line
-            console.log('Stored Razorpay Order ID:', newOrder.razorpayOrderId); // Debugging line
+            console.log('Order created:', req.session.tempOrder); // Debugging line
+            console.log('Stored Razorpay Order ID:', req.session.tempOrder.razorpayOrderId); // Debugging line
 
             res.json({ success: true, amount: options.amount, orderId: razorpayOrder.id, userName: req.user.name, userEmail: req.user.email, userContact: req.user.contact });
         } else {
@@ -248,20 +247,26 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
 
             if (generatedSignature === signature) {
                 console.log('Generated Signature:', generatedSignature); // Debugging line
-                const order = await Order.findOne({ razorpayOrderId: orderId });
-                if (!order) {
+
+                // Retrieve order details from session or cache
+                const tempOrder = req.session.tempOrder;
+                if (!tempOrder || tempOrder.razorpayOrderId !== orderId) {
                     console.log('Order not found for verification:', orderId); // Debugging line
                     return res.json({ success: false, message: 'Order not found.' });
                 }
 
-                console.log('Order found for verification:', order); // Debugging line
+                console.log('Order found for verification:', tempOrder); // Debugging line
 
-                // Update order status to 'Paid'
-                order.paymentStatus = 'Paid';
-                await order.save();
+                // Save order to database
+                const newOrder = new Order(tempOrder);
+                newOrder.paymentStatus = 'Paid';
+                await newOrder.save();
 
                 // Clear the cart after successful payment verification
-                await Cart.deleteMany({ userId: order.userId });
+                await Cart.deleteMany({ userId: newOrder.userId });
+
+                // Clear temporary order details from session or cache
+                req.session.tempOrder = null;
 
                 res.json({ success: true, message: 'Payment verified and order placed successfully.' });
             } else {
