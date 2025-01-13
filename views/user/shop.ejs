@@ -1,5 +1,4 @@
-
-    <%- include('../partials/grabifyheader.ejs', { username: username }) %>
+<%- include('../partials/grabifyheader.ejs', { username: username }) %>
 
     <div class="container main-container headerOffset">
 
@@ -136,7 +135,7 @@
                                         <% } %>
                                     </div>
                                 </div>
-                                <div class="price"><span>$<%= variant.price %></span></div>
+                                <div class="price"><span>₹<%= variant.price %></span></div>
                                 <div class="action-control"><a class="btn btn-primary" href="/user/product/<%= variant._id %>"> <span class="add2cart"><i class="glyphicon glyphicon-shopping-cart"> </i> Buy Now </span> </a></div>
                             </div>
                         </div>
@@ -214,7 +213,7 @@
                                         ${Object.entries(variant.size).map(([size, stock]) => stock > 0 ? `<span class="size"> / ${size}</span>` : '').join('')}
                                     </div>
                                 </div>
-                                <div class="price"><span>$${variant.price}</span></div>
+                                <div class="price"><span>₹${variant.price}</span></div>
                                 <div class="action-control"><a class="btn btn-primary" href="/user/product/${variant._id}"> <span class="add2cart"><i class="glyphicon glyphicon-shopping-cart"> </i> Buy Now </span> </a></div>
                             </div>
                         </div>
@@ -244,5 +243,5 @@
         });
     </script>
 
- 
+
 
