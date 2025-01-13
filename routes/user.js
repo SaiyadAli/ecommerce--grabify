@@ -111,5 +111,6 @@ router.get('/shop', shopController.getShopPage);
 // Route for displaying wishlist
 router.get('/wishlist',auth.checkSession, wishlistController.getWishlist);
 router.post('/wishlist/add', auth.checkSession, wishlistController.addToWishlist);
+router.delete('/wishlist/delete/:id', auth.checkSession, wishlistController.deleteFromWishlist);
 
 module.exports = router;

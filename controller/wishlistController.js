@@ -29,4 +29,17 @@ const addToWishlist = async (req, res) => {
     }
 };
 
-module.exports = { getWishlist, addToWishlist };
+const deleteFromWishlist = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Received DELETE request for wishlist item:', id); // Debugging line
+        await Wishlist.findByIdAndDelete(id);
+        console.log('Wishlist item deleted successfully'); // Debugging line
+        res.status(200).json({ message: 'Product removed from wishlist successfully' });
+    } catch (error) {
+        console.log('Error deleting wishlist item:', error); // Debugging line
+        res.status(500).send(error.message);
+    }
+};
+
+module.exports = { getWishlist, addToWishlist, deleteFromWishlist };
