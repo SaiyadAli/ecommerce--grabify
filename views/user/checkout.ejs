@@ -200,47 +200,138 @@
 <%- include('../partials/grabifyfooter.ejs') %>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     document.getElementById('order-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const form = this;
 
-        fetch('/user/create-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chosenAddress: form.chosenAddress.value,
-                paymentType: form.paymentType.value
+        if (form.paymentType.value === 'razorpay') {
+            fetch('/user/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chosenAddress: form.chosenAddress.value,
+                    paymentType: form.paymentType.value
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Order Created',
-                    text: data.message,
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    window.location.href = '/user/home';
-                });
-            } else {
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const options = {
+                        key: 'rzp_test_3TZZC2O6tszKWO', // Replace with your Razorpay key
+                        amount: data.amount, // Amount in paise
+                        currency: 'INR',
+                        name: 'Your Company Name',
+                        description: 'Order Payment',
+                        order_id: data.orderId, // Order ID from Razorpay
+                        handler: function (response) {
+                            fetch('/user/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    paymentId: response.razorpay_payment_id,
+                                    orderId: response.razorpay_order_id,
+                                    signature: response.razorpay_signature
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Payment Successful',
+                                        text: 'Your order has been placed successfully.',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        window.location.href = '/user/home';
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Payment Failed',
+                                        text: data.message
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred while verifying the payment: ' + error.message
+                                });
+                            });
+                        },
+                        prefill: {
+                            name: data.userName,
+                            email: data.userEmail,
+                            contact: data.userContact
+                        },
+                        theme: {
+                            color: '#F37254'
+                        }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: data.message
+                    text: 'An error occurred while creating the order: ' + error.message
                 });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An error occurred while creating the order.'
             });
-        });
+        } else {
+            fetch('/user/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chosenAddress: form.chosenAddress.value,
+                    paymentType: form.paymentType.value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Created',
+                        text: data.message,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = '/user/home';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while creating the order: ' + error.message
+                });
+            });
+        }
     });
 </script>

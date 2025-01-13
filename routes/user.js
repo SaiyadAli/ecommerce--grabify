@@ -92,6 +92,9 @@ router.get('/checkout',auth.checkSession, cartController.checkout);
 // Route for handling order creation
 router.post('/create-order', auth.checkSession, cartController.createOrder);
 
+// Route for verifying payment
+router.post('/verify-payment', auth.checkSession, cartController.verifyPayment);
+
 // Route for displaying order history
 router.get('/order', auth.checkSession, cartController.viewOrders);
 

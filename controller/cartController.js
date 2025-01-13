@@ -4,6 +4,13 @@ const Product = require('../model/productModel');
 const Variant = require('../model/variantModel'); // Import the Variant model
 const User = require('../model/userModel'); // Import the User model
 const Order = require('../model/orderModel'); // Import the Order model
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 const addToCart = async (req, res) => {
     try {
@@ -153,22 +160,51 @@ const createOrder = async (req, res) => {
             }
         }
 
-        const newOrder = new Order({
-            userId,
-            orderNumber: Date.now(), // Use current timestamp as order number
-            paymentType,
-            addressChosen: chosenAddress,
-            cartData: orderData,
-            grandTotalCost: grandTotal
-        });
+        if (paymentType === 'razorpay') {
+            const options = {
+                amount: grandTotal * 100, // amount in paise
+                currency: 'INR',
+                receipt: `receipt_order_${Date.now()}`
+            };
+            const order = await razorpay.orders.create(options);
+            res.json({ success: true, amount: options.amount, orderId: order.id, userName: req.user.name, userEmail: req.user.email, userContact: req.user.contact });
+        } else {
+            const newOrder = new Order({
+                userId,
+                orderNumber: Date.now(), // Use current timestamp as order number
+                paymentType,
+                addressChosen: chosenAddress,
+                cartData: orderData,
+                grandTotalCost: grandTotal
+            });
 
-        await newOrder.save();
-        await Cart.deleteMany({ userId }); // Clear the cart after order is placed
+            await newOrder.save();
+            await Cart.deleteMany({ userId }); // Clear the cart after order is placed
 
-        res.json({ success: true, message: 'Order created successfully!' });
+            res.json({ success: true, message: 'Order created successfully!' });
+        }
     } catch (error) {
         console.error('Error creating order:', error);
         res.status(500).json({ success: false, message: 'Error creating order', error });
+    }
+};
+
+const verifyPayment = async (req, res) => {
+    try {
+        const { paymentId, orderId, signature } = req.body;
+        const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+        hmac.update(orderId + '|' + paymentId);
+        const generatedSignature = hmac.digest('hex');
+
+        if (generatedSignature === signature) {
+            // ...existing code to update order status...
+            res.json({ success: true });
+        } else {
+            res.json({ success: false, message: 'Payment verification failed.' });
+        }
+    } catch (error) {
+        console.error('Error verifying payment:', error);
+        res.json({ success: false, message: 'An error occurred while verifying the payment.' });
     }
 };
 
@@ -266,6 +302,7 @@ module.exports = {
     updateCartQuantity,
     checkout,
     createOrder,
+    verifyPayment,
     viewOrders,
     viewOrderStatus,
     cancelOrder
