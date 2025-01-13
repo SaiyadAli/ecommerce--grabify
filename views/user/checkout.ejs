@@ -131,7 +131,7 @@
                     <tbody>
                         <tr>
                             <td>Total Price</td>
-                            <td class="price" id="totalPrice1">$<%= grandTotal %></td>
+                            <td class="price" id="totalPrice1">₹<%= grandTotal %></td>
                         </tr>
                         <tr style="">
                             <td>Shipping</td>
@@ -143,7 +143,7 @@
                         </tr> -->
                         <tr>
                             <td>Grand Total</td>
-                            <td class="site-color" id="total-price">$<span id="grandTotal"><%= grandTotal %></span></td>
+                            <td class="site-color" id="total-price">₹<span id="grandTotal"><%= grandTotal %></span></td>
                         </tr>
                         <!-- <tr>
                             <td colspan="2">
@@ -176,12 +176,12 @@
                                 <td>
                                     <div class="CartDescription">
                                         <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %>(<%= item.variantId.color %>)</a></h4>
-                                        <div class="price"><span>$<%= item.variantId.price %></span></div>
+                                        <div class="price"><span>₹<%= item.variantId.price %></span></div>
                                     </div>
                                 </td>
                                 <!-- <td><%= item.quantity %></td>
                                 <td><%= item.size %></td> -->
-                                <td class="price">$<%= item.variantId.price * item.quantity %></td>
+                                <td class="price">₹<%= item.variantId.price * item.quantity %></td>
                             </tr>
                             <% }) %>
                         </tbody>

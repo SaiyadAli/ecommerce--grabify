@@ -215,7 +215,7 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
             }
 
             const options = {
-                amount: grandTotal * 100, // amount in paise
+                amount: grandTotal * 100, // amount in cents
                 currency: 'INR',
                 receipt: `receipt_order_${Date.now()}`
             };

@@ -50,7 +50,7 @@
                                         <div class="CartDescription">
                                             <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %>(<%= item.variantId.color %>)</a></h4>
                                             <span class="size"><%= item.size %></span>
-                                            <div class="price"><span>$<%= item.variantId.price %></span></div>
+                                            <div class="price"><span>₹<%= item.variantId.price %></span></div>
                                         </div>
                                     </td>
                                     <td class="delete"><a href="/user/cart/delete/<%= item._id %>" title="Delete"><i class="glyphicon glyphicon-trash fa-2x"></i></a></td>
@@ -60,7 +60,7 @@
                                         <button type="button" class="btn btn-sm btn-primary decrease-qty" data-id="<%= item._id %>" data-size="<%= item.size %>" style="margin-top: 10px;">-</button>
                                     </td>
                                     <td><%= item.size %></td>
-                                    <td class="price" id="total-item-<%= item._id %>">$<%= item.variantId.price * item.quantity %></td>
+                                    <td class="price" id="total-item-<%= item._id %>">₹<%= item.variantId.price * item.quantity %></td>
                                     <% sum+=item.variantId.price * item.quantity %>
                                 </tr>
                                 <% }) %>
@@ -97,7 +97,7 @@
                                 <tbody>
                                 <tr>
                                     <td>Total price </td>
-                                    <td class="price" id="total-price">$<%= sum%></td>
+                                    <td class="price" id="total-price">₹<%= sum%></td>
                                 </tr>
                                 <tr style="">
                                     <td>Shipping</td>
@@ -105,7 +105,7 @@
                                 </tr>
                                 <tr>
                                     <td> Total</td>
-                                    <td class=" site-color" id="total-price">$<%= sum%></td>
+                                    <td class=" site-color" id="total-price">₹<%= sum%></td>
                                 </tr>
                                 </tbody>
                                
@@ -170,9 +170,9 @@
                     allowOutsideClick: false
                 });
             } else {
-                document.getElementById('total-price').innerText = `$${data.total}`;
-                document.querySelectorAll('#total-price')[1].innerText = `$${data.total}`;
-                document.getElementById(`total-item-${itemId}`).innerText = `$${data.totalItem}`;
+                document.getElementById('total-price').innerText = `₹${data.total}`;
+                document.querySelectorAll('#total-price')[1].innerText = `₹${data.total}`;
+                document.getElementById(`total-item-${itemId}`).innerText = `₹${data.totalItem}`;
                 document.querySelector(`input[data-id="${itemId}"]`).value = quantity;
             }
         })
