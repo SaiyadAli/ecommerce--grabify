@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const userModel = require('../model/userModel');
 const cartModel = require('../model/cartModel');
 const orderModel = require('../model/orderModel');
+const walletModel = require('../model/walletModel'); // Import the wallet model
+const wishlistModel = require('../model/wishlistModel'); // Import the wishlist model
 
 const loadLogin = async (req, res) => {
 
@@ -120,6 +122,12 @@ const deleteUser = async (req, res) => {
 
             // Delete the orders associated with the user
             await orderModel.deleteMany({ userId: id });
+
+            // Delete the wallet associated with the user
+            await walletModel.deleteMany({ userId: id });
+
+            // Delete the wishlist associated with the user
+            await wishlistModel.deleteMany({ userId: id });
 
             return res.status(200).json({ message: 'User and associated data deleted successfully.' });
         } else {
