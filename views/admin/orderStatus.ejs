@@ -27,7 +27,7 @@
                                     <td><%= order.orderDate.toLocaleDateString() %></td>
                                     <td><%= order.paymentType %></td>
                                     <td><%= order.orderStatus %></td>
-                                    <td>$<%= order.grandTotalCost %></td>
+                                    <td>₹<%= order.grandTotalCost %></td>
                                     <td><%= order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'N/A' %></td>
                                 </tr>
                             </tbody>
@@ -82,8 +82,8 @@
                                         <td><%= item.variantColor %></td>
                                         <td><%= item.quantity %></td>
                                         <td><%= item.size %></td>
-                                        <td>$<%= item.price %></td>
-                                        <td>$<%= item.price * item.quantity %></td>
+                                        <td>₹<%= item.price %></td>
+                                        <td>₹<%= item.price * item.quantity %></td>
                                     </tr>
                                 <% }) %>
                             </tbody>

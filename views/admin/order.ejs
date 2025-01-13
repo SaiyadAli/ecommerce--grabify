@@ -1,5 +1,4 @@
-
-    <%- include('../partials/header.ejs') %>
+<%- include('../partials/header.ejs') %>
     <%- include('../partials/navbar.ejs') %>
     <%- include('../partials/topnavigation.ejs') %>
 
@@ -34,7 +33,7 @@
                                 <td><%= order.cartData.length %> <small>item(s)</small></td>
                                 <td><%= order.paymentType %></td>
                                 
-                                <td>$<%= order.grandTotalCost %></td>
+                                <td>₹<%= order.grandTotalCost %></td>
                                 <td data-value="<%= order.orderDate.getTime() %>"><%= order.orderDate.toLocaleDateString() %></td>
                                 <td data-value="<%= order.orderStatus === 'Pending' ? 1 : order.orderStatus === 'Done' ? 3 : 2 %>">
                                     <span class="label label-<%= order.orderStatus === 'Pending' ? 'primary' : order.orderStatus === 'Done' ? 'success' : 'danger' %>"><%= order.orderStatus %></span>
