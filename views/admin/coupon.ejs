@@ -49,7 +49,7 @@
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                    <form action="/admin/coupons/<%= coupon._id %>" method="POST">
+                                    <form id="editCouponForm<%= coupon._id %>" action="/admin/coupons/<%= coupon._id %>" method="POST">
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label for="couponCode">Coupon Code</label>
@@ -101,7 +101,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="/admin/coupons" method="POST">
+            <form id="newCouponForm" action="/admin/coupons" method="POST">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="couponCode">Coupon Code</label>
@@ -204,6 +204,87 @@
                     });
                 }
             });
+        });
+    });
+
+    document.querySelectorAll('[id^="editCouponForm"]').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const couponId = this.action.split('/').pop();
+
+            fetch(`/admin/coupons/${couponId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(Object.fromEntries(formData))
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Coupon updated successfully.') {
+                    Swal.fire(
+                        'Updated!',
+                        data.message,
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        data.message,
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'There was an error updating the coupon.',
+                    'error'
+                );
+            });
+        });
+    });
+
+    document.getElementById('newCouponForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+
+        fetch('/admin/coupons', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Coupon created successfully.') {
+                Swal.fire(
+                    'Created!',
+                    data.message,
+                    'success'
+                ).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire(
+                    'Error!',
+                    data.message,
+                    'error'
+                );
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire(
+                'Error!',
+                'There was an error creating the coupon.',
+                'error'
+            );
         });
     });
 </script>

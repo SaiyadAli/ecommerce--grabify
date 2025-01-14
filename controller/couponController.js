@@ -15,10 +15,10 @@ const createCoupon = async (req, res) => {
         const { couponCode, discountPercentage, startDate, expiryDate, minimumPurchase, maximumDiscount } = req.body;
         const newCoupon = new Coupon({ couponCode, discountPercentage, startDate, expiryDate, minimumPurchase, maximumDiscount });
         await newCoupon.save();
-        res.redirect('/admin/coupons');
+        res.json({ message: 'Coupon created successfully.' });
     } catch (error) {
         console.error('Error creating coupon:', error);
-        res.status(500).send('Error creating coupon');
+        res.status(500).json({ message: 'Error creating coupon' });
     }
 };
 
@@ -26,10 +26,10 @@ const updateCoupon = async (req, res) => {
     try {
         const { couponCode, discountPercentage, startDate, expiryDate, minimumPurchase, maximumDiscount } = req.body;
         await Coupon.findByIdAndUpdate(req.params.id, { couponCode, discountPercentage, startDate, expiryDate, minimumPurchase, maximumDiscount });
-        res.redirect('/admin/coupons');
+        res.json({ message: 'Coupon updated successfully.' });
     } catch (error) {
         console.error('Error updating coupon:', error);
-        res.status(500).send('Error updating coupon');
+        res.status(500).json({ message: 'Error updating coupon' });
     }
 };
 
