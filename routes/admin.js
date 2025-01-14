@@ -8,6 +8,7 @@ const adminController = require('../controller/adminController');
 const categoryController = require('../controller/categoryController');
 const productController = require('../controller/productController');
 const orderController = require('../controller/orderController');
+const couponController = require('../controller/couponController');
 
 const adminAuth = require('../middleware/adminAuth');
 
@@ -41,6 +42,12 @@ router.get('/orders/:id/status', adminAuth.checkSession, orderController.viewOrd
 router.post('/cancel-order/:id', adminAuth.checkSession, orderController.cancelOrder);
 router.post('/ship-order/:id', adminAuth.checkSession, orderController.shipOrder);
 router.post('/deliver-order/:id', adminAuth.checkSession, orderController.deliverOrder);
+
+// Coupon routes
+router.get('/coupons', adminAuth.checkSession, couponController.listCoupons);
+router.post('/coupons', adminAuth.checkSession, couponController.createCoupon);
+router.post('/coupons/:id', adminAuth.checkSession, couponController.updateCoupon);
+router.delete('/coupons/:id', adminAuth.checkSession, couponController.deleteCoupon);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
