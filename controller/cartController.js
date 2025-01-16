@@ -116,7 +116,14 @@ const checkout = async (req, res) => {
         const user = await User.findById(req.user._id).populate('addresses');
         const cartItems = await Cart.find({ userId: req.user._id }).populate('productId variantId');
         const grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
-        const coupons = await Coupon.find(); // Fetch available coupons
+
+        // Fetch available coupons that satisfy the conditions
+        const currentDate = new Date();
+        const coupons = await Coupon.find({
+            startDate: { $lte: currentDate },
+            expiryDate: { $gte: currentDate },
+            minimumPurchase: { $lte: grandTotal }
+        });
 
         res.render('user/checkout', {
             username: req.user.username,
@@ -140,7 +147,10 @@ const createOrderCOD = async (req, res) => {
         const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
 
         const coupon = await Coupon.findOne({ couponCode });
-        const discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
+        let discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
+        if (coupon && discountAmount > coupon.maximumDiscount) {
+            discountAmount = coupon.maximumDiscount;
+        }
         const grandTotal = total - discountAmount;
 
         const orderData = cartItems.map(item => ({
@@ -199,7 +209,10 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
             const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
 
             const coupon = await Coupon.findOne({ couponCode });
-            const discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
+            let discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
+            if (coupon && discountAmount > coupon.maximumDiscount) {
+                discountAmount = coupon.maximumDiscount;
+            }
             const grandTotal = total - discountAmount;
 
             const orderData = cartItems.map(item => ({
@@ -419,7 +432,10 @@ const applyCoupon = async (req, res) => {
         const cartItems = await Cart.find({ userId }).populate('variantId');
         const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
 
-        const discountAmount = (total * coupon.discountPercentage) / 100;
+        let discountAmount = (total * coupon.discountPercentage) / 100;
+        if (discountAmount > coupon.maximumDiscount) {
+            discountAmount = coupon.maximumDiscount;
+        }
         const newTotal = total - discountAmount;
 
         res.json({ success: true, discountAmount, newTotal });
