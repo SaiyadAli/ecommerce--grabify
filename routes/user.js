@@ -10,6 +10,7 @@ const auth = require('../middleware/auth');
 const cartController = require('../controller/cartController'); // Import the cartController
 const shopController = require('../controller/shopController'); // Import the shopController
 const wishlistController = require('../controller/wishlistController'); // Import the wishlistController
+const walletController = require('../controller/walletController'); // Import the walletController
 
 router.get('/home', userController.loadHome);
 // router.get('/', homeController.loadHomePage);
@@ -115,5 +116,11 @@ router.get('/shop', shopController.getShopPage);
 router.get('/wishlist',auth.checkSession, wishlistController.getWishlist);
 router.post('/wishlist/add', auth.checkSession, wishlistController.addToWishlist);
 router.delete('/wishlist/delete/:id', auth.checkSession, wishlistController.deleteFromWishlist);
+
+// Route for displaying wallet
+router.get('/wallet',auth.checkSession, walletController.viewWallet);
+
+// Route for handling coupon application
+router.post('/apply-coupon',auth.checkSession, cartController.applyCoupon);
 
 module.exports = router;

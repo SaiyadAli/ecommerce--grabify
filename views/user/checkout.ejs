@@ -108,6 +108,7 @@
                                                         </div>
                                                     </div>
                                                     <br>
+                                                    <input type="hidden" name="couponCode" id="hiddenCouponCode">
                                                     <button type="submit" class="pull-left btn btn-primary btn-lg">
                                                         Order &nbsp; <i class="fa fa-arrow-circle-right"></i>
                                                     </button>
@@ -145,16 +146,21 @@
                             <td>Grand Total</td>
                             <td class="site-color" id="total-price">₹<span id="grandTotal"><%= grandTotal %></span></td>
                         </tr>
-                        <!-- <tr>
+                        <tr>
                             <td colspan="2">
                                 <div class="input-append couponForm">
                                     <form id="couponApplyForm">
-                                        <input class="col-lg-8" name="couponCode" id="appendedInputButton" type="text" placeholder="Enter coupon code">
-                                        <button class="col-lg-4 btn btn-success" type="submit">Apply!</button>
+                                        <select class="form-control" id="couponCode" name="couponCode">
+                                            <option value="">Select Coupon</option>
+                                            <% coupons.forEach(coupon => { %>
+                                                <option value="<%= coupon.couponCode %>"><%= coupon.couponCode %> - <%= coupon.discountPercentage %>% off</option>
+                                            <% }) %>
+                                        </select>
+                                        <button class="btn btn-success" type="submit">Apply!</button>
                                     </form>
                                 </div>
                             </td>
-                        </tr> -->
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -214,7 +220,8 @@
                 },
                 body: JSON.stringify({
                     chosenAddress: form.chosenAddress.value,
-                    paymentType: form.paymentType.value
+                    paymentType: form.paymentType.value,
+                    couponCode: document.getElementById('hiddenCouponCode').value
                 })
             })
             .then(response => response.json())
@@ -303,7 +310,8 @@
                 },
                 body: JSON.stringify({
                     chosenAddress: form.chosenAddress.value,
-                    paymentType: form.paymentType.value
+                    paymentType: form.paymentType.value,
+                    couponCode: document.getElementById('hiddenCouponCode').value
                 })
             })
             .then(response => response.json())
@@ -334,5 +342,62 @@
                 });
             });
         }
+    });
+
+    document.getElementById('couponApplyForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const couponCode = document.getElementById('couponCode').value;
+
+        if (!couponCode) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Please select a coupon code.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            return;
+        }
+
+        fetch('/user/apply-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ couponCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Coupon Applied',
+                    text: `Coupon applied successfully! You saved ₹${data.discountAmount}.`,
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(() => {
+                    document.getElementById('grandTotal').innerText = `${data.newTotal}`;
+                    document.getElementById('hiddenCouponCode').value = couponCode;
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while applying the coupon.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        });
     });
 </script>

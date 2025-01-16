@@ -19,7 +19,8 @@ const orderSchema = new mongoose.Schema({
     }],
     grandTotalCost: { type: Number },
     paymentId: { type: String },
-    deliveryDate: { type: Date, default: null }
+    deliveryDate: { type: Date, default: null },
+    couponDeduction: { type: Number } // Add couponDeduction field
 });
 
 orderSchema.virtual('address', {

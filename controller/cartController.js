@@ -4,8 +4,10 @@ const Product = require('../model/productModel');
 const Variant = require('../model/variantModel'); // Import the Variant model
 const User = require('../model/userModel'); // Import the User model
 const Order = require('../model/orderModel'); // Import the Order model
+const Coupon = require('../model/couponModel'); // Import the Coupon model
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const Wallet = require('../model/walletModel'); // Import the Wallet model
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -114,12 +116,14 @@ const checkout = async (req, res) => {
         const user = await User.findById(req.user._id).populate('addresses');
         const cartItems = await Cart.find({ userId: req.user._id }).populate('productId variantId');
         const grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+        const coupons = await Coupon.find(); // Fetch available coupons
 
         res.render('user/checkout', {
             username: req.user.username,
             addressData: user.addresses,
             cartItems,
-            grandTotal
+            grandTotal,
+            coupons // Pass coupons to the view
         });
     } catch (error) {
         console.error('Error fetching user addresses or cart items:', error);
@@ -130,10 +134,14 @@ const checkout = async (req, res) => {
 const createOrderCOD = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { chosenAddress } = req.body;
+        const { chosenAddress, couponCode } = req.body;
 
         const cartItems = await Cart.find({ userId }).populate('productId variantId');
-        const grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+        const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+
+        const coupon = await Coupon.findOne({ couponCode });
+        const discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
+        const grandTotal = total - discountAmount;
 
         const orderData = cartItems.map(item => ({
             productName: item.productId.name,
@@ -166,7 +174,8 @@ const createOrderCOD = async (req, res) => {
             paymentType: 'COD',
             addressChosen: chosenAddress,
             cartData: orderData,
-            grandTotalCost: grandTotal
+            grandTotalCost: grandTotal,
+            couponDeduction: discountAmount // Set coupon deduction
         });
 
         await newOrder.save();
@@ -182,12 +191,16 @@ const createOrderCOD = async (req, res) => {
 const createAndVerifyOrderRazorpay = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { chosenAddress, paymentId, orderId, signature } = req.body;
+        const { chosenAddress, paymentId, orderId, signature, couponCode } = req.body;
 
         if (!paymentId || !orderId || !signature) {
             // Create order logic
             const cartItems = await Cart.find({ userId }).populate('productId variantId');
-            const grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+            const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+
+            const coupon = await Coupon.findOne({ couponCode });
+            const discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
+            const grandTotal = total - discountAmount;
 
             const orderData = cartItems.map(item => ({
                 productName: item.productId.name,
@@ -229,6 +242,7 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                 addressChosen: chosenAddress,
                 cartData: orderData,
                 grandTotalCost: grandTotal,
+                couponDeduction: discountAmount, // Set coupon deduction
                 razorpayOrderId: razorpayOrder.id, // Store Razorpay order ID
                 paymentStatus: 'Pending' // Set initial payment status
             };
@@ -359,11 +373,59 @@ const cancelOrder = async (req, res) => {
         order.orderStatus = 'Cancelled';
         await order.save();
 
+        // If payment status is 'Paid', add the money back to the user's wallet
+        if (order.paymentStatus === 'Paid') {
+            let wallet = await Wallet.findOne({ userId: order.userId });
+            if (!wallet) {
+                wallet = new Wallet({
+                    userId: order.userId,
+                    walletBalance: order.grandTotalCost,
+                    walletTransaction: [{
+                        transactionDate: new Date(),
+                        transactionAmount: order.grandTotalCost,
+                        transactionType: 'Refund'
+                    }]
+                });
+            } else {
+                wallet.walletBalance += order.grandTotalCost;
+                wallet.walletTransaction.push({
+                    transactionDate: new Date(),
+                    transactionAmount: order.grandTotalCost,
+                    transactionType: 'Refund'
+                });
+            }
+            await wallet.save();
+            console.log('Money added to wallet:', wallet);
+        }
+
         console.log('Order cancelled successfully');
         res.redirect(`/user/orderStatus/${orderId}`);
     } catch (error) {
         console.error('Error cancelling order:', error);
         res.status(500).json({ message: 'Error cancelling order', error });
+    }
+};
+
+const applyCoupon = async (req, res) => {
+    try {
+        const { couponCode } = req.body;
+        const userId = req.user._id;
+
+        const coupon = await Coupon.findOne({ couponCode });
+        if (!coupon) {
+            return res.status(400).json({ success: false, message: 'Invalid coupon code.' });
+        }
+
+        const cartItems = await Cart.find({ userId }).populate('variantId');
+        const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+
+        const discountAmount = (total * coupon.discountPercentage) / 100;
+        const newTotal = total - discountAmount;
+
+        res.json({ success: true, discountAmount, newTotal });
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        res.status(500).json({ success: false, message: 'Error applying coupon', error });
     }
 };
 
@@ -377,5 +439,6 @@ module.exports = {
     createAndVerifyOrderRazorpay, // Ensure this function is exported
     viewOrders,
     viewOrderStatus,
-    cancelOrder
+    cancelOrder,
+    applyCoupon // Ensure this function is exported
 };

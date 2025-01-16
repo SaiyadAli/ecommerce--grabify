@@ -2,9 +2,15 @@ const Wallet = require('../model/walletModel');
 
 const viewWallet = async (req, res) => {
     try {
-        const wallet = await Wallet.findOne({ userId: req.user._id });
+        let wallet = await Wallet.findOne({ userId: req.user._id });
         if (!wallet) {
-            return res.status(404).json({ message: 'Wallet not found' });
+            // Create a new wallet if it doesn't exist
+            wallet = new Wallet({
+                userId: req.user._id,
+                walletBalance: 0,
+                walletTransaction: []
+            });
+            await wallet.save();
         }
         res.render('user/wallet', { wallet, username: req.user.username });
     } catch (error) {
