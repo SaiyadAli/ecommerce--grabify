@@ -231,7 +231,6 @@
         };
 
         if (parseFloat(document.getElementById('grandTotal').innerText) === 0) {
-            // If grand total is zero, set payment type to 'wallet' and mark as paid
             requestBody.paymentType = 'wallet';
             fetch('/user/create-order-cod', {
                 method: 'POST',
@@ -278,14 +277,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log('Razorpay Order ID:', data.orderId); // Debugging line
                     const options = {
-                        key: 'rzp_test_3TZZC2O6tszKWO', // Replace with your Razorpay key
-                        amount: data.amount, // Amount in paise
+                        key: 'rzp_test_3TZZC2O6tszKWO',
+                        amount: data.amount,
                         currency: 'INR',
                         name: 'Your Company Name',
                         description: 'Order Payment',
-                        order_id: data.orderId, // Order ID from Razorpay
+                        order_id: data.orderId,
                         handler: function (response) {
                             fetch('/user/create-and-verify-order-razorpay', {
                                 method: 'POST',
@@ -425,7 +423,6 @@
                 }).then(() => {
                     document.getElementById('grandTotal').innerText = `${data.newTotal}`;
                     document.getElementById('hiddenCouponCode').value = couponCode;
-                    // Show wallet balance after coupon is applied
                     if (walletBalance != 0) {
                         document.getElementById('walletBalanceRow').style.display = 'table-row';
                         document.getElementById('useWalletRow').style.display = 'table-row';
@@ -472,44 +469,14 @@
             timer: 2000
         });
 
-        // Update wallet balance dynamically
         const newWalletBalance = walletBalance - walletDeduction;
         document.getElementById('walletBalance').innerText = newWalletBalance.toFixed(2);
 
-        // Hide payment method section if grand total is zero
         if (grandTotal === 0) {
             document.getElementById('Paymentmethod').style.display = 'none';
         }
-
-        // Update wallet balance in the database
-        fetch('/user/update-wallet', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ walletDeduction })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while updating the wallet balance.'
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An error occurred while updating the wallet balance.'
-            });
-        });
     });
 
-    // Show wallet balance rows if no coupons are available
     if (walletBalance != 0 && coupons.length === 0) {
         document.getElementById('walletBalanceRow').style.display = 'table-row';
         document.getElementById('useWalletRow').style.display = 'table-row';

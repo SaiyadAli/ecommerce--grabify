@@ -149,7 +149,7 @@ const checkout = async (req, res) => {
 const createOrderCOD = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { chosenAddress, couponCode, useWallet, walletDeduction, paymentType } = req.body;
+        const { chosenAddress, couponCode, walletDeduction, paymentType } = req.body;
 
         const cartItems = await Cart.find({ userId }).populate('productId variantId');
         const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
@@ -161,22 +161,10 @@ const createOrderCOD = async (req, res) => {
         }
         let grandTotal = total - discountAmount;
 
-        // Deduct wallet balance if applicable
-        if (useWallet && walletDeduction) {
+        if (walletDeduction) {
             grandTotal -= walletDeduction;
-            const wallet = await Wallet.findOne({ userId });
-            if (wallet) {
-                wallet.walletBalance -= walletDeduction;
-                wallet.walletTransaction.push({
-                    transactionDate: new Date(),
-                    transactionAmount: walletDeduction,
-                    transactionType: 'Debit'
-                });
-                await wallet.save();
-            }
         }
 
-        // Ensure grand total is not negative
         if (grandTotal < 0) {
             grandTotal = 0;
         }
@@ -190,7 +178,6 @@ const createOrderCOD = async (req, res) => {
             variantId: item.variantId._id
         }));
 
-        // Subtract stock count for each item
         for (const item of cartItems) {
             const variant = item.variantId;
             if (variant.size.has(item.size)) {
@@ -208,18 +195,32 @@ const createOrderCOD = async (req, res) => {
 
         const newOrder = new Order({
             userId,
-            orderNumber: Date.now(), // Use current timestamp as order number
+            orderNumber: Date.now(),
             paymentType: paymentType === 'wallet' ? 'wallet' : 'COD',
             addressChosen: chosenAddress,
             cartData: orderData,
             grandTotalCost: grandTotal,
-            couponDeduction: discountAmount, // Set coupon deduction
-            walletDeduction, // Set wallet deduction
-            paymentStatus: paymentType === 'wallet' ? 'Paid' : 'Pending' // Mark as paid if payment type is wallet
+            couponDeduction: discountAmount,
+            walletDeduction,
+            paymentStatus: paymentType === 'wallet' ? 'Paid' : 'Pending'
         });
 
         await newOrder.save();
-        await Cart.deleteMany({ userId }); // Clear the cart after order is placed
+        await Cart.deleteMany({ userId });
+
+        // Deduct wallet balance after order is successfully placed
+        if (walletDeduction) {
+            const wallet = await Wallet.findOne({ userId });
+            if (wallet) {
+                wallet.walletBalance -= walletDeduction;
+                wallet.walletTransaction.push({
+                    transactionDate: new Date(),
+                    transactionAmount: walletDeduction,
+                    transactionType: 'Debit'
+                });
+                await wallet.save();
+            }
+        }
 
         res.json({ success: true, message: 'Order created successfully!' });
     } catch (error) {
@@ -234,7 +235,6 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
         const { chosenAddress, paymentId, orderId, signature, couponCode, walletDeduction } = req.body;
 
         if (!paymentId || !orderId || !signature) {
-            // Create order logic
             const cartItems = await Cart.find({ userId }).populate('productId variantId');
             const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
 
@@ -245,22 +245,10 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
             }
             let grandTotal = total - discountAmount;
 
-            // Deduct wallet balance if applicable
             if (walletDeduction) {
                 grandTotal -= walletDeduction;
-                const wallet = await Wallet.findOne({ userId });
-                if (wallet) {
-                    wallet.walletBalance -= walletDeduction;
-                    wallet.walletTransaction.push({
-                        transactionDate: new Date(),
-                        transactionAmount: walletDeduction,
-                        transactionType: 'Debit'
-                    });
-                    await wallet.save();
-                }
             }
 
-            // Ensure grand total is not negative
             if (grandTotal < 0) {
                 grandTotal = 0;
             }
@@ -274,7 +262,6 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                 variantId: item.variantId._id
             }));
 
-            // Subtract stock count for each item
             for (const item of cartItems) {
                 const variant = item.variantId;
                 if (variant.size.has(item.size)) {
@@ -291,64 +278,61 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
             }
 
             const options = {
-                amount: grandTotal * 100, // amount in cents
+                amount: grandTotal * 100,
                 currency: 'INR',
                 receipt: `receipt_order_${Date.now()}`
             };
             const razorpayOrder = await razorpay.orders.create(options);
 
-            // Store order details temporarily in session or cache
             req.session.tempOrder = {
                 userId,
-                orderNumber: Date.now(), // Use current timestamp as order number
+                orderNumber: Date.now(),
                 paymentType: 'razorpay',
                 addressChosen: chosenAddress,
                 cartData: orderData,
                 grandTotalCost: grandTotal,
-                couponDeduction: discountAmount, // Set coupon deduction
-                razorpayOrderId: razorpayOrder.id, // Store Razorpay order ID
-                paymentStatus: 'Pending', // Set initial payment status
-                walletDeduction // Store wallet deduction
+                couponDeduction: discountAmount,
+                razorpayOrderId: razorpayOrder.id,
+                paymentStatus: 'Pending',
+                walletDeduction
             };
-
-            console.log('Order created:', req.session.tempOrder); // Debugging line
-            console.log('Stored Razorpay Order ID:', req.session.tempOrder.razorpayOrderId); // Debugging line
 
             res.json({ success: true, amount: options.amount, orderId: razorpayOrder.id, userName: req.user.name, userEmail: req.user.email, userContact: req.user.contact });
         } else {
-            // Verify payment logic
-            console.log('Verifying payment:', { paymentId, orderId, signature }); // Debugging line
-
             const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
             hmac.update(orderId + '|' + paymentId);
             const generatedSignature = hmac.digest('hex');
 
             if (generatedSignature === signature) {
-                console.log('Generated Signature:', generatedSignature); // Debugging line
-
-                // Retrieve order details from session or cache
                 const tempOrder = req.session.tempOrder;
                 if (!tempOrder || tempOrder.razorpayOrderId !== orderId) {
-                    console.log('Order not found for verification:', orderId); // Debugging line
                     return res.json({ success: false, message: 'Order not found.' });
                 }
 
-                console.log('Order found for verification:', tempOrder); // Debugging line
-
-                // Save order to database
                 const newOrder = new Order(tempOrder);
                 newOrder.paymentStatus = 'Paid';
                 await newOrder.save();
 
-                // Clear the cart after successful payment verification
                 await Cart.deleteMany({ userId: newOrder.userId });
 
-                // Clear temporary order details from session or cache
                 req.session.tempOrder = null;
+
+                // Deduct wallet balance after order is successfully placed
+                if (tempOrder.walletDeduction) {
+                    const wallet = await Wallet.findOne({ userId: newOrder.userId });
+                    if (wallet) {
+                        wallet.walletBalance -= tempOrder.walletDeduction;
+                        wallet.walletTransaction.push({
+                            transactionDate: new Date(),
+                            transactionAmount: tempOrder.walletDeduction,
+                            transactionType: 'Debit'
+                        });
+                        await wallet.save();
+                    }
+                }
 
                 res.json({ success: true, message: 'Payment verified and order placed successfully.' });
             } else {
-                console.log('Payment verification failed:', { generatedSignature, signature }); // Debugging line
                 res.json({ success: false, message: 'Payment verification failed.' });
             }
         }
