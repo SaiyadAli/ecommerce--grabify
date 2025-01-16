@@ -109,6 +109,7 @@
                                                     </div>
                                                     <br>
                                                     <input type="hidden" name="couponCode" id="hiddenCouponCode">
+                                                    <input type="hidden" name="walletDeduction" id="hiddenWalletDeduction">
                                                     <button type="submit" class="pull-left btn btn-primary btn-lg">
                                                         Order &nbsp; <i class="fa fa-arrow-circle-right"></i>
                                                     </button>
@@ -223,17 +224,57 @@
         event.preventDefault();
         const form = this;
 
-        if (form.paymentType.value === 'razorpay') {
+        const requestBody = {
+            chosenAddress: form.chosenAddress.value,
+            paymentType: form.paymentType.value,
+            couponCode: document.getElementById('hiddenCouponCode').value,
+            walletDeduction: document.getElementById('hiddenWalletDeduction').value
+        };
+
+        if (parseFloat(document.getElementById('grandTotal').innerText) === 0) {
+            // If grand total is zero, set payment type to 'wallet' and mark as paid
+            requestBody.paymentType = 'wallet';
+            fetch('/user/create-order-cod', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Created',
+                        text: data.message,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = '/user/home';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while creating the order: ' + error.message
+                });
+            });
+        } else if (form.paymentType.value === 'razorpay') {
             fetch('/user/create-and-verify-order-razorpay', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    chosenAddress: form.chosenAddress.value,
-                    paymentType: form.paymentType.value,
-                    couponCode: document.getElementById('hiddenCouponCode').value
-                })
+                body: JSON.stringify(requestBody)
             })
             .then(response => response.json())
             .then(data => {
@@ -319,11 +360,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    chosenAddress: form.chosenAddress.value,
-                    paymentType: form.paymentType.value,
-                    couponCode: document.getElementById('hiddenCouponCode').value
-                })
+                body: JSON.stringify(requestBody)
             })
             .then(response => response.json())
             .then(data => {
@@ -422,5 +459,49 @@
         document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
         document.getElementById('hiddenWalletDeduction').value = walletDeduction;
         document.getElementById('useWalletButton').disabled = true;
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Wallet Applied',
+            text: `Wallet balance applied successfully! You saved ₹${walletDeduction}.`,
+            showConfirmButton: false,
+            timer: 2000
+        });
+
+        // Update wallet balance dynamically
+        const newWalletBalance = walletBalance - walletDeduction;
+        document.getElementById('walletBalance').innerText = newWalletBalance.toFixed(2);
+
+        // Hide payment method section if grand total is zero
+        if (grandTotal === 0) {
+            document.getElementById('Paymentmethod').style.display = 'none';
+        }
+
+        // Update wallet balance in the database
+        fetch('/user/update-wallet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ walletDeduction })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while updating the wallet balance.'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while updating the wallet balance.'
+            });
+        });
     });
 </script>

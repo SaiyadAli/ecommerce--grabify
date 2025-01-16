@@ -149,7 +149,7 @@ const checkout = async (req, res) => {
 const createOrderCOD = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { chosenAddress, couponCode, useWallet, walletDeduction } = req.body;
+        const { chosenAddress, couponCode, useWallet, walletDeduction, paymentType } = req.body;
 
         const cartItems = await Cart.find({ userId }).populate('productId variantId');
         const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
@@ -174,6 +174,11 @@ const createOrderCOD = async (req, res) => {
                 });
                 await wallet.save();
             }
+        }
+
+        // Ensure grand total is not negative
+        if (grandTotal < 0) {
+            grandTotal = 0;
         }
 
         const orderData = cartItems.map(item => ({
@@ -204,12 +209,13 @@ const createOrderCOD = async (req, res) => {
         const newOrder = new Order({
             userId,
             orderNumber: Date.now(), // Use current timestamp as order number
-            paymentType: 'COD',
+            paymentType: paymentType === 'wallet' ? 'wallet' : 'COD',
             addressChosen: chosenAddress,
             cartData: orderData,
             grandTotalCost: grandTotal,
             couponDeduction: discountAmount, // Set coupon deduction
-            walletDeduction // Set wallet deduction
+            walletDeduction, // Set wallet deduction
+            paymentStatus: paymentType === 'wallet' ? 'Paid' : 'Pending' // Mark as paid if payment type is wallet
         });
 
         await newOrder.save();
@@ -225,7 +231,7 @@ const createOrderCOD = async (req, res) => {
 const createAndVerifyOrderRazorpay = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { chosenAddress, paymentId, orderId, signature, couponCode } = req.body;
+        const { chosenAddress, paymentId, orderId, signature, couponCode, walletDeduction } = req.body;
 
         if (!paymentId || !orderId || !signature) {
             // Create order logic
@@ -237,7 +243,27 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
             if (coupon && discountAmount > coupon.maximumDiscount) {
                 discountAmount = coupon.maximumDiscount;
             }
-            const grandTotal = total - discountAmount;
+            let grandTotal = total - discountAmount;
+
+            // Deduct wallet balance if applicable
+            if (walletDeduction) {
+                grandTotal -= walletDeduction;
+                const wallet = await Wallet.findOne({ userId });
+                if (wallet) {
+                    wallet.walletBalance -= walletDeduction;
+                    wallet.walletTransaction.push({
+                        transactionDate: new Date(),
+                        transactionAmount: walletDeduction,
+                        transactionType: 'Debit'
+                    });
+                    await wallet.save();
+                }
+            }
+
+            // Ensure grand total is not negative
+            if (grandTotal < 0) {
+                grandTotal = 0;
+            }
 
             const orderData = cartItems.map(item => ({
                 productName: item.productId.name,
@@ -281,7 +307,8 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                 grandTotalCost: grandTotal,
                 couponDeduction: discountAmount, // Set coupon deduction
                 razorpayOrderId: razorpayOrder.id, // Store Razorpay order ID
-                paymentStatus: 'Pending' // Set initial payment status
+                paymentStatus: 'Pending', // Set initial payment status
+                walletDeduction // Store wallet deduction
             };
 
             console.log('Order created:', req.session.tempOrder); // Debugging line
@@ -410,30 +437,37 @@ const cancelOrder = async (req, res) => {
         order.orderStatus = 'Cancelled';
         await order.save();
 
-        // If payment status is 'Paid', add the money back to the user's wallet
-        if (order.paymentStatus === 'Paid') {
-            let wallet = await Wallet.findOne({ userId: order.userId });
-            if (!wallet) {
-                wallet = new Wallet({
-                    userId: order.userId,
-                    walletBalance: order.grandTotalCost,
-                    walletTransaction: [{
-                        transactionDate: new Date(),
-                        transactionAmount: order.grandTotalCost,
-                        transactionType: 'Refund'
-                    }]
-                });
-            } else {
-                wallet.walletBalance += order.grandTotalCost;
-                wallet.walletTransaction.push({
-                    transactionDate: new Date(),
-                    transactionAmount: order.grandTotalCost,
-                    transactionType: 'Refund'
-                });
-            }
-            await wallet.save();
-            console.log('Money added to wallet:', wallet);
+        // Handle wallet balance based on payment type and status
+        let wallet = await Wallet.findOne({ userId: order.userId });
+        if (!wallet) {
+            wallet = new Wallet({ userId: order.userId, walletBalance: 0, walletTransaction: [] });
         }
+
+        if (order.paymentType === 'wallet') {
+            wallet.walletBalance += order.walletDeduction;
+            wallet.walletTransaction.push({
+                transactionDate: new Date(),
+                transactionAmount: order.walletDeduction,
+                transactionType: 'Refund'
+            });
+        } else if (order.paymentStatus === 'Paid') {
+            wallet.walletBalance += order.grandTotalCost + order.walletDeduction;
+            wallet.walletTransaction.push({
+                transactionDate: new Date(),
+                transactionAmount: order.grandTotalCost + order.walletDeduction,
+                transactionType: 'Refund'
+            });
+        } else if (order.paymentType === 'COD' && order.walletDeduction > 0) {
+            wallet.walletBalance += order.walletDeduction;
+            wallet.walletTransaction.push({
+                transactionDate: new Date(),
+                transactionAmount: order.walletDeduction,
+                transactionType: 'Refund'
+            });
+        }
+
+        await wallet.save();
+        console.log('Money added to wallet:', wallet);
 
         console.log('Order cancelled successfully');
         res.redirect(`/user/orderStatus/${orderId}`);
@@ -469,6 +503,30 @@ const applyCoupon = async (req, res) => {
     }
 };
 
+const updateWallet = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { walletDeduction } = req.body;
+
+        const wallet = await Wallet.findOne({ userId });
+        if (wallet) {
+            wallet.walletBalance -= walletDeduction;
+            wallet.walletTransaction.push({
+                transactionDate: new Date(),
+                transactionAmount: walletDeduction,
+                transactionType: 'Debit'
+            });
+            await wallet.save();
+            res.json({ success: true, message: 'Wallet updated successfully' });
+        } else {
+            res.status(404).json({ success: false, message: 'Wallet not found' });
+        }
+    } catch (error) {
+        console.error('Error updating wallet:', error);
+        res.status(500).json({ success: false, message: 'Error updating wallet', error });
+    }
+};
+
 module.exports = {
     viewCart,
     addToCart,
@@ -480,5 +538,6 @@ module.exports = {
     viewOrders,
     viewOrderStatus,
     cancelOrder,
-    applyCoupon // Ensure this function is exported
+    applyCoupon, // Ensure this function is exported
+    updateWallet // Ensure this function is exported
 };

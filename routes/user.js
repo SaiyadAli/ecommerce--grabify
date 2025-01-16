@@ -123,4 +123,7 @@ router.get('/wallet',auth.checkSession, walletController.viewWallet);
 // Route for handling coupon application
 router.post('/apply-coupon',auth.checkSession, cartController.applyCoupon);
 
+// Route for handling wallet update request
+router.post('/update-wallet',auth.checkSession, cartController.updateWallet);
+
 module.exports = router;

@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
     userId: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
-    orderNumber: { type: Number, required: true },
+    orderNumber: { type: Number, required: true, unique: true },
     orderDate: { type: Date, required: true, default: Date.now },
-    paymentType: { type: String, default: 'toBeChosen' },
-    orderStatus: { type: String, default: 'Pending' },
-    paymentStatus: { type: String, default: 'Pending' }, // Add paymentStatus field
-    razorpayOrderId: { type: String }, // Make razorpayOrderId optional
-    addressChosen: { type: mongoose.Types.ObjectId, required: true },
+    paymentType: { type: String, required: true },
+    orderStatus: { type: String, default: 'Processing' },
+    paymentStatus: { type: String, default: 'Pending' },
+    razorpayOrderId: { type: String },
+    addressChosen: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
     cartData: [{
         productName: { type: String, required: true },
         variantColor: { type: String, required: true },
@@ -17,11 +17,11 @@ const orderSchema = new mongoose.Schema({
         price: { type: Number, required: true },
         variantId: { type: mongoose.Types.ObjectId, required: true, ref: 'Variant' }
     }],
-    grandTotalCost: { type: Number },
+    grandTotalCost: { type: Number, required: true },
     paymentId: { type: String },
     deliveryDate: { type: Date, default: null },
-    couponDeduction: { type: Number }, // Add couponDeduction field
-    walletDeduction: { type: Number, default: 0 } // Add walletDeduction field
+    couponDeduction: { type: Number, default: 0 },
+    walletDeduction: { type: Number, default: 0 }
 });
 
 orderSchema.virtual('address', {
