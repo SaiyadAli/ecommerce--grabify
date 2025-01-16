@@ -158,6 +158,16 @@
                                         <button class="btn btn-success" style="margin-top: 10px;" type="submit">Apply!</button>
                                     </form>
                                 </div>
+                                <% } else if (walletBalance != 0) { %>
+                                <tr id="walletBalanceRow">
+                                    <td>Wallet Balance</td>
+                                    <td class="price">₹<span id="walletBalance"><%= walletBalance %></span></td>
+                                </tr>
+                                <tr id="useWalletRow">
+                                    <td colspan="2">
+                                        <button class="btn btn-primary" id="WalletButton">Wallet Balance</button>
+                                    </td>
+                                </tr>
                                 <% } %>
                             </td>
                         </tr>
@@ -481,4 +491,43 @@
         document.getElementById('walletBalanceRow').style.display = 'table-row';
         document.getElementById('useWalletRow').style.display = 'table-row';
     }
+
+
+
+
+
+
+    
+
+    
+</script>
+
+
+<script>
+    document.getElementById('WalletButton').addEventListener('click', function() {
+        const walletBalance = parseFloat(document.getElementById('walletBalance').innerText);
+        let grandTotal = parseFloat(document.getElementById('grandTotal').innerText);
+
+        const walletDeduction = Math.min(walletBalance, grandTotal);
+        grandTotal -= walletDeduction;
+
+        document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+        document.getElementById('hiddenWalletDeduction').value = walletDeduction;
+        document.getElementById('useWalletButton').disabled = true;
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Wallet Applied',
+            text: `Wallet balance applied successfully! You saved ₹${walletDeduction}.`,
+            showConfirmButton: false,
+            timer: 2000
+        });
+
+        const newWalletBalance = walletBalance - walletDeduction;
+        document.getElementById('walletBalance').innerText = newWalletBalance.toFixed(2);
+
+        if (grandTotal === 0) {
+            document.getElementById('Paymentmethod').style.display = 'none';
+        }
+    });
 </script>
