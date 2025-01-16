@@ -20,7 +20,8 @@ const orderSchema = new mongoose.Schema({
     grandTotalCost: { type: Number },
     paymentId: { type: String },
     deliveryDate: { type: Date, default: null },
-    couponDeduction: { type: Number } // Add couponDeduction field
+    couponDeduction: { type: Number }, // Add couponDeduction field
+    walletDeduction: { type: Number, default: 0 } // Add walletDeduction field
 });
 
 orderSchema.virtual('address', {

@@ -128,12 +128,17 @@ const checkout = async (req, res) => {
             minimumPurchase: { $lte: grandTotal }
         });
 
+        // Fetch user's wallet balance
+        const wallet = await Wallet.findOne({ userId: req.user._id });
+        const walletBalance = wallet ? wallet.walletBalance : 0;
+
         res.render('user/checkout', {
             username: req.user.username,
             addressData: user.addresses,
             cartItems,
             grandTotal,
-            coupons // Pass coupons to the view
+            coupons, // Pass coupons to the view
+            walletBalance // Pass wallet balance to the view
         });
     } catch (error) {
         console.error('Error fetching user addresses or cart items:', error);
@@ -144,7 +149,7 @@ const checkout = async (req, res) => {
 const createOrderCOD = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { chosenAddress, couponCode } = req.body;
+        const { chosenAddress, couponCode, useWallet, walletDeduction } = req.body;
 
         const cartItems = await Cart.find({ userId }).populate('productId variantId');
         const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
@@ -154,7 +159,22 @@ const createOrderCOD = async (req, res) => {
         if (coupon && discountAmount > coupon.maximumDiscount) {
             discountAmount = coupon.maximumDiscount;
         }
-        const grandTotal = total - discountAmount;
+        let grandTotal = total - discountAmount;
+
+        // Deduct wallet balance if applicable
+        if (useWallet && walletDeduction) {
+            grandTotal -= walletDeduction;
+            const wallet = await Wallet.findOne({ userId });
+            if (wallet) {
+                wallet.walletBalance -= walletDeduction;
+                wallet.walletTransaction.push({
+                    transactionDate: new Date(),
+                    transactionAmount: walletDeduction,
+                    transactionType: 'Debit'
+                });
+                await wallet.save();
+            }
+        }
 
         const orderData = cartItems.map(item => ({
             productName: item.productId.name,
@@ -188,7 +208,8 @@ const createOrderCOD = async (req, res) => {
             addressChosen: chosenAddress,
             cartData: orderData,
             grandTotalCost: grandTotal,
-            couponDeduction: discountAmount // Set coupon deduction
+            couponDeduction: discountAmount, // Set coupon deduction
+            walletDeduction // Set wallet deduction
         });
 
         await newOrder.save();

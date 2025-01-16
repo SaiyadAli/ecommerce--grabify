@@ -138,10 +138,10 @@
                             <td>Shipping</td>
                             <td class="price">Free shipping!</td>
                         </tr>
-                        <!-- <tr>
-                            <td>Total Discount</td>
-                            <td class="price" id="totalDiscount">₹0</td>
-                        </tr> -->
+                        <tr>
+                            <td>Wallet Balance</td>
+                            <td class="price">₹<%= walletBalance %></td>
+                        </tr>
                         <tr>
                             <td>Grand Total</td>
                             <td class="site-color" id="total-price">₹<span id="grandTotal"><%= grandTotal %></span></td>
@@ -161,6 +161,15 @@
                                     </form>
                                 </div>
                                 <% } %>
+                            </td>
+                        </tr>
+                        <tr id="walletBalanceRow">
+                            <td>Wallet Balance</td>
+                            <td class="price">₹<span id="walletBalance"><%= walletBalance %></span></td>
+                        </tr>
+                        <tr id="useWalletRow">
+                            <td colspan="2">
+                                <button class="btn btn-primary" id="useWalletButton">Use Wallet Balance</button>
                             </td>
                         </tr>
                     </tbody>
@@ -401,5 +410,17 @@
                 timer: 2000
             });
         });
+    });
+
+    document.getElementById('useWalletButton').addEventListener('click', function() {
+        const walletBalance = parseFloat(document.getElementById('walletBalance').innerText);
+        let grandTotal = parseFloat(document.getElementById('grandTotal').innerText);
+
+        const walletDeduction = Math.min(walletBalance, grandTotal);
+        grandTotal -= walletDeduction;
+
+        document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+        document.getElementById('hiddenWalletDeduction').value = walletDeduction;
+        document.getElementById('useWalletButton').disabled = true;
     });
 </script>
