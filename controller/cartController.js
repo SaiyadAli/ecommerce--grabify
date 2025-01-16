@@ -115,7 +115,10 @@ const checkout = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).populate('addresses');
         const cartItems = await Cart.find({ userId: req.user._id }).populate('productId variantId');
-        const grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+        let grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+
+        // Round grand total to 2 decimal places
+        grandTotal = Math.round(grandTotal * 100) / 100;
 
         // Fetch available coupons that satisfy the conditions
         const currentDate = new Date();

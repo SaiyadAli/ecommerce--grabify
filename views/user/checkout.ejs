@@ -148,6 +148,7 @@
                         </tr>
                         <tr>
                             <td colspan="2">
+                                <% if (coupons.length > 0) { %>
                                 <div class="input-append couponForm">
                                     <form id="couponApplyForm">
                                         <select class="form-control" id="couponCode" name="couponCode">
@@ -159,6 +160,7 @@
                                         <button class="btn btn-success" type="submit">Apply!</button>
                                     </form>
                                 </div>
+                                <% } %>
                             </td>
                         </tr>
                     </tbody>
