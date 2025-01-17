@@ -60,7 +60,7 @@ const loadDashboard = async (req, res) => {
         console.log("Total Orders:", totalOrders); // Debug line
 
         const totalSalesAmount = await orderModel.aggregate([
-           
+            { $match: { orderStatus: 'Delivered' } },
             { $group: { _id: null, total: { $sum: { $add: ["$grandTotalCost", "$walletDeduction"] } } } }
         ]);
         console.log("Total Sales Amount:", totalSalesAmount); // Debug line
@@ -72,6 +72,20 @@ const loadDashboard = async (req, res) => {
 
         const sales = totalSalesAmount.length > 0 ? totalSalesAmount[0].total : 0;
         console.log("Sales:", sales); // Debug line
+
+        // Fetch latest 5 orders
+        const latestOrders = await orderModel.find().sort({ orderDate: -1 }).limit(5).populate('userId', 'username');
+        console.log("Latest Orders:", latestOrders); // Debug line
+
+        // Fetch top 5 products by unit sold for delivered orders
+        const topProducts = await orderModel.aggregate([
+            { $match: { orderStatus: 'Delivered' } },
+            { $unwind: "$cartData" },
+            { $group: { _id: "$cartData.productName", totalSold: { $sum: "$cartData.quantity" } } },
+            { $sort: { totalSold: -1 } },
+            { $limit: 5 }
+        ]);
+        console.log("Top Products:", topProducts); // Debug line
 
         res.render('admin/dashboard', {
             users,
@@ -86,7 +100,9 @@ const loadDashboard = async (req, res) => {
             salesChange,
             totalOrders,
             totalSalesAmount: sales,
-            totalDiscount: totalDiscount.length > 0 ? totalDiscount[0].total : 0
+            totalDiscount: totalDiscount.length > 0 ? totalDiscount[0].total : 0,
+            latestOrders, // Pass latest orders to the view
+            topProducts // Pass top products to the view
         });
     } catch (error) {
         console.error(error);
@@ -206,7 +222,9 @@ const getSalesReport = async (req, res) => {
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
-        res.status(200).json({ ...report, orders });
+        const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
+
+        res.status(200).json({ ...report, orders, totalSalesAmount });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error.' });

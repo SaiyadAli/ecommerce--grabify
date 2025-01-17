@@ -54,7 +54,7 @@
         <div class="card mb-4">
           <div class="card-body position-relative">
             <h3 class="h6 text-muted">Sales</h3>
-            <strong class="fs-3 text-dark lh-1">$<%= sales %></strong>
+            <strong class="fs-3 text-dark lh-1" id="sales-amount">$<%= sales %></strong>
             <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> <%= salesChange %></small>
             <i class="bi bi-piggy-bank fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
           </div>
@@ -75,48 +75,21 @@
             <div class="table-responsive">
               <table class="table table-striped">
                 <tbody>
-                  <tr>
-                    <td>#16123871</td>
-                    <td>Yesterday at 10:37 AM</td>
-                    <td>James</td>
-                    <td>$154.23</td>
-                    <td><span class="badge rounded-pill bg-warning">Pending</span></td>
-                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
-                  </tr>
-                  <tr>
-                    <td>#16123753</td>
-                    <td>Dec 6 at 08:22 AM</td>
-                    <td>John</td>
-                    <td>$196.13</td>
-                    <td><span class="badge rounded-pill bg-success">Delivered</span></td>
-                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
-                  </tr>
-                  <tr>
-                    <td>#16123532</td>
-                    <td>Dec 5 at 08:22 AM</td>
-                    <td>Jane</td>
-                    <td>$87.33</td>
-                    <td><span class="badge rounded-pill bg-danger">Failed</span></td>
-                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
-                  </tr>
-                  <tr>
-                    <td>#16123222</td>
-                    <td>Dec 4 at 11:07 PM</td>
-                    <td>James</td>
-                    <td>$126.98</td>
-                    <td><span class="badge rounded-pill bg-success">Delivered</span></td>
-                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
-                  </tr>
-                  <tr>
-                    <td>#16123443</td>
-                    <td>Dec 4 at 11:07 PM</td>
-                    <td>Jordan</td>
-                    <td>$98.23</td>
-                    <td><span class="badge rounded-pill bg-success">Delivered</span></td>
-                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
-                  </tr>
+                  <% latestOrders.forEach(order => { %>
+                    <tr>
+                      <td>#<%= order.orderNumber %></td>
+                        <td><%= new Date(order.orderDate).toLocaleString() %></td>
+                        <td><%= order.userId.username.split(' ')[0] %></td>
+                      <td>$<%= order.grandTotalCost %></td>
+                      <td><span class="badge rounded-pill bg-<%= order.orderStatus === 'Pending' ? 'warning' : order.orderStatus === 'Delivered' ? 'success' : 'danger' %>"><%= order.orderStatus %></span></td>
+                      <td><a href="/admin/orders/<%= order._id %>/status" ><button type="button" class="btn btn-xs btn-light">Details</button></a></td>
+                    </tr>
+                  <% }) %>
                 </tbody>
               </table>
+              <% if (latestOrders.length === 0) { %>
+                <p>No orders found.</p>
+              <% } %>
             </div>
           </div>
         </div>
@@ -140,68 +113,24 @@
             <div class="table-responsive">
               <table class="table mb-4">
                 <tbody>
-                  <tr>
-                    <td>
-                      <div class="d-flex">
-                        <span class="me-2">
-                          <img src="/kassets/images/content/2-185x160.png" alt="" width="25" class="img-fluid">
-                        </span>
-                        <a href="#" class="text-truncate w-75 text-reset">Wireless Headphones with Noise Cancellation Tru Bass Bluetooth 5.2</a>
-                      </div>
-                    </td>
-                    <td>1,324</td>
-                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> 23%</span></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex">
-                        <span class="me-2">
-                          <img src="/kassets/images/content/3-185x160.png" alt="" width="25" class="img-fluid">
-                        </span>
-                        <a href="#" class="text-truncate w-75 text-reset">Smartwatch IP68 Waterproof GPS and Bluetooth Support</a>
-                      </div>
-                    </td>
-                    <td>754</td>
-                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> 12%</span></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex">
-                        <span class="me-2">
-                          <img src="/kassets/images/content/1-185x160.png" alt="" width="25" class="img-fluid">
-                        </span>
-                        <a href="#" class="text-truncate w-75 text-reset">Smartphone 5G Black 12GB RAM+512GB NEW</a>
-                      </div>
-                    </td>
-                    <td>622</td>
-                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> 8%</span></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex">
-                        <span class="me-2">
-                          <img src="/kassets/images/content/4-185x160.png" alt="" width="25" class="img-fluid">
-                        </span>
-                        <a href="#" class="text-truncate w-75 text-reset">Men's Running Shoes</a>
-                      </div>
-                    </td>
-                    <td>432</td>
-                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> 11%</span></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex">
-                        <span class="me-2">
-                          <img src="/kassets/images/content/2-185x160.png" alt="" width="25" class="img-fluid">
-                        </span>
-                        <a href="#" class="text-truncate w-75 text-reset">Wireless Headphones with Noise Cancellation Tru Bass Bluetooth 5.2</a>
-                      </div>
-                    </td>
-                    <td>232</td>
-                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> 23%</span></td>
-                  </tr>
+                  <% topProducts.forEach(product => { %>
+                    <tr>
+                      <td>
+                        <div class="d-flex">
+                          <span class="me-2">
+                            <img src="/kassets/images/content/2-185x160.png" alt="" width="25" class="img-fluid">
+                          </span>
+                          <a href="#" class="text-truncate w-75 text-reset"><%= product._id %></a>
+                        </div>
+                      </td>
+                      <td><%= product.totalSold %></td>
+                    </tr>
+                  <% }) %>
                 </tbody>
               </table>
+              <% if (topProducts.length === 0) { %>
+                <p>No products found.</p>
+              <% } %>
             </div>
           </div>
         </div>
@@ -272,6 +201,7 @@
       `;
 
       $('#salesReport').html(reportHtml);
+      $('#sales-amount').text(`$${data.totalSalesAmount.toFixed(2)}`);
     });
   }
 
