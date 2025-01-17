@@ -57,14 +57,21 @@ const loadDashboard = async (req, res) => {
 
         // Fetch additional data from cartModel and orderModel
         const totalOrders = await orderModel.countDocuments({});
+        console.log("Total Orders:", totalOrders); // Debug line
+
         const totalSalesAmount = await orderModel.aggregate([
-            { $match: { orderStatus: 'Delivered' } },
+           
             { $group: { _id: null, total: { $sum: { $add: ["$grandTotalCost", "$walletDeduction"] } } } }
         ]);
+        console.log("Total Sales Amount:", totalSalesAmount); // Debug line
+
         const totalDiscount = await orderModel.aggregate([
             { $group: { _id: null, total: { $sum: "$couponDeduction" } } }
         ]);
+        console.log("Total Discount:", totalDiscount); // Debug line
+
         const sales = totalSalesAmount.length > 0 ? totalSalesAmount[0].total : 0;
+        console.log("Sales:", sales); // Debug line
 
         res.render('admin/dashboard', {
             users,
