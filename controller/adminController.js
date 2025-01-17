@@ -5,109 +5,85 @@ const cartModel = require('../model/cartModel');
 const orderModel = require('../model/orderModel');
 const walletModel = require('../model/walletModel'); // Import the wallet model
 const wishlistModel = require('../model/wishlistModel'); // Import the wishlist model
+const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs');
 
 const loadLogin = async (req, res) => {
+    res.render('admin/login');
+};
 
-    res.render('admin/login')
-
-}
 let loadCustomers = async (req, res) => {
     try {
+        const admin = req.session.admin;
+        if (!admin) return res.redirect('/admin/login');
 
-        const admin = req.session.admin
-        if(!admin) return res.redirect('/admin/login')
-
-        const users = await userModel.find({})
-
-        res.render('admin/customers',{users,message: ''})
-        
-
-
+        const users = await userModel.find({});
+        res.render('admin/customers', { users, message: '' });
     } catch (error) {
-        
+        console.error(error);
     }
-}
-
+};
 
 const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const admin = await adminModel.findOne({ email });
 
-try {
+        if (!admin) return res.render('admin/login', { message: 'admin not found' });
 
-    const {email, password} = req.body
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) return res.render('admin/login', { message: 'Invalid credentials' });
 
-    console.log(email)
-    const admin = await adminModel.findOne({email})
-
-
-    if(!admin) return res.render('admin/login', {message: 'admin not found'})
-
-
-    const isMatch = await bcrypt.compare(password, admin.password)
-
-    if(!isMatch) return res.render('admin/login', {message: 'Invalid credentials'})
-
-    req.session.admin = true
-
-    res.redirect('/admin/dashboard')
-
-    
-} catch (error) {
-    
-    res.send(error)
-}
-
-}
+        req.session.admin = true;
+        res.redirect('/admin/dashboard');
+    } catch (error) {
+        res.send(error);
+    }
+};
 
 const loadDashboard = async (req, res) => {
-
     try {
+        const admin = req.session.admin;
+        if (!admin) return res.redirect('/admin/login');
 
-        const admin = req.session.admin
-        if(!admin) return res.redirect('/admin/login')
+        const users = await userModel.find({});
+        const conversionRate = 3.72; // Fetch from database
+        const conversionRateChange = 23; // Fetch from database
+        const addedToCart = 12.92; // Fetch from database
+        const addedToCartChange = -5; // Fetch from database
+        const reachedCheckout = 5.67; // Fetch from database
+        const reachedCheckoutChange = -2; // Fetch from database
+        const sales = 1565.78; // Fetch from database
+        const salesChange = 12.23; // Fetch from database
 
-        const users = await userModel.find({})
+        // Fetch additional data from cartModel and orderModel
+        const totalOrders = await orderModel.countDocuments({});
+        const totalSalesAmount = await orderModel.aggregate([
+            { $group: { _id: null, total: { $sum: "$grandTotalCost" } } }
+        ]);
+        const totalDiscount = await orderModel.aggregate([
+            { $group: { _id: null, total: { $sum: "$couponDeduction" } } }
+        ]);
 
-        res.render('admin/dashboard',{users,message: ''})
-        
-
-
+        res.render('admin/dashboard', {
+            users,
+            message: '',
+            conversionRate,
+            conversionRateChange,
+            addedToCart,
+            addedToCartChange,
+            reachedCheckout,
+            reachedCheckoutChange,
+            sales,
+            salesChange,
+            totalOrders,
+            totalSalesAmount: totalSalesAmount[0]?.total || 0,
+            totalDiscount: totalDiscount[0]?.total || 0
+        });
     } catch (error) {
-        
+        console.error(error);
     }
-}
-
-
-
-
-// const editUser = async (req, res) => {
-//     try {
-//         const { email, password, id } = req.body;
-
-//         // Check if the email already exists for another user
-//         const existingUser = await userModel.findOne({ email });
-//         if (existingUser && existingUser._id.toString() !== id) {
-//             return res.render('admin/dashboard', {
-//                 users: await userModel.find({}),
-//                 message: 'Email already exists!' // Add error message for duplicate email
-//             });
-//         }
-
-//         const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
-
-//         const user = await userModel.findOneAndUpdate({ _id: id }, {
-//             $set: {
-//                 email,
-//                 password: hashedPassword ? hashedPassword : undefined
-//             }
-//         });
-
-//         res.redirect('/admin/dashboard');
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
-
+};
 
 const deleteUser = async (req, res) => {
     try {
@@ -139,66 +115,124 @@ const deleteUser = async (req, res) => {
     }
 };
 
-
-  const editUserStatus = async (req, res) => {
+const editUserStatus = async (req, res) => {
     try {
-      const { id } = req.params;
-  
-      // Find the user and toggle the isBlock status
-      const user = await userModel.findById(id);
-  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found.' });
-      }
-  
-      user.isBlock = !user.isBlock; // Toggle the status
-      await user.save();
-  
-      res.status(200).json({ message: `User status updated to ${user.isBlock ? 'Blocked' : 'Live'}.` });
+        const { id } = req.params;
+
+        // Find the user and toggle the isBlock status
+        const user = await userModel.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        user.isBlock = !user.isBlock; // Toggle the status
+        await user.save();
+
+        res.status(200).json({ message: `User status updated to ${user.isBlock ? 'Blocked' : 'Live'}.` });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error.' });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
-  };
-  
-// const addUser = async (req, res) => {
-//     try {
-//         const { email, password } = req.body;
-
-//         // Check if the email already exists
-//         const existingUser = await userModel.findOne({ email });
-//         if (existingUser) {
-//             return res.render('admin/dashboard', {
-//                 users: await userModel.find({}),
-//                 message: 'Email already exists!' // Add error message for duplicate email
-//             });
-//         }
-
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         const newUser = new userModel({
-//             email,
-//             password: hashedPassword
-//         });
-
-//         await newUser.save();
-
-//         res.redirect('/admin/dashboard');
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
-
+};
 
 const logout = async (req, res) => {
+    req.session.admin = null;
+    res.redirect('/admin/login');
+};
 
-    req.session.admin = null
+const generateSalesReport = async (period, startDate, endDate) => {
+    const match = {};
+    if (startDate && endDate) {
+        match.orderDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    } else if (period) {
+        const now = new Date();
+        if (period === 'daily') {
+            match.orderDate = { $gte: new Date(now.setDate(now.getDate() - 1)) };
+        } else if (period === 'weekly') {
+            match.orderDate = { $gte: new Date(now.setDate(now.getDate() - 7)) };
+        } else if (period === 'monthly') {
+            match.orderDate = { $gte: new Date(now.setMonth(now.getMonth() - 1)) };
+        }
+    }
 
-    res.redirect('/admin/login')
-}
-   
+    const orders = await orderModel.find(match);
+    const totalOrders = orders.length;
+    const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost, 0);
+    const totalDiscount = orders.reduce((sum, order) => sum + order.couponDeduction, 0);
 
+    return { totalOrders, totalSalesAmount, totalDiscount };
+};
 
+const generatePDF = (reportData) => {
+    const doc = new PDFDocument();
+    let buffers = [];
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {
+        const pdfData = Buffer.concat(buffers);
+        return pdfData;
+    });
 
-module.exports = {loadLogin,login, loadDashboard,loadCustomers ,editUserStatus,  deleteUser,  logout};
+    doc.fontSize(25).text('Sales Report', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(16).text(`Total Orders: ${reportData.totalOrders}`);
+    doc.text(`Total Sales Amount: $${reportData.totalSalesAmount.toFixed(2)}`);
+    doc.text(`Total Discount: $${reportData.totalDiscount.toFixed(2)}`);
+    doc.end();
+};
+
+const generateExcel = async (reportData) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sales Report');
+
+    worksheet.columns = [
+        { header: 'Metric', key: 'metric', width: 30 },
+        { header: 'Value', key: 'value', width: 30 }
+    ];
+
+    worksheet.addRow({ metric: 'Total Orders', value: reportData.totalOrders });
+    worksheet.addRow({ metric: 'Total Sales Amount', value: `$${reportData.totalSalesAmount.toFixed(2)}` });
+    worksheet.addRow({ metric: 'Total Discount', value: `$${reportData.totalDiscount.toFixed(2)}` });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer;
+};
+
+const getSalesReport = async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+        const report = await generateSalesReport(null, startDate, endDate);
+        const orders = await orderModel.find({
+            orderDate: { $gte: new Date(startDate), $lte: new Date(endDate) },
+            orderStatus: 'Delivered'
+        }).populate('userId', 'username');
+
+        res.status(200).json({ ...report, orders });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+const downloadReport = async (req, res) => {
+    try {
+        const { format, period, startDate, endDate } = req.query;
+        const reportData = await generateSalesReport(period, startDate, endDate);
+        let reportBuffer;
+
+        if (format === 'pdf') {
+            reportBuffer = generatePDF(reportData);
+        } else if (format === 'excel') {
+            reportBuffer = await generateExcel(reportData);
+        }
+
+        res.setHeader('Content-Disposition', `attachment; filename=sales_report.${format}`);
+        res.setHeader('Content-Type', format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.status(200).send(reportBuffer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+module.exports = { loadLogin, login, loadDashboard, loadCustomers, editUserStatus, deleteUser, logout, getSalesReport, downloadReport };

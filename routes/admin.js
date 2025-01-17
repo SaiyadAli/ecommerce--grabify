@@ -62,6 +62,10 @@ router.delete('/variant/:id', adminAuth.checkSession, variantController.deleteVa
 router.get('/editvariant/:id', adminAuth.checkSession, variantController.getEditVariantPage);
 router.post('/editvariant/:id', adminAuth.checkSession, upload.array('images', 5), variantController.editVariant); // Ensure multer is used for file uploads
 
+// Sales report routes
+router.get('/sales-report', adminAuth.checkSession, adminController.getSalesReport); // Add route for generating sales report
+router.get('/download-report', adminAuth.checkSession, adminController.downloadReport); // Add route for downloading sales report
+
 // Admin logout
 router.get('/logout', adminAuth.checkSession, adminController.logout);
 

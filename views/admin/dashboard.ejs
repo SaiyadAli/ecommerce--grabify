@@ -1,15 +1,303 @@
 <%- include('../partials/header.ejs') %>
 <%- include('../partials/navbar.ejs') %>
 <%- include('../partials/topnavigation.ejs') %>
-      
+  <div class="container-fluid">
+    
+    <!-- Title -->
+    <div class="d-flex justify-content-between align-items-lg-center py-3 flex-column flex-lg-row">
+      <h2 class="h5 mb-3 mb-lg-0">Dashboard</h2>
+      <div>
+        <div class="input-group" style="min-width: 16rem;">
+          <span class="input-group-text"><i class="bi bi-calendar-range"></i></span>
+          <input type="text" class="form-control daterange" />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row -->
+    <div class="row">
+      <div class="col-lg-3">
+        <!-- Conversion rate -->
+        <div class="card mb-4">
+          <div class="card-body position-relative">
+            <h3 class="h6 text-muted">Conversion rate</h3>
+            <strong class="fs-3 text-dark lh-1"><%= conversionRate %></strong>
+            <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> <%= conversionRateChange %></small>
+            <i class="bi bi-arrow-left-right fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <!-- Added to cart -->
+        <div class="card mb-4">
+          <div class="card-body position-relative">
+            <h3 class="h6 text-muted">Added to cart</h3>
+            <strong class="fs-3 text-dark lh-1"><%= addedToCart %></strong>
+            <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> <%= addedToCartChange %></small>
+            <i class="bi bi-cart fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <!-- Reached checkout -->
+        <div class="card mb-4">
+          <div class="card-body position-relative">
+            <h3 class="h6 text-muted">Reached checkout</h3>
+            <strong class="fs-3 text-dark lh-1"><%= reachedCheckout %></strong>
+            <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> <%= reachedCheckoutChange %></small>
+            <i class="bi bi-bag-check fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <!-- Sales -->
+        <div class="card mb-4">
+          <div class="card-body position-relative">
+            <h3 class="h6 text-muted">Sales</h3>
+            <strong class="fs-3 text-dark lh-1">$<%= sales %></strong>
+            <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> <%= salesChange %></small>
+            <i class="bi bi-piggy-bank fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row -->
+    <div class="row">
+      <div class="col-lg-6">
+        <!-- Latest orders -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6 mb-0">Latest orders</h3>
+              <a href="#" class="small">View all orders</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <tbody>
+                  <tr>
+                    <td>#16123871</td>
+                    <td>Yesterday at 10:37 AM</td>
+                    <td>James</td>
+                    <td>$154.23</td>
+                    <td><span class="badge rounded-pill bg-warning">Pending</span></td>
+                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
+                  </tr>
+                  <tr>
+                    <td>#16123753</td>
+                    <td>Dec 6 at 08:22 AM</td>
+                    <td>John</td>
+                    <td>$196.13</td>
+                    <td><span class="badge rounded-pill bg-success">Delivered</span></td>
+                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
+                  </tr>
+                  <tr>
+                    <td>#16123532</td>
+                    <td>Dec 5 at 08:22 AM</td>
+                    <td>Jane</td>
+                    <td>$87.33</td>
+                    <td><span class="badge rounded-pill bg-danger">Failed</span></td>
+                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
+                  </tr>
+                  <tr>
+                    <td>#16123222</td>
+                    <td>Dec 4 at 11:07 PM</td>
+                    <td>James</td>
+                    <td>$126.98</td>
+                    <td><span class="badge rounded-pill bg-success">Delivered</span></td>
+                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
+                  </tr>
+                  <tr>
+                    <td>#16123443</td>
+                    <td>Dec 4 at 11:07 PM</td>
+                    <td>Jordan</td>
+                    <td>$98.23</td>
+                    <td><span class="badge rounded-pill bg-success">Delivered</span></td>
+                    <td><button type="button" class="btn btn-xs btn-light">Details</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <!-- Top products -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6 mb-0">Top products by unit sold</h3>
+              <div class="dropdown">
+                <button class="btn btn-link p-0 text-muted" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-repeat"></i> Refresh</a></li>
+                  <li><a class="dropdown-item" href="#"><i class="bi bi-list"></i> View all products</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table mb-4">
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="d-flex">
+                        <span class="me-2">
+                          <img src="/kassets/images/content/2-185x160.png" alt="" width="25" class="img-fluid">
+                        </span>
+                        <a href="#" class="text-truncate w-75 text-reset">Wireless Headphones with Noise Cancellation Tru Bass Bluetooth 5.2</a>
+                      </div>
+                    </td>
+                    <td>1,324</td>
+                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> 23%</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="d-flex">
+                        <span class="me-2">
+                          <img src="/kassets/images/content/3-185x160.png" alt="" width="25" class="img-fluid">
+                        </span>
+                        <a href="#" class="text-truncate w-75 text-reset">Smartwatch IP68 Waterproof GPS and Bluetooth Support</a>
+                      </div>
+                    </td>
+                    <td>754</td>
+                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> 12%</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="d-flex">
+                        <span class="me-2">
+                          <img src="/kassets/images/content/1-185x160.png" alt="" width="25" class="img-fluid">
+                        </span>
+                        <a href="#" class="text-truncate w-75 text-reset">Smartphone 5G Black 12GB RAM+512GB NEW</a>
+                      </div>
+                    </td>
+                    <td>622</td>
+                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> 8%</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="d-flex">
+                        <span class="me-2">
+                          <img src="/kassets/images/content/4-185x160.png" alt="" width="25" class="img-fluid">
+                        </span>
+                        <a href="#" class="text-truncate w-75 text-reset">Men's Running Shoes</a>
+                      </div>
+                    </td>
+                    <td>432</td>
+                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> 11%</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="d-flex">
+                        <span class="me-2">
+                          <img src="/kassets/images/content/2-185x160.png" alt="" width="25" class="img-fluid">
+                        </span>
+                        <a href="#" class="text-truncate w-75 text-reset">Wireless Headphones with Noise Cancellation Tru Bass Bluetooth 5.2</a>
+                      </div>
+                    </td>
+                    <td>232</td>
+                    <td><span class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> 23%</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sales Report Section -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h3 class="h6">Sales Report</h3>
+        <div id="salesReport">
+          <!-- Sales report content will be dynamically loaded here -->
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+          <button class="btn btn-success me-2" onclick="downloadReport('pdf')">Download PDF</button>
+          <button class="btn btn-success" onclick="downloadReport('excel')">Download Excel</button>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+<%- include('../partials/footer.ejs') %>
+<script>
+  function filterSales() {
+    const daterange = $('.daterange').val();
+    const [startDate, endDate] = daterange.split(' - ');
 
-        <!-- Bottom content -->
-      
-        
-        
-        
-        
-          
- <%- include('../partials/footer.ejs') %>
+    $.get('/admin/sales-report', { startDate, endDate }, function(data) {
+      let reportHtml = `
+        <p>Total Orders: ${data.totalOrders}</p>
+        <p>Total Sales Amount: $${data.totalSalesAmount.toFixed(2)}</p>
+        <p>Total Discount: $${data.totalDiscount.toFixed(2)}</p>
+      `;
+
+      if (data.orders && data.orders.length > 0) {
+        reportHtml += `
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Order Number</th>
+                <th>User Name</th>
+                <th>Items</th>
+                <th>Payment Type</th>
+                <th>Total Cost</th>
+                <th>Order Date</th>
+                <th>Status</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.orders.forEach(order => {
+          reportHtml += `
+            <tr>
+              <td>#${order.orderNumber}</td>
+              <td>${order.userId.username}</td>
+              <td>${order.cartData.length} <small>item(s)</small></td>
+              <td>${order.paymentType}</td>
+              <td>₹${order.grandTotalCost}</td>
+              <td>${new Date(order.orderDate).toLocaleDateString()}</td>
+              <td><span class="badge rounded-pill bg-success">Delivered</span></td>
+              <td><a href="/admin/orders/${order._id}/status" class="btn btn-primary btn-sm">View Details</a></td>
+            </tr>
+          `;
+        });
+
+        reportHtml += `
+            </tbody>
+          </table>
+        `;
+      } else {
+        reportHtml += `<p>No orders found for the selected date range.</p>`;
+      }
+
+      $('#salesReport').html(reportHtml);
+    });
+  }
+
+  function downloadReport(format) {
+    const daterange = $('.daterange').val();
+    const [startDate, endDate] = daterange.split(' - ');
+
+    const url = `/admin/download-report?format=${format}&startDate=${startDate}&endDate=${endDate}`;
+    window.location.href = url;
+  }
+
+  // Trigger filterSales on date range change
+  $('.daterange').on('apply.daterangepicker', function() {
+    filterSales();
+  });
+
+  // Initial load
+  $(document).ready(function() {
+    filterSales();
+  });
+</script>
 
 
