@@ -53,17 +53,18 @@ const loadDashboard = async (req, res) => {
         const addedToCartChange = -5; // Fetch from database
         const reachedCheckout = 5.67; // Fetch from database
         const reachedCheckoutChange = -2; // Fetch from database
-        const sales = 1565.78; // Fetch from database
         const salesChange = 12.23; // Fetch from database
 
         // Fetch additional data from cartModel and orderModel
         const totalOrders = await orderModel.countDocuments({});
         const totalSalesAmount = await orderModel.aggregate([
-            { $group: { _id: null, total: { $sum: "$grandTotalCost" } } }
+            { $match: { orderStatus: 'Delivered' } },
+            { $group: { _id: null, total: { $sum: { $add: ["$grandTotalCost", "$walletDeduction"] } } } }
         ]);
         const totalDiscount = await orderModel.aggregate([
             { $group: { _id: null, total: { $sum: "$couponDeduction" } } }
         ]);
+        const sales = totalSalesAmount.length > 0 ? totalSalesAmount[0].total : 0;
 
         res.render('admin/dashboard', {
             users,
@@ -77,8 +78,8 @@ const loadDashboard = async (req, res) => {
             sales,
             salesChange,
             totalOrders,
-            totalSalesAmount: totalSalesAmount[0]?.total || 0,
-            totalDiscount: totalDiscount[0]?.total || 0
+            totalSalesAmount: sales,
+            totalDiscount: totalDiscount.length > 0 ? totalDiscount[0].total : 0
         });
     } catch (error) {
         console.error(error);
@@ -144,21 +145,12 @@ const logout = async (req, res) => {
 const generateSalesReport = async (period, startDate, endDate) => {
     const match = {};
     if (startDate && endDate) {
-        match.orderDate = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    } else if (period) {
-        const now = new Date();
-        if (period === 'daily') {
-            match.orderDate = { $gte: new Date(now.setDate(now.getDate() - 1)) };
-        } else if (period === 'weekly') {
-            match.orderDate = { $gte: new Date(now.setDate(now.getDate() - 7)) };
-        } else if (period === 'monthly') {
-            match.orderDate = { $gte: new Date(now.setMonth(now.getMonth() - 1)) };
-        }
+        match.orderDate = { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) };
     }
 
     const orders = await orderModel.find(match);
     const totalOrders = orders.length;
-    const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost, 0);
+    const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
     const totalDiscount = orders.reduce((sum, order) => sum + order.couponDeduction, 0);
 
     return { totalOrders, totalSalesAmount, totalDiscount };
@@ -203,7 +195,7 @@ const getSalesReport = async (req, res) => {
         const { startDate, endDate } = req.query;
         const report = await generateSalesReport(null, startDate, endDate);
         const orders = await orderModel.find({
-            orderDate: { $gte: new Date(startDate), $lte: new Date(endDate) },
+            orderDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
