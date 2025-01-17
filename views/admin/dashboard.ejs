@@ -33,7 +33,7 @@
           <div class="card-body position-relative">
             <h3 class="h6 text-muted">Added to cart</h3>
             <strong class="fs-3 text-dark lh-1"><%= addedToCart %></strong>
-            <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> <%= addedToCartChange %></small>
+            
             <i class="bi bi-cart fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
           </div>
         </div>
@@ -44,7 +44,7 @@
           <div class="card-body position-relative">
             <h3 class="h6 text-muted">Reached checkout</h3>
             <strong class="fs-3 text-dark lh-1"><%= reachedCheckout %></strong>
-            <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-down text-danger"></i> <%= reachedCheckoutChange %></small>
+           
             <i class="bi bi-bag-check fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
           </div>
         </div>
@@ -54,8 +54,8 @@
         <div class="card mb-4">
           <div class="card-body position-relative">
             <h3 class="h6 text-muted">Sales</h3>
-            <strong class="fs-3 text-dark lh-1" id="sales-amount">$<%= sales %></strong>
-            <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> <%= salesChange %></small>
+            <strong class="fs-3 text-dark lh-1" id="sales-amount-mood"><%= sales %></strong>
+            
             <i class="bi bi-piggy-bank fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
           </div>
         </div>
@@ -80,7 +80,7 @@
                       <td>#<%= order.orderNumber %></td>
                         <td><%= new Date(order.orderDate).toLocaleString() %></td>
                         <td><%= order.userId.username.split(' ')[0] %></td>
-                      <td>$<%= order.grandTotalCost %></td>
+                      <td>₹<%= order.grandTotalCost %></td>
                       <td><span class="badge rounded-pill bg-<%= order.orderStatus === 'Pending' ? 'warning' : order.orderStatus === 'Delivered' ? 'success' : 'danger' %>"><%= order.orderStatus %></span></td>
                       <td><a href="/admin/orders/<%= order._id %>/status" ><button type="button" class="btn btn-xs btn-light">Details</button></a></td>
                     </tr>
@@ -201,7 +201,7 @@
       `;
 
       $('#salesReport').html(reportHtml);
-      $('#sales-amount').text(`$${data.totalSalesAmount.toFixed(2)}`);
+      $('#sales-amount-mood').text(`₹${data.totalSalesAmount.toFixed(2)}`);
     });
   }
 
