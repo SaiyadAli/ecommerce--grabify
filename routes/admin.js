@@ -9,6 +9,7 @@ const categoryController = require('../controller/categoryController');
 const productController = require('../controller/productController');
 const orderController = require('../controller/orderController');
 const couponController = require('../controller/couponController');
+const offerController = require('../controller/offerController');
 
 const adminAuth = require('../middleware/adminAuth');
 
@@ -48,6 +49,13 @@ router.get('/coupons', adminAuth.checkSession, couponController.listCoupons);
 router.post('/coupons', adminAuth.checkSession, couponController.createCoupon);
 router.post('/coupons/:id', adminAuth.checkSession, couponController.updateCoupon);
 router.delete('/coupons/:id', adminAuth.checkSession, couponController.deleteCoupon);
+
+// Offer routes
+router.get('/offers',adminAuth.checkSession, offerController.getOffers);
+router.post('/offers',adminAuth.checkSession, offerController.createOffer);
+router.get('/offers/edit/:id',adminAuth.checkSession, offerController.editOffer);
+router.post('/offers/edit/:id',adminAuth.checkSession, offerController.updateOffer);
+router.post('/offers/delete/:id',adminAuth.checkSession, offerController.deleteOffer);
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

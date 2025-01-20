@@ -16,7 +16,10 @@ const ProductSchema = new mongoose.Schema({
     ref: 'categories', // Reference to Category model
     required: true,
   },
-  
+  productOfferId: {
+    type: mongoose.Types.ObjectId,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -25,7 +28,6 @@ const ProductSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-
 });
 
 // Export the model
