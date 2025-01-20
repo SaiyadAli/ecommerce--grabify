@@ -5,6 +5,8 @@ const cartModel = require('../model/cartModel');
 const orderModel = require('../model/orderModel');
 const walletModel = require('../model/walletModel'); // Import the wallet model
 const wishlistModel = require('../model/wishlistModel'); // Import the wishlist model
+const categoryModel = require('../model/categoryModel'); // Import the category model
+const productModel = require('../model/productModel'); // Import the product model
 const PDFDocument = require('pdfkit');
 
 const loadLogin = async (req, res) => {
@@ -86,6 +88,30 @@ const loadDashboard = async (req, res) => {
         ]);
         console.log("Top Products:", topProducts); // Debug line
 
+        // Fetch all delivered orders
+        const deliveredOrders = await orderModel.find({ orderStatus: 'Delivered' }).populate('cartData.variantId');
+
+        // Map product IDs to their respective categories
+        const categorySalesMap = new Map();
+        for (const order of deliveredOrders) {
+            for (const item of order.cartData) {
+                const product = await productModel.findById(item.variantId.productId).populate('categoryid');
+                const categoryName = product.categoryid.categoryName;
+                if (categorySalesMap.has(categoryName)) {
+                    categorySalesMap.set(categoryName, categorySalesMap.get(categoryName) + item.quantity);
+                } else {
+                    categorySalesMap.set(categoryName, item.quantity);
+                }
+            }
+        }
+
+        // Convert the map to an array and sort by totalSold
+        const topCategories = Array.from(categorySalesMap, ([categoryName, totalSold]) => ({ categoryName, totalSold }))
+            .sort((a, b) => b.totalSold - a.totalSold)
+            .slice(0, 5);
+
+        console.log("Top Categories:", topCategories); // Debug line
+
         res.render('admin/dashboard', {
             users,
             message: '',
@@ -101,7 +127,8 @@ const loadDashboard = async (req, res) => {
             totalSalesAmount: sales,
             totalDiscount: totalDiscount.length > 0 ? totalDiscount[0].total : 0,
             latestOrders, // Pass latest orders to the view
-            topProducts // Pass top products to the view
+            topProducts, // Pass top products to the view
+            topCategories // Pass top categories to the view
         });
     } catch (error) {
         console.error(error);
@@ -195,46 +222,6 @@ const getSalesReport = async (req, res) => {
         res.status(500).json({ message: 'Internal server error.' });
     }
 };
-
-// const downloadSalesReportPDF = async (req, res) => {
-//     try {
-//         const { startDate, endDate } = req.query;
-//         const report = await generateSalesReport(null, startDate, endDate);
-//         const orders = await orderModel.find({
-//             orderDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
-//             orderStatus: 'Delivered'
-//         }).populate('userId', 'username');
-
-//         const doc = new PDFDocument();
-
-//         res.setHeader('Content-Type', 'application/pdf');
-//         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
-
-//         doc.pipe(res);
-
-//         doc.fontSize(18).text('Sales Report', { align: 'center' });
-//         doc.fontSize(12).text(`Period: ${startDate} to ${endDate}`, { align: 'center' });
-//         doc.moveDown();
-
-//         doc.fontSize(14).text('Orders:');
-//         orders.forEach(order => {
-//             doc.fontSize(12).text(`Order Number: ${order.orderNumber}`);
-//             doc.text(`User Name: ${order.userId.username}`);
-//             doc.text(`Items: ${order.cartData.length}`);
-//             doc.text(`Payment Type: ${order.paymentType}`);
-//             doc.text(`Total Cost: ₹${order.grandTotalCost}`);
-//             doc.text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`);
-//             doc.text(`Status: Delivered`);
-//             doc.moveDown();
-//         });
-
-//         doc.end();
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Internal server error.' });
-//     }
-// };
-
 
 const downloadSalesReportPDF = async (req, res) => {
     try {
