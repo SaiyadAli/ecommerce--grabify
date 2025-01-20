@@ -144,6 +144,7 @@
         <div id="salesReport">
           <!-- Sales report content will be dynamically loaded here -->
         </div>
+        <button id="downloadPDF" class="btn btn-primary mt-3">Download PDF</button>
       </div>
     </div>
     
@@ -209,6 +210,12 @@
   // Initial load
   $(document).ready(function() {
     filterSales();
+  });
+
+  $('#downloadPDF').on('click', function() {
+    const daterange = $('.daterange').val();
+    const [startDate, endDate] = daterange.split(' - ');
+    window.location.href = `/admin/sales-report-pdf?startDate=${startDate}&endDate=${endDate}`;
   });
 </script>
 

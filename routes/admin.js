@@ -79,6 +79,7 @@ router.post('/editvariant/:id', adminAuth.checkSession, upload.array('images', 5
 
 // Sales report routes
 router.get('/sales-report', adminAuth.checkSession, adminController.getSalesReport); // Add route for generating sales report
+router.get('/sales-report-pdf', adminAuth.checkSession, adminController.downloadSalesReportPDF); // Add route for downloading sales report PDF
 
 // Admin logout
 router.get('/logout', adminAuth.checkSession, adminController.logout);

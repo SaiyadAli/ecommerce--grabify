@@ -5,6 +5,7 @@ const cartModel = require('../model/cartModel');
 const orderModel = require('../model/orderModel');
 const walletModel = require('../model/walletModel'); // Import the wallet model
 const wishlistModel = require('../model/wishlistModel'); // Import the wishlist model
+const PDFDocument = require('pdfkit');
 
 const loadLogin = async (req, res) => {
     res.render('admin/login');
@@ -195,4 +196,53 @@ const getSalesReport = async (req, res) => {
     }
 };
 
-module.exports = { loadLogin, login, loadDashboard, loadCustomers, editUserStatus, deleteUser, logout, getSalesReport };
+const downloadSalesReportPDF = async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+        const report = await generateSalesReport(null, startDate, endDate);
+        const orders = await orderModel.find({
+            orderDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
+            orderStatus: 'Delivered'
+        }).populate('userId', 'username');
+
+        const doc = new PDFDocument();
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
+
+        doc.pipe(res);
+
+        doc.fontSize(18).text('Sales Report', { align: 'center' });
+        doc.fontSize(12).text(`Period: ${startDate} to ${endDate}`, { align: 'center' });
+        doc.moveDown();
+
+        doc.fontSize(14).text('Orders:');
+        orders.forEach(order => {
+            doc.fontSize(12).text(`Order Number: ${order.orderNumber}`);
+            doc.text(`User Name: ${order.userId.username}`);
+            doc.text(`Items: ${order.cartData.length}`);
+            doc.text(`Payment Type: ${order.paymentType}`);
+            doc.text(`Total Cost: ₹${order.grandTotalCost}`);
+            doc.text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`);
+            doc.text(`Status: Delivered`);
+            doc.moveDown();
+        });
+
+        doc.end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+module.exports = { 
+    loadLogin, 
+    login, 
+    loadDashboard, 
+    loadCustomers, 
+    editUserStatus, 
+    deleteUser, 
+    logout, 
+    getSalesReport, 
+    downloadSalesReportPDF // Add this line
+};
