@@ -25,7 +25,9 @@
                 <div style="clear:both"></div>
 
                 <div class="col-xs-12 col-sm-12">
-                    <% if (orders.length > 0) { %>
+                    <% if (orders.length > 0) { 
+                        orders.sort((a, b) => b.orderDate.getTime() - a.orderDate.getTime());
+                    %>
                         <table class="footable">
                             <thead>
                                 <tr>
