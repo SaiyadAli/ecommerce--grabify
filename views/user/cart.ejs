@@ -50,7 +50,7 @@
                                         <div class="CartDescription">
                                             <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %>(<%= item.variantId.color %>)</a></h4>
                                             <span class="size"><%= item.size %></span>
-                                            <div class="price"><span>₹<%= item.variantId.price %></span></div>
+                                            <div class="price"><span>₹<%= item.variantId.effectivePrice %></span></div>
                                         </div>
                                     </td>
                                     <td class="delete"><a href="/user/cart/delete/<%= item._id %>" title="Delete"><i class="glyphicon glyphicon-trash fa-2x"></i></a></td>
@@ -60,8 +60,8 @@
                                         <button type="button" class="btn btn-sm btn-primary decrease-qty" data-id="<%= item._id %>" data-size="<%= item.size %>" style="margin-top: 10px;">-</button>
                                     </td>
                                     <td><%= item.size %></td>
-                                    <td class="price" id="total-item-<%= item._id %>">₹<%= item.variantId.price * item.quantity %></td>
-                                    <% sum+=item.variantId.price * item.quantity %>
+                                    <td class="price" id="total-item-<%= item._id %>">₹<%= item.variantId.effectivePrice * item.quantity %></td>
+                                    <% sum+=item.variantId.effectivePrice * item.quantity %>
                                 </tr>
                                 <% }) %>
                                 </tbody>

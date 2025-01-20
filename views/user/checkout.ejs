@@ -203,12 +203,12 @@
                                 <td>
                                     <div class="CartDescription">
                                         <h4><a href="/product/<%= item.productId._id %>"><%= item.productId.name %>(<%= item.variantId.color %>)</a></h4>
-                                        <div class="price"><span>₹<%= item.variantId.price %></span></div>
+                                        <div class="price"><span>₹<%= item.variantId.effectivePrice %></span></div>
                                     </div>
                                 </td>
                                 <!-- <td><%= item.quantity %></td>
                                 <td><%= item.size %></td> -->
-                                <td class="price">₹<%= item.variantId.price * item.quantity %></td>
+                                <td class="price">₹<%= item.variantId.effectivePrice * item.quantity %></td>
                             </tr>
                             <% }) %>
                         </tbody>

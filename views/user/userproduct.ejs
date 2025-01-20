@@ -60,7 +60,12 @@
             <!-- <div class="rating">
                 <p><span><i class="fa fa-star"></i></span> <span><i class="fa fa-star"></i></span> <span><i class="fa fa-star"></i></span> <span><i class="fa fa-star"></i></span> <span><i class="fa fa-star-o "></i></span> <span class="ratingInfo"> <span> / </span> <a data-target="#modal-review" data-toggle="modal"> Write a review</a> </span></p>
             </div> -->
-            <div class="product-price"><span class="price-sales"> $<%= variant.price %></span></div>
+            <div class="product-price">
+                <span class="price-sales"> $<%= variant.effectivePrice.toFixed(2) %></span>
+                <span class="price-standard">$<%= variant.price %></span>
+            </div>
+            
+
             <div class="details-description">
                 <p><%= variant.productId.description %></p>
             </div>

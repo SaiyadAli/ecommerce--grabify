@@ -14,6 +14,10 @@ const VariantSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  effectivePrice: {
+    type: Number,
+    default: null,
+  },
   size: {
     type: Map,
     of: Number, // A map where key is size and value is stock count

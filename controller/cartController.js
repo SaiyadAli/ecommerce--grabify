@@ -102,8 +102,8 @@ const updateCartQuantity = async (req, res) => {
         await cartItem.save();
 
         const cartItems = await Cart.find({ userId: req.user._id }).populate('variantId');
-        const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
-        const totalItem = cartItem.variantId.price * cartItem.quantity;
+        const total = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
+        const totalItem = cartItem.variantId.effectivePrice * cartItem.quantity;
 
         res.status(200).json({ message: 'Cart updated successfully', total, totalItem });
     } catch (error) {
@@ -115,7 +115,7 @@ const checkout = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).populate('addresses');
         const cartItems = await Cart.find({ userId: req.user._id }).populate('productId variantId');
-        let grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+        let grandTotal = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
 
         // Round grand total to 2 decimal places
         grandTotal = Math.round(grandTotal * 100) / 100;
@@ -152,7 +152,7 @@ const createOrderCOD = async (req, res) => {
         const { chosenAddress, couponCode, walletDeduction, paymentType } = req.body;
 
         const cartItems = await Cart.find({ userId }).populate('productId variantId');
-        const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+        const total = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
 
         const coupon = await Coupon.findOne({ couponCode });
         let discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
@@ -174,7 +174,7 @@ const createOrderCOD = async (req, res) => {
             variantColor: item.variantId.color,
             quantity: item.quantity,
             size: item.size,
-            price: item.variantId.price,
+            price: item.variantId.effectivePrice,
             variantId: item.variantId._id
         }));
 
@@ -236,7 +236,7 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
 
         if (!paymentId || !orderId || !signature) {
             const cartItems = await Cart.find({ userId }).populate('productId variantId');
-            const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+            const total = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
 
             const coupon = await Coupon.findOne({ couponCode });
             let discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
@@ -258,7 +258,7 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                 variantColor: item.variantId.color,
                 quantity: item.quantity,
                 size: item.size,
-                price: item.variantId.price,
+                price: item.variantId.effectivePrice,
                 variantId: item.variantId._id
             }));
 
@@ -472,7 +472,7 @@ const applyCoupon = async (req, res) => {
         }
 
         const cartItems = await Cart.find({ userId }).populate('variantId');
-        const total = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
+        const total = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
 
         let discountAmount = (total * coupon.discountPercentage) / 100;
         if (discountAmount > coupon.maximumDiscount) {
