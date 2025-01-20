@@ -196,6 +196,46 @@ const getSalesReport = async (req, res) => {
     }
 };
 
+// const downloadSalesReportPDF = async (req, res) => {
+//     try {
+//         const { startDate, endDate } = req.query;
+//         const report = await generateSalesReport(null, startDate, endDate);
+//         const orders = await orderModel.find({
+//             orderDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
+//             orderStatus: 'Delivered'
+//         }).populate('userId', 'username');
+
+//         const doc = new PDFDocument();
+
+//         res.setHeader('Content-Type', 'application/pdf');
+//         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
+
+//         doc.pipe(res);
+
+//         doc.fontSize(18).text('Sales Report', { align: 'center' });
+//         doc.fontSize(12).text(`Period: ${startDate} to ${endDate}`, { align: 'center' });
+//         doc.moveDown();
+
+//         doc.fontSize(14).text('Orders:');
+//         orders.forEach(order => {
+//             doc.fontSize(12).text(`Order Number: ${order.orderNumber}`);
+//             doc.text(`User Name: ${order.userId.username}`);
+//             doc.text(`Items: ${order.cartData.length}`);
+//             doc.text(`Payment Type: ${order.paymentType}`);
+//             doc.text(`Total Cost: ₹${order.grandTotalCost}`);
+//             doc.text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`);
+//             doc.text(`Status: Delivered`);
+//             doc.moveDown();
+//         });
+
+//         doc.end();
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Internal server error.' });
+//     }
+// };
+
+
 const downloadSalesReportPDF = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
@@ -205,26 +245,55 @@ const downloadSalesReportPDF = async (req, res) => {
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
-        const doc = new PDFDocument();
+        const PDFDocument = require('pdfkit');
+        const doc = new PDFDocument({ margin: 30 });
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
 
         doc.pipe(res);
 
-        doc.fontSize(18).text('Sales Report', { align: 'center' });
-        doc.fontSize(12).text(`Period: ${startDate} to ${endDate}`, { align: 'center' });
+        // Header Section
+        doc.fontSize(20).text('Sales Report', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(12).text(`Report Type: Monthly`, { align: 'left' });
+        doc.text(`Sales Report Period: ${startDate} to ${endDate}`);
+        doc.text(`Total Sales Count: ${orders.length}`);
+        doc.text(`Overall Order Amount: ₹${report.totalAmount}`);
+        doc.text(`Total Coupon Deductions: ₹${report.totalCouponDeductions}`);
+        doc.moveDown(2);
+
+        // Table Header
+        doc.fontSize(14).text('Order Details', { underline: true });
         doc.moveDown();
 
-        doc.fontSize(14).text('Orders:');
+        const tableHeader = ["Order ID", "Customer", "Total Price", "Created At"];
+        const tableColumnWidths = [80, 150, 100, 150];
+
+        // Draw table header
+        let cursorY = doc.y;
+        tableHeader.forEach((header, i) => {
+            doc.fontSize(12).font('Helvetica-Bold').text(header, 50 + tableColumnWidths.slice(0, i).reduce((a, b) => a + b, 0), cursorY, { width: tableColumnWidths[i], align: 'center' });
+        });
+
+        // Draw a horizontal line below header
+        doc.moveTo(50, cursorY + 15).lineTo(550, cursorY + 15).stroke();
+        doc.moveDown();
+
+        // Draw table rows
         orders.forEach(order => {
-            doc.fontSize(12).text(`Order Number: ${order.orderNumber}`);
-            doc.text(`User Name: ${order.userId.username}`);
-            doc.text(`Items: ${order.cartData.length}`);
-            doc.text(`Payment Type: ${order.paymentType}`);
-            doc.text(`Total Cost: ₹${order.grandTotalCost}`);
-            doc.text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`);
-            doc.text(`Status: Delivered`);
+            cursorY = doc.y;
+            const orderDetails = [
+                order.orderNumber,
+                order.userId.username,
+                `₹${order.grandTotalCost}`,
+                new Date(order.orderDate).toLocaleString()
+            ];
+
+            orderDetails.forEach((detail, i) => {
+                doc.fontSize(10).font('Helvetica').text(detail, 50 + tableColumnWidths.slice(0, i).reduce((a, b) => a + b, 0), cursorY, { width: tableColumnWidths[i], align: 'center' });
+            });
+
             doc.moveDown();
         });
 
