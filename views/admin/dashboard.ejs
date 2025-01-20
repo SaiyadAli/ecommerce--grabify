@@ -144,10 +144,6 @@
         <div id="salesReport">
           <!-- Sales report content will be dynamically loaded here -->
         </div>
-        <div class="d-flex justify-content-end mt-3">
-          <button class="btn btn-success me-2" onclick="downloadReport('pdf')">Download PDF</button>
-          <button class="btn btn-success" onclick="downloadReport('excel')">Download Excel</button>
-        </div>
       </div>
     </div>
     
@@ -203,14 +199,6 @@
       $('#salesReport').html(reportHtml);
       $('#sales-amount-mood').text(`₹${data.totalSalesAmount.toFixed(2)}`);
     });
-  }
-
-  function downloadReport(format) {
-    const daterange = $('.daterange').val();
-    const [startDate, endDate] = daterange.split(' - ');
-
-    const url = `/admin/download-report?format=${format}&startDate=${startDate}&endDate=${endDate}`;
-    window.location.href = url;
   }
 
   // Trigger filterSales on date range change

@@ -5,8 +5,6 @@ const cartModel = require('../model/cartModel');
 const orderModel = require('../model/orderModel');
 const walletModel = require('../model/walletModel'); // Import the wallet model
 const wishlistModel = require('../model/wishlistModel'); // Import the wishlist model
-const PDFDocument = require('pdfkit');
-const ExcelJS = require('exceljs');
 
 const loadLogin = async (req, res) => {
     res.render('admin/login');
@@ -179,40 +177,6 @@ const generateSalesReport = async (period, startDate, endDate) => {
     return { totalOrders, totalSalesAmount, totalDiscount };
 };
 
-const generatePDF = (reportData) => {
-    const doc = new PDFDocument();
-    let buffers = [];
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {
-        const pdfData = Buffer.concat(buffers);
-        return pdfData;
-    });
-
-    doc.fontSize(25).text('Sales Report', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(16).text(`Total Orders: ${reportData.totalOrders}`);
-    doc.text(`Total Sales Amount: $${reportData.totalSalesAmount.toFixed(2)}`);
-    doc.text(`Total Discount: $${reportData.totalDiscount.toFixed(2)}`);
-    doc.end();
-};
-
-const generateExcel = async (reportData) => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Sales Report');
-
-    worksheet.columns = [
-        { header: 'Metric', key: 'metric', width: 30 },
-        { header: 'Value', key: 'value', width: 30 }
-    ];
-
-    worksheet.addRow({ metric: 'Total Orders', value: reportData.totalOrders });
-    worksheet.addRow({ metric: 'Total Sales Amount', value: `$${reportData.totalSalesAmount.toFixed(2)}` });
-    worksheet.addRow({ metric: 'Total Discount', value: `$${reportData.totalDiscount.toFixed(2)}` });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    return buffer;
-};
-
 const getSalesReport = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
@@ -231,25 +195,4 @@ const getSalesReport = async (req, res) => {
     }
 };
 
-const downloadReport = async (req, res) => {
-    try {
-        const { format, period, startDate, endDate } = req.query;
-        const reportData = await generateSalesReport(period, startDate, endDate);
-        let reportBuffer;
-
-        if (format === 'pdf') {
-            reportBuffer = generatePDF(reportData);
-        } else if (format === 'excel') {
-            reportBuffer = await generateExcel(reportData);
-        }
-
-        res.setHeader('Content-Disposition', `attachment; filename=sales_report.${format}`);
-        res.setHeader('Content-Type', format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.status(200).send(reportBuffer);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-};
-
-module.exports = { loadLogin, login, loadDashboard, loadCustomers, editUserStatus, deleteUser, logout, getSalesReport, downloadReport };
+module.exports = { loadLogin, login, loadDashboard, loadCustomers, editUserStatus, deleteUser, logout, getSalesReport };
