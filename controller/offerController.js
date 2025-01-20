@@ -1,5 +1,7 @@
 const ProductOffer = require('../model/productOfferModel');
 const Product = require('../model/productModel');
+const CategoryOffer = require('../model/categoryOfferModel');
+const Category = require('../model/categoryModel'); // Ensure this is the correct path to your Category model
 
 const getOffers = async (req, res) => {
     try {
@@ -74,4 +76,88 @@ const deleteOffer = async (req, res) => {
     }
 };
 
-module.exports = {deleteOffer, editOffer, getOffers, createOffer, updateOffer};
+const getCategoryOffers = async (req, res) => {
+    try {
+        const offers = await CategoryOffer.find().populate('categoryId');
+        const categories = await Category.find();
+        res.render('admin/categoryOffer', { offers, categories });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
+const createCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId, categoryOfferPercentage, startDate, endDate, currentStatus } = req.body;
+        const existingOffer = await CategoryOffer.findOne({ categoryId });
+        if (existingOffer) {
+            return res.status(400).json({ message: 'An offer for this category already exists.' });
+        }
+        const category = await Category.findById(categoryId);
+        const newOffer = new CategoryOffer({
+            categoryId,
+            categoryName: category.categoryName,
+            categoryOfferPercentage,
+            startDate,
+            endDate,
+            currentStatus
+        });
+        await newOffer.save();
+        res.json({ message: 'Category offer created successfully.' });
+    } catch (error) {
+        console.error('Error creating category offer:', error);
+        res.status(500).json({ message: 'Error creating category offer' });
+    }
+};
+
+const editCategoryOffer = async (req, res) => {
+    try {
+        const offer = await CategoryOffer.findById(req.params.id).populate('categoryId');
+        const categories = await Category.find();
+        res.render('admin/editCategoryOffer', { offer, categories });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
+const updateCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId, categoryOfferPercentage, startDate, endDate, currentStatus } = req.body;
+        const category = await Category.findById(categoryId);
+        await CategoryOffer.findByIdAndUpdate(req.params.id, {
+            categoryId,
+            categoryName: category.categoryName,
+            categoryOfferPercentage,
+            startDate,
+            endDate,
+            currentStatus
+        });
+        res.json({ message: 'Category offer updated successfully.' });
+    } catch (error) {
+        console.error('Error updating category offer:', error);
+        res.status(500).json({ message: 'Error updating category offer' });
+    }
+};
+
+const deleteCategoryOffer = async (req, res) => {
+    try {
+        await CategoryOffer.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Category offer deleted successfully.' });
+    } catch (error) {
+        console.error('Error deleting category offer:', error);
+        res.status(500).json({ message: 'Error deleting category offer' });
+    }
+};
+
+module.exports = {
+    deleteOffer,
+    editOffer,
+    getOffers,
+    createOffer,
+    updateOffer,
+    getCategoryOffers,
+    createCategoryOffer,
+    editCategoryOffer,
+    updateCategoryOffer,
+    deleteCategoryOffer
+};

@@ -5,8 +5,8 @@
 <div class="container-fluid">
     <!-- Title -->
     <div class="d-flex justify-content-between align-items-center py-3">
-        <h2 class="h5">Product Offer Management</h2>
-        <button class="btn btn-primary" data-toggle="modal" data-target="#newOfferModal">Add New Offer</button>
+        <h2 class="h5">Category Offer Management</h2>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#newCategoryOfferModal">Add New Category Offer</button>
     </div>
 
     <!-- Table -->
@@ -15,7 +15,7 @@
             <table class="table table-striped align-middle datatables">
                 <thead>
                     <tr>
-                        <th>Product Name</th>
+                        <th>Category Name</th>
                         <th>Offer Percentage</th>
                         <th>Start Date</th>
                         <th>End Date</th>
@@ -26,40 +26,40 @@
                 <tbody>
                     <% offers.forEach(offer => { %>
                         <tr>
-                            <td><%= offer.productId.name %></td>
-                            <td><%= offer.productOfferPercentage %>%</td>
+                            <td><%= offer.categoryId.name %></td>
+                            <td><%= offer.categoryOfferPercentage %>%</td>
                             <td><%= new Date(offer.startDate).toLocaleDateString() %></td>
                             <td><%= new Date(offer.endDate).toLocaleDateString() %></td>
                             <td><%= offer.currentStatus ? 'Active' : 'Inactive' %></td>
                             <td>
-                                <i class="bi bi-pencil-square text-primary edit-offer-icon" data-toggle="modal" data-target="#editOfferModal<%= offer._id %>" style="cursor: pointer; margin-right: 10px;"></i>
-                                <i class="bi bi-trash text-danger delete-offer-icon" data-offer-id="<%= offer._id %>" style="cursor: pointer;"></i>
+                                <i class="bi bi-pencil-square text-primary edit-category-offer-icon" data-toggle="modal" data-target="#editCategoryOfferModal<%= offer._id %>" style="cursor: pointer; margin-right: 10px;"></i>
+                                <i class="bi bi-trash text-danger delete-category-offer-icon" data-offer-id="<%= offer._id %>" style="cursor: pointer;"></i>
                             </td>
                         </tr>
 
-                        <!-- Edit Offer Modal -->
-                        <div class="modal fade" id="editOfferModal<%= offer._id %>" tabindex="-1" role="dialog" aria-labelledby="editOfferModalLabel<%= offer._id %>" aria-hidden="true">
+                        <!-- Edit Category Offer Modal -->
+                        <div class="modal fade" id="editCategoryOfferModal<%= offer._id %>" tabindex="-1" role="dialog" aria-labelledby="editCategoryOfferModalLabel<%= offer._id %>" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="editOfferModalLabel<%= offer._id %>">Edit Offer</h5>
+                                        <h5 class="modal-title" id="editCategoryOfferModalLabel<%= offer._id %>">Edit Category Offer</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                    <form id="editOfferForm<%= offer._id %>" action="/admin/offers/edit/<%= offer._id %>" method="POST">
+                                    <form id="editCategoryOfferForm<%= offer._id %>" action="/admin/category-offers/edit/<%= offer._id %>" method="POST">
                                         <div class="modal-body">
                                             <div class="form-group">
-                                                <label for="productId">Product</label>
-                                                <select class="form-control" name="productId" required>
-                                                    <% products.forEach(product => { %>
-                                                        <option value="<%= product._id %>" <%= offer.productId._id.equals(product._id) ? 'selected' : '' %>><%= product.name %></option>
+                                                <label for="categoryId">Category</label>
+                                                <select class="form-control" name="categoryId" required disabled>
+                                                    <% categories.forEach(category => { %>
+                                                        <option value="<%= category._id %>" <%= offer.categoryId._id.equals(category._id) ? 'selected' : '' %>><%= category.name %></option>
                                                     <% }); %>
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label for="productOfferPercentage">Offer Percentage</label>
-                                                <input type="number" class="form-control" name="productOfferPercentage" value="<%= offer.productOfferPercentage %>" min="5" max="90" required>
+                                                <label for="categoryOfferPercentage">Offer Percentage</label>
+                                                <input type="number" class="form-control" name="categoryOfferPercentage" value="<%= offer.categoryOfferPercentage %>" min="5" max="90" required>
                                             </div>
                                             <div class="form-group">
                                                 <label for="startDate">Start Date</label>
@@ -92,29 +92,29 @@
     </div>
 </div>
 
-<!-- New Offer Modal -->
-<div class="modal fade" id="newOfferModal" tabindex="-1" role="dialog" aria-labelledby="newOfferModalLabel" aria-hidden="true">
+<!-- New Category Offer Modal -->
+<div class="modal fade" id="newCategoryOfferModal" tabindex="-1" role="dialog" aria-labelledby="newCategoryOfferModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="newOfferModalLabel">Add New Offer</h5>
+                <h5 class="modal-title" id="newCategoryOfferModalLabel">Add New Category Offer</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="newOfferForm" action="/admin/offers" method="POST">
+            <form id="newCategoryOfferForm" action="/admin/category-offers" method="POST">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="productId">Product</label>
-                        <select class="form-control" name="productId" required>
-                            <% products.forEach(product => { %>
-                                <option value="<%= product._id %>"><%= product.name %></option>
+                        <label for="categoryId">Category</label>
+                        <select class="form-control" name="categoryId" required>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>"><%= category.name %></option>
                             <% }); %>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="productOfferPercentage">Offer Percentage</label>
-                        <input type="number" class="form-control" name="productOfferPercentage" min="5" max="90" required>
+                        <label for="categoryOfferPercentage">Offer Percentage</label>
+                        <input type="number" class="form-control" name="categoryOfferPercentage" min="5" max="90" required>
                     </div>
                     <div class="form-group">
                         <label for="startDate">Start Date</label>
@@ -134,7 +134,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Add Offer</button>
+                    <button type="submit" class="btn btn-primary">Add Category Offer</button>
                 </div>
             </form>
         </div>
@@ -167,7 +167,7 @@
         });
     });
 
-    document.querySelectorAll('.delete-offer-icon').forEach(icon => {
+    document.querySelectorAll('.delete-category-offer-icon').forEach(icon => {
         icon.addEventListener('click', function() {
             const offerId = this.getAttribute('data-offer-id');
             Swal.fire({
@@ -180,7 +180,7 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/admin/offers/delete/${offerId}`, {
+                    fetch(`/admin/category-offers/delete/${offerId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -202,7 +202,7 @@
                         console.error('Error:', error);
                         Swal.fire(
                             'Error!',
-                            'There was an error deleting the offer.',
+                            'There was an error deleting the category offer.',
                             'error'
                         );
                     });
@@ -211,13 +211,13 @@
         });
     });
 
-    document.querySelectorAll('[id^="editOfferForm"]').forEach(form => {
+    document.querySelectorAll('[id^="editCategoryOfferForm"]').forEach(form => {
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
             const offerId = this.action.split('/').pop();
 
-            fetch(`/admin/offers/edit/${offerId}`, {
+            fetch(`/admin/category-offers/edit/${offerId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -226,7 +226,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message === 'Offer updated successfully.') {
+                if (data.message === 'Category offer updated successfully.') {
                     Swal.fire(
                         'Updated!',
                         data.message,
@@ -246,18 +246,18 @@
                 console.error('Error:', error);
                 Swal.fire(
                     'Error!',
-                    'There was an error updating the offer.',
+                    'There was an error updating the category offer.',
                     'error'
                 );
             });
         });
     });
 
-    document.getElementById('newOfferForm').addEventListener('submit', function(event) {
+    document.getElementById('newCategoryOfferForm').addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(this);
 
-        fetch('/admin/offers', {
+        fetch('/admin/category-offers', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -266,7 +266,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.message === 'Offer created successfully.') {
+            if (data.message === 'Category offer created successfully.') {
                 Swal.fire(
                     'Created!',
                     data.message,
@@ -286,7 +286,7 @@
             console.error('Error:', error);
             Swal.fire(
                 'Error!',
-                'There was an error creating the offer.',
+                'There was an error creating the category offer.',
                 'error'
             );
         });

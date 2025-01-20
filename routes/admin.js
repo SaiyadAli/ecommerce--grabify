@@ -57,6 +57,13 @@ router.get('/offers/edit/:id',adminAuth.checkSession, offerController.editOffer)
 router.post('/offers/edit/:id',adminAuth.checkSession, offerController.updateOffer);
 router.post('/offers/delete/:id',adminAuth.checkSession, offerController.deleteOffer);
 
+// Category Offer routes
+router.get('/category-offers', adminAuth.checkSession, offerController.getCategoryOffers);
+router.post('/category-offers', adminAuth.checkSession, offerController.createCategoryOffer);
+router.get('/category-offers/edit/:id', adminAuth.checkSession, offerController.editCategoryOffer);
+router.post('/category-offers/edit/:id', adminAuth.checkSession, offerController.updateCategoryOffer);
+router.post('/category-offers/delete/:id', adminAuth.checkSession, offerController.deleteCategoryOffer);
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
