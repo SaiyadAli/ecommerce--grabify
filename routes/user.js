@@ -110,7 +110,7 @@ router.get('/forgot', userController.forgotPassword);
 router.post('/reset-password', userController.resetPassword);
 
 // Route for displaying shop page
-router.get('/shop', shopController.getShopPage);
+router.get('/shop', auth.checkSession,shopController.getShopPage);
 
 // Route for displaying wishlist
 router.get('/wishlist',auth.checkSession, wishlistController.getWishlist);
