@@ -93,6 +93,7 @@
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                            <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
                         </div>
                     </div>
                 </div>
@@ -146,6 +147,11 @@
                         </div>
                     <% } %>
                 </div>
+                <div id="pagination" class="text-center" style="display: none;">
+                    <button class="btn btn-default" onclick="prevPage()">Previous</button>
+                    <span id="pageNumber">1</span>
+                    <button class="btn btn-default" onclick="nextPage()">Next</button>
+                </div>
             </div>
 
 
@@ -161,6 +167,8 @@
 
     <script>
         let allVariants = <%- JSON.stringify(variants) %>;
+        let currentPage = 1;
+        const itemsPerPage = 6;
 
         function applyFilters() {
             const selectedColors = Array.from(document.querySelectorAll('input[name="colorPattern"]:checked')).map(input => input.value);
@@ -190,11 +198,27 @@
                 filteredVariants = filteredVariants.filter(variant => variant.productId.name.toLowerCase().includes(searchQuery.toLowerCase()));
             }
 
+            renderProducts(filteredVariants);
+        }
+
+        function clearFilters() {
+            document.querySelectorAll('input[name="colorPattern"]:checked').forEach(input => input.checked = false);
+            document.querySelectorAll('input[name="sortBy"]:checked').forEach(input => input.checked = false);
+            document.querySelectorAll('.category-filter:checked').forEach(input => input.checked = false);
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+
+        function renderProducts(variants) {
             const productContainer = document.getElementById('productContainer');
             productContainer.innerHTML = '';
 
-            if (filteredVariants.length > 0) {
-                filteredVariants.forEach(variant => {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedVariants = variants.slice(start, end);
+
+            if (paginatedVariants.length > 0) {
+                paginatedVariants.forEach(variant => {
                     const productHtml = `
                         <div class="item col-lg-4 col-md-4 col-sm-6 col-xs-12">
                             <div class="product">
@@ -220,8 +244,27 @@
                     `;
                     productContainer.insertAdjacentHTML('beforeend', productHtml);
                 });
+                document.getElementById('pagination').style.display = 'block';
             } else {
                 productContainer.innerHTML = '<div class="col-lg-12"><p class="text-center">No products found in this category.</p></div>';
+                document.getElementById('pagination').style.display = 'none';
+            }
+
+            document.getElementById('pageNumber').textContent = currentPage;
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                applyFilters();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(allVariants.length / itemsPerPage);
+            if (currentPage < totalPages-1) {
+                currentPage++;
+                applyFilters();
             }
         }
 
