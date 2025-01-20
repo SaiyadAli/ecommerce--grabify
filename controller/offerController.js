@@ -122,11 +122,9 @@ const editCategoryOffer = async (req, res) => {
 
 const updateCategoryOffer = async (req, res) => {
     try {
-        const { categoryId, categoryOfferPercentage, startDate, endDate, currentStatus } = req.body;
-        const category = await Category.findById(categoryId);
+        const { categoryOfferPercentage, startDate, endDate, currentStatus } = req.body;
+       
         await CategoryOffer.findByIdAndUpdate(req.params.id, {
-            categoryId,
-            categoryName: category.categoryName,
             categoryOfferPercentage,
             startDate,
             endDate,
