@@ -101,7 +101,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.getElementById('editAddressForm').addEventListener('submit', function(event) {
+    document.getElementById('editAddressForm').addEventListener('submit', async function(event) {
         event.preventDefault();
         
         const firstName = document.getElementById('InputName').value;
@@ -112,6 +112,7 @@
         const postalCode = document.getElementById('InputZip').value;
         const country = document.getElementById('InputCountry').value;
         const mobilePhone = document.getElementById('InputMobile').value;
+        const addressAlias = document.getElementById('addressAlias').value;
 
         const nameRegex = /^[A-Za-z\s]+$/;
         const postalCodeRegex = /^[0-9]+$/;
@@ -150,16 +151,46 @@
             return;
         }
 
-        Swal.fire({
-            title: 'Success',
-            text: 'Your address has been updated successfully!',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.submit();
+        try {
+            const response = await fetch(`/user/editAddress/<%= address._id %>`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    company: document.getElementById('InputCompany').value,
+                    street: address,
+                    addressLine2: document.getElementById('InputAddress2').value,
+                    city,
+                    state,
+                    country,
+                    pincode: postalCode,
+                    additionalInformation: document.getElementById('InputAdditionalInformation').value,
+                    number: mobilePhone,
+                    addressAlias
+                })
+            });
+
+            const result = await response.json();
+            if (response.status === 400) {
+                Swal.fire('Error', result.message, 'error');
+            } else {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Your address has been updated successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/user/myAddress';
+                    }
+                });
             }
-        });
+        } catch (error) {
+            window.location.href = '/user/myAddress';
+        }
     });
 </script>
 

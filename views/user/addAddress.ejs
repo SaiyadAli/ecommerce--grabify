@@ -29,7 +29,7 @@
                     <p class="required"><sup>*</sup> Required field</p>
                 </div>
 
-                <form action="/user/addAddress" method="POST">
+                <form action="/user/addAddress" method="POST" id="addAddressForm">
 
                     <div class="col-xs-12 col-sm-6">
 
@@ -147,4 +147,103 @@
 <!-- /wrapper -->
 
 <div class="gap"></div>
+
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('addAddressForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const firstName = document.getElementById('InputName').value;
+        const lastName = document.getElementById('InputLastName').value;
+        const address = document.getElementById('InputAddress').value;
+        const city = document.getElementById('InputCity').value;
+        const state = document.getElementById('InputState').value;
+        const postalCode = document.getElementById('InputZip').value;
+        const country = document.getElementById('InputCountry').value;
+        const mobilePhone = document.getElementById('InputMobile').value;
+        const addressAlias = document.getElementById('addressAlias').value;
+
+        const nameRegex = /^[A-Za-z\s]+$/;
+        const postalCodeRegex = /^[0-9]+$/;
+        const mobilePhoneRegex = /^[0-9]+$/;
+
+        if (!nameRegex.test(firstName)) {
+            Swal.fire('Error', 'First Name should contain only alphabets and spaces.', 'error');
+            return;
+        }
+        if (!nameRegex.test(lastName)) {
+            Swal.fire('Error', 'Last Name should contain only alphabets.', 'error');
+            return;
+        }
+        if (address.trim() === '') {
+            Swal.fire('Error', 'Address is required.', 'error');
+            return;
+        }
+        if (city.trim() === '') {
+            Swal.fire('Error', 'City is required.', 'error');
+            return;
+        }
+        if (state.trim() === '') {
+            Swal.fire('Error', 'State is required.', 'error');
+            return;
+        }
+        if (!postalCodeRegex.test(postalCode)) {
+            Swal.fire('Error', 'Postal Code should be a number.', 'error');
+            return;
+        }
+        if (country.trim() === '') {
+            Swal.fire('Error', 'Country is required.', 'error');
+            return;
+        }
+        if (!mobilePhoneRegex.test(mobilePhone)) {
+            Swal.fire('Error', 'Mobile Phone should be a number.', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/user/addAddress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    firstName,
+                    lastName,
+                    company: document.getElementById('InputCompany').value,
+                    street: address,
+                    addressLine2: document.getElementById('InputAddress2').value,
+                    city,
+                    state,
+                    country,
+                    pincode: postalCode,
+                    additionalInformation: document.getElementById('InputAdditionalInformation').value,
+                    number: mobilePhone,
+                    addressAlias
+                })
+            });
+
+            const result = await response.json();
+            if (response.status === 400) {
+                Swal.fire('Error', result.message, 'error');
+            } else {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Your address has been added successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/user/myAddress';
+                    }
+                });
+            }
+        } catch (error) {
+            window.location.href = '/user/myAddress';
+        }
+    });
+</script>
+
 <%- include('../partials/grabifyfooter.ejs') %>

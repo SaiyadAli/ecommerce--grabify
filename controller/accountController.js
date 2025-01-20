@@ -54,6 +54,10 @@ const postAddAddress = async (req, res) => {
         try {
             const user = await User.findById(req.user._id);
             if (user) {
+                const existingAlias = user.addresses.find(address => address.addressAlias === req.body.addressAlias);
+                if (existingAlias) {
+                    return res.status(400).json({ message: 'Address alias must be unique.' });
+                }
                 user.addresses.push({
                     firstName: req.body.firstName,
                     lastName: req.body.lastName,
@@ -110,6 +114,10 @@ const postEditAddress = async (req, res) => {
             const user = await User.findById(req.user._id);
             const address = user.addresses.id(req.params.addressId);
             if (address) {
+                const existingAlias = user.addresses.find(addr => addr.addressAlias === req.body.addressAlias && addr._id.toString() !== req.params.addressId);
+                if (existingAlias) {
+                    return res.status(400).json({ message: 'Address alias must be unique.' });
+                }
                 address.firstName = req.body.firstName;
                 address.lastName = req.body.lastName;
                 address.company = req.body.company;
