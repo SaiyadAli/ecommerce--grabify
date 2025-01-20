@@ -24,9 +24,10 @@ const createOffer = async (req, res) => {
             currentStatus
         });
         await newOffer.save();
-        res.redirect('/admin/offers');
+        res.json({ message: 'Offer created successfully.' });
     } catch (error) {
-        res.status(500).send(error.message);
+        console.error('Error creating coupon:', error);
+        res.status(500).json({ message: 'Error creating coupon' });
     }
 };
 
@@ -52,19 +53,21 @@ const updateOffer = async (req, res) => {
             endDate,
             currentStatus
         });
-        res.redirect('/admin/offers');
+        res.json({ message: 'Offer updated successfully.' });
     } catch (error) {
-        res.status(500).send(error.message);
+        console.error('Error updating offer:', error);
+        res.status(500).json({ message: 'Error updating offer' });
     }
 };
 
 const deleteOffer = async (req, res) => {
     try {
         await ProductOffer.findByIdAndDelete(req.params.id);
-        res.redirect('/admin/offers');
+        res.json({ message: 'Offer deleted successfully.' });
     } catch (error) {
-        res.status(500).send(error.message);
+        console.error('Error deleting offer:', error);
+        res.status(500).json({ message: 'Error deleting offer' });
     }
 };
 
-module.exports = {deleteOffer, editOffer, getOffers, createOffer, updateOffer}; 
+module.exports = {deleteOffer, editOffer, getOffers, createOffer, updateOffer};
