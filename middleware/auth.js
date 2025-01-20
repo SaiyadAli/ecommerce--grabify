@@ -15,6 +15,18 @@ const checkSession = async (req, res, next) => {
                     return res.redirect('/user/login');
                 });
             }
+
+            // Check if user is blocked
+            if (user.isBlock) {
+                return req.session.destroy((err) => {
+                    if (err) {
+                        console.error('Error destroying session:', err);
+                    }
+                    res.clearCookie('connect.sid');
+                    return res.redirect('/user/login?message=Your account has been blocked. Please contact support.');
+                });
+            }
+
             req.user = user; // Attach user to request
             next(); // Proceed if user exists
         } catch (err) {
