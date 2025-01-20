@@ -153,6 +153,7 @@ const createOrderCOD = async (req, res) => {
 
         const cartItems = await Cart.find({ userId }).populate('productId variantId');
         const total = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
+        const nonOfferPrice = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
 
         const coupon = await Coupon.findOne({ couponCode });
         let discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
@@ -202,7 +203,8 @@ const createOrderCOD = async (req, res) => {
             grandTotalCost: grandTotal,
             couponDeduction: discountAmount,
             walletDeduction,
-            paymentStatus: paymentType === 'wallet' ? 'Paid' : 'Pending'
+            paymentStatus: paymentType === 'wallet' ? 'Paid' : 'Pending',
+            nonOfferPrice
         });
 
         await newOrder.save();
@@ -237,6 +239,7 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
         if (!paymentId || !orderId || !signature) {
             const cartItems = await Cart.find({ userId }).populate('productId variantId');
             const total = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
+            const nonOfferPrice = cartItems.reduce((sum, item) => sum + item.variantId.price * item.quantity, 0);
 
             const coupon = await Coupon.findOne({ couponCode });
             let discountAmount = coupon ? (total * coupon.discountPercentage) / 100 : 0;
@@ -294,7 +297,8 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                 couponDeduction: discountAmount,
                 razorpayOrderId: razorpayOrder.id,
                 paymentStatus: 'Pending',
-                walletDeduction
+                walletDeduction,
+                nonOfferPrice
             };
 
             res.json({ success: true, amount: options.amount, orderId: razorpayOrder.id, userName: req.user.name, userEmail: req.user.email, userContact: req.user.contact });

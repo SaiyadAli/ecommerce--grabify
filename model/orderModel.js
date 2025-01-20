@@ -21,7 +21,8 @@ const orderSchema = new mongoose.Schema({
     paymentId: { type: String },
     deliveryDate: { type: Date, default: null },
     couponDeduction: { type: Number, default: 0 },
-    walletDeduction: { type: Number, default: 0 }
+    walletDeduction: { type: Number, default: 0 },
+    nonOfferPrice: { type: Number, required: true }
 });
 
 orderSchema.virtual('address', {
