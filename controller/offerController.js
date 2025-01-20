@@ -14,6 +14,10 @@ const getOffers = async (req, res) => {
 const createOffer = async (req, res) => {
     try {
         const { productId, productOfferPercentage, startDate, endDate, currentStatus } = req.body;
+        const existingOffer = await ProductOffer.findOne({ productId });
+        if (existingOffer) {
+            return res.status(400).json({ message: 'An offer for this product already exists.' });
+        }
         const product = await Product.findById(productId);
         const newOffer = new ProductOffer({
             productId,

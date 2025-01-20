@@ -51,7 +51,7 @@
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label for="productId">Product</label>
-                                                <select class="form-control" name="productId" required>
+                                                <select class="form-control" name="productId" required disabled>
                                                     <% products.forEach(product => { %>
                                                         <option value="<%= product._id %>" <%= offer.productId._id.equals(product._id) ? 'selected' : '' %>><%= product.name %></option>
                                                     <% }); %>
