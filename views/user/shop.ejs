@@ -206,7 +206,8 @@
             document.querySelectorAll('input[name="sortBy"]:checked').forEach(input => input.checked = false);
             document.querySelectorAll('.category-filter:checked').forEach(input => input.checked = false);
             document.getElementById('searchInput').value = '';
-            applyFilters();
+            currentPage = 1;
+            renderProducts(allVariants);
         }
 
         function renderProducts(variants) {
@@ -262,7 +263,7 @@
 
         function nextPage() {
             const totalPages = Math.ceil(allVariants.length / itemsPerPage);
-            if (currentPage < totalPages-1) {
+            if (currentPage < totalPages) {
                 currentPage++;
                 applyFilters();
             }
@@ -284,6 +285,9 @@
             event.preventDefault();
             applyFilters();
         });
+
+        // Initial render
+        renderProducts(allVariants);
     </script>
 
 
