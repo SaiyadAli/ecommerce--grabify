@@ -26,6 +26,12 @@ passport.use(new GoogleStrategy({
           await user.save();
         }
       }
+
+      // Check if user is blocked
+      if (user.isBlock) {
+        return done(null, false, { message: 'Your account has been blocked. Please contact support.' });
+      }
+
       done(null, user);
     } catch (error) {
       done(error, false);
