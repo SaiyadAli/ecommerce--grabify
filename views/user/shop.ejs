@@ -150,7 +150,7 @@
                 <div id="pagination" class="text-center" style="display: none;">
                     <button class="btn btn-default" onclick="prevPage()">Previous</button>
                     <span id="pageNumber">1</span>
-                    <button class="btn btn-default" onclick="nextPage()">Next</button>
+                    <button id="nextButton" class="btn btn-default" onclick="nextPage()">Next</button>
                 </div>
             </div>
 
@@ -208,6 +208,7 @@
             document.getElementById('searchInput').value = '';
             currentPage = 1;
             renderProducts(allVariants);
+            location.reload();
         }
 
         function renderProducts(variants) {
@@ -236,7 +237,7 @@
                                     <p>${variant.productId.description}</p>
                                     <div class="sizes">
                                         ${Object.entries(variant.size).map(([size, stock]) => stock > 0 ? `<span class="size"> / ${size}</span>` : '').join('')}
-                                    </div>
+                                </div>
                                 </div>
                                 <div class="price"><span>₹${variant.price}</span></div>
                                 <div class="action-control"><a class="btn btn-primary" href="/user/product/${variant._id}"> <span class="add2cart"><i class="glyphicon glyphicon-shopping-cart"> </i> Buy Now </span> </a></div>
@@ -246,6 +247,7 @@
                     productContainer.insertAdjacentHTML('beforeend', productHtml);
                 });
                 document.getElementById('pagination').style.display = 'block';
+                document.getElementById('nextButton').disabled = paginatedVariants.length < itemsPerPage;
             } else {
                 productContainer.innerHTML = '<div class="col-lg-12"><p class="text-center">No products found in this category.</p></div>';
                 document.getElementById('pagination').style.display = 'none';
