@@ -126,4 +126,7 @@ router.post('/apply-coupon',auth.checkSession, cartController.applyCoupon);
 // Route for handling wallet update request
 router.post('/update-wallet',auth.checkSession, cartController.updateWallet);
 
+// Route for handling invoice download request
+router.get('/download-invoice/:orderId', cartController.downloadInvoice);
+
 module.exports = router;

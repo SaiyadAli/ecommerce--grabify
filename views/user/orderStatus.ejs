@@ -93,10 +93,14 @@
                         </tbody>
                     </table>
 
-                    <% if (order.orderStatus !== 'Cancelled') { %>
+                    <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered' ) { %>
                         <form id="cancelOrderForm" action="/user/cancel-order/<%= order._id %>" method="POST">
                             <button type="button" id="cancelOrderButton" class="btn btn-danger">Cancel Order</button>
                         </form>
+                    <% } %>
+
+                    <% if (order.orderStatus === 'Delivered') { %>
+                        <a href="/user/download-invoice/<%= order._id %>" class="btn btn-info" style="margin-top: 20px;">Download Invoice</a>
                     <% } %>
                 </div>
             </div>
