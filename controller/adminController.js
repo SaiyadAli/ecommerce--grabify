@@ -211,7 +211,7 @@ const generateSalesReport = async (period, startDate, endDate) => {
     const orders = await orderModel.find(match);
     const totalOrders = orders.length;
     const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
-    const totalDiscount = orders.reduce((sum, order) => sum + order.couponDeduction, 0);
+    const totalDiscount = orders.reduce((sum, order) => sum + (order.nonOfferPrice - (order.grandTotalCost + order.walletDeduction)), 0);
 
     return { totalOrders, totalSalesAmount, totalDiscount };
 };
@@ -258,15 +258,15 @@ const downloadSalesReportPDF = async (req, res) => {
         doc.fontSize(12).text(`Report Type: Monthly`, { align: 'left' });
         doc.text(`Sales Report Period: ${startDate} to ${endDate}`);
         doc.text(`Total Sales Count: ${orders.length}`);
-        doc.text(`Overall Order Amount: ₹${report.totalAmount}`);
-        doc.text(`Total Coupon Deductions: ₹${report.totalCouponDeductions}`);
+        doc.text(`Overall Order Amount: ₹${report.totalSalesAmount}`);
+        doc.text(`Total Coupon Deductions: ₹${report.totalDiscount}`);
         doc.moveDown(2);
 
         // Table Header
         doc.fontSize(14).text('Order Details', { underline: true });
         doc.moveDown();
 
-        const tableHeader = ["Order ID", "Customer", "Total Price", "Created At"];
+        const tableHeader = ["Order ID", "Customer", "Total Price", "Delivered At"];
         const tableColumnWidths = [80, 150, 100, 150];
 
         // Draw table header
