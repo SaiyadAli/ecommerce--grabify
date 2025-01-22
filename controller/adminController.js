@@ -48,10 +48,8 @@ const loadDashboard = async (req, res) => {
         if (!admin) return res.redirect('/admin/login');
 
         const users = await userModel.find({});
-        const conversionRate = 3.72; // Fetch from database
-        const conversionRateChange = 23; // Fetch from database
-        const addedToCart = 12.92; // Fetch from database
-        const addedToCartChange = -5; // Fetch from database
+      
+    
      
         // Fetch additional data from cartModel and orderModel
         const totalOrders = await orderModel.countDocuments({});
@@ -63,15 +61,15 @@ const loadDashboard = async (req, res) => {
         ]);
         console.log("Total Sales Amount:", totalSalesAmount); // Debug line
 
-        const dOrders = await orderModel.find({ orderStatus: 'Delivered' });
-        // console.log("Delivered Orders:", dOrders);
-        dOrders.forEach(order => {
+        // const dOrders = await orderModel.find({ orderStatus: 'Delivered' });
+        // // console.log("Delivered Orders:", dOrders);
+        // dOrders.forEach(order => {
             
-            console.log("grandTotalCost:", order.grandTotalCost);
-            console.log("walletDeduction:", order.walletDeduction);
-            console.log("couponDeduction:", order.couponDeduction);
-            console.log("nonOfferPrice:", order.nonOfferPrice);
-        });
+        //     console.log("grandTotalCost:", order.grandTotalCost);
+        //     console.log("walletDeduction:", order.walletDeduction);
+        //     console.log("couponDeduction:", order.couponDeduction);
+        //     console.log("nonOfferPrice:", order.nonOfferPrice);
+        // });
 
         const totalDiscount = await orderModel.aggregate([
             { $match: { orderStatus: 'Delivered' } },
@@ -128,16 +126,14 @@ const loadDashboard = async (req, res) => {
         console.log("Top Categories:", topCategories); // Debug line
 
         const ordersDelivered = await orderModel.countDocuments({ orderStatus: 'Delivered' });
+        const pendingOrders = await orderModel.countDocuments({ orderStatus: { $nin: ['Delivered', 'Cancelled'] } });
 
         res.render('admin/dashboard', {
             users,
             message: '',
-            conversionRate,
-            conversionRateChange,
-            addedToCart,
-            addedToCartChange,
             sales,
             totalOrders,
+            pendingOrders,
             totalSalesAmount: sales,
             totalDiscount: totalDiscount.length > 0 ? totalDiscount[0].total : 0,
             latestOrders, // Pass latest orders to the view
