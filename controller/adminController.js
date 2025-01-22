@@ -88,7 +88,7 @@ const loadDashboard = async (req, res) => {
         console.log("Sales:", sales); // Debug line
 
         // Fetch latest 5 orders
-        const latestOrders = await orderModel.find().sort({ orderDate: -1 }).limit(5).populate('userId', 'username');
+        const latestOrders = await orderModel.find().sort({ orderDate: -1 }).limit(8).populate('userId', 'username');
         // console.log("Latest Orders:", latestOrders); // Debug line
 
         // Fetch top 5 products by unit sold for delivered orders
@@ -97,7 +97,7 @@ const loadDashboard = async (req, res) => {
             { $unwind: "$cartData" },
             { $group: { _id: "$cartData.productName", totalSold: { $sum: "$cartData.quantity" } } },
             { $sort: { totalSold: -1 } },
-            { $limit: 5 }
+            { $limit: 5}
         ]);
         console.log("Top Products:", topProducts); // Debug line
 
