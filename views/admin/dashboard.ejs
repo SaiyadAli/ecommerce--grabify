@@ -66,7 +66,7 @@
         <div class="card mb-4">
           <div class="card-body">
             <h3 class="h6">Sales performance</h3>
-            <div id="dashboardChart" class="apex-chart"></div>
+            <div id="dChart" class="apex-chart"></div>
           </div>
         </div>
       </div>
@@ -202,6 +202,7 @@
     
   </div>
 <%- include('../partials/footer.ejs') %>
+<script src="/kassets/plugins/apexcharts/apexcharts.min.js"></script>
 <script>
   function filterSales() {
     const daterange = $('.daterange').val();
@@ -253,7 +254,58 @@
       $('#sales-amount-mood').text(`₹${data.totalSalesAmount.toFixed(2)}`);
       $('#orders-delivered-amount').text(data.ordersDelivered); // Update orders delivered count
       $('#total-discount-amount').text(`₹${data.totalDiscount.toFixed(2)}`); // Update total discount amount
+
+      // Update sales performance chart
+      updateSalesPerformanceChart(data.orders);
     });
+  }
+
+  function updateSalesPerformanceChart(orders) {
+    const dateSalesMap = orders.reduce((acc, order) => {
+      const date = new Date(order.deliveryDate).toLocaleDateString();
+      if (!acc[date]) {
+        acc[date] = { sales: 0, ordersDelivered: 0 };
+      }
+      acc[date].sales += order.grandTotalCost;
+      if (order.orderStatus === 'Delivered') {
+        acc[date].ordersDelivered += 1;
+      }
+      return acc;
+    }, {});
+
+    const dates = Object.keys(dateSalesMap).sort((a, b) => new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-')));
+    const sales = dates.map(date => dateSalesMap[date].sales);
+    const ordersDelivered = dates.map(date => dateSalesMap[date].ordersDelivered);
+
+    const chartOptions = {
+      series: [{
+        name: 'Sales',
+        data: sales
+      }, {
+        name: 'Orders Delivered',
+        data: ordersDelivered
+      }],
+      chart: {
+        type: 'line',
+        height: 350
+      },
+      xaxis: {
+        categories: dates
+      },
+      yaxis: [{
+        title: {
+          text: 'Sales (₹)'
+        }
+      }, {
+        opposite: true,
+        title: {
+          text: 'Orders Delivered'
+        }
+      }]
+    };
+
+    const chart = new ApexCharts(document.querySelector("#dChart"), chartOptions);
+    chart.render();
   }
 
   // Trigger filterSales on date range change
