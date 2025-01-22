@@ -59,9 +59,17 @@
         </div>
       </div>
     </div>
-    
-    <!-- Row -->
+
     <div class="row">
+      <div class="col-lg-6">
+        <!-- Sales performance -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h3 class="h6">Sales performance</h3>
+            <div id="dashboardChart" class="apex-chart"></div>
+          </div>
+        </div>
+      </div>
       <div class="col-lg-6">
         <!-- Latest orders -->
         <div class="card mb-4">
@@ -76,8 +84,8 @@
                   <% latestOrders.forEach(order => { %>
                     <tr>
                       <td>#<%= order.orderNumber %></td>
-                        <td><%= new Date(order.orderDate).toLocaleString() %></td>
-                        <td><%= order.userId.username.split(' ')[0] %></td>
+                      <td><%= new Date(order.orderDate).toLocaleString() %></td>
+                      <td><%= order.userId.username.split(' ')[0] %></td>
                       <td>₹<%= order.grandTotalCost %></td>
                       <td><span class="badge rounded-pill bg-<%= order.orderStatus === 'Pending' ? 'warning' : order.orderStatus === 'Delivered' ? 'success' : 'danger' %>"><%= order.orderStatus %></span></td>
                       <td><a href="/admin/orders/<%= order._id %>/status" ><button type="button" class="btn btn-xs btn-light">Details</button></a></td>
@@ -92,6 +100,13 @@
           </div>
         </div>
       </div>
+    </div>
+
+    
+  </div>
+
+
+  <div class="row">
       <div class="col-lg-6">
         <!-- Top products -->
         <div class="card mb-4">
@@ -133,10 +148,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Row for Top Categories -->
-    <div class="row">
       <div class="col-lg-6">
         <!-- Top categories -->
         <div class="card mb-4">
@@ -176,6 +187,7 @@
         </div>
       </div>
     </div>
+
     
     <!-- Sales Report Section -->
     <div class="card mb-4">
