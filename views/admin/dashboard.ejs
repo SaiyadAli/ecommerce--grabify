@@ -39,12 +39,11 @@
         </div>
       </div>
       <div class="col-lg-3">
-        <!-- Reached checkout -->
+        <!-- Orders Delivered -->
         <div class="card mb-4">
           <div class="card-body position-relative">
-            <h3 class="h6 text-muted">orders delivered</h3>
-            <strong class="fs-3 text-dark lh-1"><%= reachedCheckout %></strong>
-           
+            <h3 class="h6 text-muted">Orders Delivered</h3>
+            <strong class="fs-3 text-dark lh-1" id="orders-delivered-amount"><%= ordersDelivered %></strong>
             <i class="bi bi-bag-check fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
           </div>
         </div>
@@ -241,6 +240,7 @@
 
       $('#salesReport').html(reportHtml);
       $('#sales-amount-mood').text(`₹${data.totalSalesAmount.toFixed(2)}`);
+      $('#orders-delivered-amount').text(data.ordersDelivered); // Update orders delivered count
     });
   }
 

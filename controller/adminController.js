@@ -52,10 +52,7 @@ const loadDashboard = async (req, res) => {
         const conversionRateChange = 23; // Fetch from database
         const addedToCart = 12.92; // Fetch from database
         const addedToCartChange = -5; // Fetch from database
-        const reachedCheckout = 5.67; // Fetch from database
-        const reachedCheckoutChange = -2; // Fetch from database
-        const salesChange = 12.23; // Fetch from database
-
+     
         // Fetch additional data from cartModel and orderModel
         const totalOrders = await orderModel.countDocuments({});
         console.log("Total Orders:", totalOrders); // Debug line
@@ -112,6 +109,8 @@ const loadDashboard = async (req, res) => {
 
         console.log("Top Categories:", topCategories); // Debug line
 
+        const ordersDelivered = await orderModel.countDocuments({ orderStatus: 'Delivered' });
+
         res.render('admin/dashboard', {
             users,
             message: '',
@@ -119,16 +118,14 @@ const loadDashboard = async (req, res) => {
             conversionRateChange,
             addedToCart,
             addedToCartChange,
-            reachedCheckout,
-            reachedCheckoutChange,
             sales,
-            salesChange,
             totalOrders,
             totalSalesAmount: sales,
             totalDiscount: totalDiscount.length > 0 ? totalDiscount[0].total : 0,
             latestOrders, // Pass latest orders to the view
             topProducts, // Pass top products to the view
-            topCategories // Pass top categories to the view
+            topCategories, // Pass top categories to the view
+            ordersDelivered // Pass orders delivered to the view
         });
     } catch (error) {
         console.error(error);
@@ -215,8 +212,9 @@ const getSalesReport = async (req, res) => {
         }).populate('userId', 'username');
 
         const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
+        const ordersDelivered = orders.length;
 
-        res.status(200).json({ ...report, orders, totalSalesAmount });
+        res.status(200).json({ ...report, orders, totalSalesAmount, ordersDelivered });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error.' });
