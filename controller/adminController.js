@@ -63,8 +63,26 @@ const loadDashboard = async (req, res) => {
         ]);
         console.log("Total Sales Amount:", totalSalesAmount); // Debug line
 
+        const dOrders = await orderModel.find({ orderStatus: 'Delivered' });
+        // console.log("Delivered Orders:", dOrders);
+        dOrders.forEach(order => {
+            
+            console.log("grandTotalCost:", order.grandTotalCost);
+            console.log("walletDeduction:", order.walletDeduction);
+            console.log("couponDeduction:", order.couponDeduction);
+            console.log("nonOfferPrice:", order.nonOfferPrice);
+        });
+
         const totalDiscount = await orderModel.aggregate([
-            { $group: { _id: null, total: { $sum: "$couponDeduction" } } }
+            { $match: { orderStatus: 'Delivered' } },
+            { $group: { _id: null, total: { $sum: { $subtract: [
+            "$nonOfferPrice",
+            { $add: [
+                { $ifNull: ["$grandTotalCost", 0] },
+                { $ifNull: ["$walletDeduction", 0] },
+                //{ $ifNull: ["$couponDeduction", 0] }
+            ]}
+            ]}}}}
         ]);
         console.log("Total Discount:", totalDiscount); // Debug line
 
@@ -73,7 +91,7 @@ const loadDashboard = async (req, res) => {
 
         // Fetch latest 5 orders
         const latestOrders = await orderModel.find().sort({ orderDate: -1 }).limit(5).populate('userId', 'username');
-        console.log("Latest Orders:", latestOrders); // Debug line
+        // console.log("Latest Orders:", latestOrders); // Debug line
 
         // Fetch top 5 products by unit sold for delivered orders
         const topProducts = await orderModel.aggregate([
@@ -191,7 +209,7 @@ const logout = async (req, res) => {
 const generateSalesReport = async (period, startDate, endDate) => {
     const match = {};
     if (startDate && endDate) {
-        match.orderDate = { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) };
+        match.deliveryDate = { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) };
     }
 
     const orders = await orderModel.find(match);
@@ -207,7 +225,7 @@ const getSalesReport = async (req, res) => {
         const { startDate, endDate } = req.query;
         const report = await generateSalesReport(null, startDate, endDate);
         const orders = await orderModel.find({
-            orderDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
+            deliveryDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
@@ -226,7 +244,7 @@ const downloadSalesReportPDF = async (req, res) => {
         const { startDate, endDate } = req.query;
         const report = await generateSalesReport(null, startDate, endDate);
         const orders = await orderModel.find({
-            orderDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
+            deliveryDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
@@ -272,7 +290,7 @@ const downloadSalesReportPDF = async (req, res) => {
                 order.orderNumber,
                 order.userId.username,
                 `₹${order.grandTotalCost}`,
-                new Date(order.orderDate).toLocaleString()
+                new Date(order.deliveryDate).toLocaleString()
             ];
 
             orderDetails.forEach((detail, i) => {

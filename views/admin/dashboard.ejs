@@ -20,8 +20,8 @@
         <!-- Conversion rate -->
         <div class="card mb-4">
           <div class="card-body position-relative">
-            <h3 class="h6 text-muted">Conversion rate</h3>
-            <strong class="fs-3 text-dark lh-1"><%= conversionRate %></strong>
+            <h3 class="h6 text-muted">(COUPON & OFFER)Discount </h3>
+            <strong class="fs-3 text-dark lh-1"><%= totalDiscount %></strong>
             <small class="text-muted ms-2 text-nowrap"><i class="bi bi-arrow-up text-success"></i> <%= conversionRateChange %></small>
             <i class="bi bi-arrow-left-right fs-3 text-primary position-absolute top-50 end-0 translate-middle pe-1"></i>
           </div>
@@ -206,7 +206,7 @@
               <th>Items</th>
               <th>Payment Type</th>
               <th>Total Cost</th>
-              <th>Order Date</th>
+              <th>Delivered Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -223,7 +223,7 @@
               <td>${order.cartData.length} <small>item(s)</small></td>
               <td>${order.paymentType}</td>
               <td>₹${order.grandTotalCost}</td>
-              <td>${new Date(order.orderDate).toLocaleDateString()}</td>
+              <td>${new Date(order.deliveryDate).toLocaleDateString()}</td>
               <td><span class="badge rounded-pill bg-success">Delivered</span></td>
               <td><a href="/admin/orders/${order._id}/status" class="btn btn-primary btn-sm">View Details</a></td>
             </tr>
