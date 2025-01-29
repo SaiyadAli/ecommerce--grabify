@@ -234,8 +234,7 @@
 function updatePaymentMethods() {
     const grandTotal = parseFloat(document.getElementById('grandTotal').innerText);
     const couponDeduction = parseFloat(document.getElementById('hiddenCouponCode').value) || 0;
-    const walletDeduction = parseFloat(document.getElementById('hiddenWalletDeduction').value) || 0;
-    const finalTotal = grandTotal - couponDeduction - walletDeduction;
+    const finalTotal = grandTotal - couponDeduction ;
 
     if (finalTotal < 1000) {
         document.getElementById('codPaymentMethod').style.display = 'block';
