@@ -245,6 +245,20 @@ function updatePaymentMethods() {
 </script>
 
 <script>
+function updateCODVisibility() {
+    const grandTotal = parseFloat(document.getElementById('grandTotal').innerText);
+    const walletDeduction = parseFloat(document.getElementById('hiddenWalletDeduction').value) || 0;
+    const finalTotal = grandTotal - walletDeduction;
+
+    if (finalTotal < 1000) {
+        document.getElementById('codPaymentMethod').style.display = 'block';
+    } else {
+        document.getElementById('codPaymentMethod').style.display = 'none';
+    }
+}
+</script>
+
+<script>
     document.getElementById('order-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const form = this;
@@ -502,6 +516,7 @@ function updatePaymentMethods() {
         if (grandTotal === 0) {
             document.getElementById('Paymentmethod').style.display = 'none';
         }
+        updateCODVisibility();
     });
 
     if (walletBalance != 0 && coupons.length === 0) {
@@ -517,6 +532,7 @@ function updatePaymentMethods() {
     if (grandTotal > 1000) {
         document.getElementById('codPaymentMethod').style.display = 'none';
     }
+    updateCODVisibility();
 });</script>
 <script>
     document.getElementById('WalletButton').addEventListener('click', function() {
@@ -544,5 +560,6 @@ function updatePaymentMethods() {
         if (grandTotal === 0) {
             document.getElementById('Paymentmethod').style.display = 'none';
         }
+        updateCODVisibility();
     });
 </script>
