@@ -99,6 +99,7 @@
                                 <li class="page-item"><a class="page-link" href="#" id="nextPage">Next</a></li>
                             </ul>
                         </div>
+                        <p id="noOrdersMessage" style="display: none;">No orders found.</p>
                     <% } else { %>
                         <p>You have no orders.</p>
                     <% } %>
@@ -150,6 +151,8 @@
         } else {
             document.getElementById('paginationControls').style.display = 'block';
         }
+
+        document.getElementById('noOrdersMessage').style.display = visibleRows === 0 ? 'block' : 'none';
     });
 
     // JavaScript for clear button
