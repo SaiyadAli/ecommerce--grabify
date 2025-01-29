@@ -93,14 +93,15 @@
                                                             <div class="panel-body">
                                                                 <div class="onepage-payment">
                                                                     <div style="clear:both;"></div>
-                                                                    <div class="card-paynemt-box payment-method">
-                                                                        <label class="radio-inline" for="CashOnDelivery" aria-controls="CashOnDeliveryCollapse">
-                                                                            <input name="paymentType" id="COD" value="COD" type="radio">Cash On Delivery
-                                                                        </label>
-                                                                    </div>
+                                                                    
                                                                     <div class="card-paynemt-box payment-method">
                                                                         <label class="radio-inline" for="razorpay" aria-controls="CashOnDeliveryCollapse">
                                                                             <input name="paymentType" id="razorpay" value="razorpay" type="radio">Razorpay
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="card-paynemt-box payment-method" id="codPaymentMethod">
+                                                                        <label class="radio-inline" for="CashOnDelivery" aria-controls="CashOnDeliveryCollapse">
+                                                                            <input name="paymentType" id="COD" value="COD" type="radio">Cash On Delivery
                                                                         </label>
                                                                     </div>
                                                                 </div>
@@ -228,6 +229,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script> function updatePaymentMethods() {
+    const grandTotal = parseFloat(document.getElementById('grandTotal').innerText);
+    const couponApplied = document.getElementById('hiddenCouponCode').value !== '';
+    const walletDeduction = parseFloat(document.getElementById('hiddenWalletDeduction').value) > 0;
+
+    if (grandTotal < 1000 && !couponApplied && !walletDeduction) {
+        document.getElementById('codPaymentMethod').style.display = 'none';
+    } else {
+        document.getElementById('codPaymentMethod').style.display = 'block';
+    }
+}</script>
+
+
 <script>
     document.getElementById('order-form').addEventListener('submit', function(event) {
         event.preventDefault();
@@ -492,17 +507,15 @@
         document.getElementById('useWalletRow').style.display = 'table-row';
     }
 
-
-
-
-
-
-    
-
-    
+   
 </script>
 
-
+<script> document.addEventListener('DOMContentLoaded', function() {
+    const grandTotal = parseFloat(document.getElementById('grandTotal').innerText);
+    if (grandTotal > 1000) {
+        document.getElementById('codPaymentMethod').style.display = 'none';
+    }
+});</script>
 <script>
     document.getElementById('WalletButton').addEventListener('click', function() {
         const walletBalance = parseFloat(document.getElementById('walletBalance').innerText);
