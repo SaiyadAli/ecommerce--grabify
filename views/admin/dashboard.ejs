@@ -69,7 +69,13 @@
         <!-- Sales performance -->
         <div class="card mb-4">
           <div class="card-body">
-            <h3 class="h6">Sales performance</h3>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6">Sales performance</h3>
+              <!-- <div class="input-group" style="min-width: 16rem;">
+                <span class="input-group-text"><i class="bi bi-calendar-range"></i></span>
+                <input type="text" class="form-control sales-daterange" />
+              </div> -->
+            </div>
             <div id="dChart" class="apex-chart"></div>
           </div>
         </div>
@@ -215,6 +221,8 @@
 <script src="/kassets/plugins/apexcharts/apexcharts.min.js"></script>
 
 <script>
+  let chart;
+
   function filterSales() {
     const daterange = $('.daterange').val();
     const [startDate, endDate] = daterange.split(' - ');
@@ -271,6 +279,26 @@
     });
   }
 
+  function initializeDateRangePicker() {
+    $('.sales-daterange').daterangepicker({
+      opens: 'left',
+      autoUpdateInput: false,
+      locale: {
+        cancelLabel: 'Clear'
+      }
+    });
+
+    $('.sales-daterange').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+      filterSalesPerformance(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
+    });
+
+    $('.sales-daterange').on('cancel.daterangepicker', function(ev, picker) {
+      $(this).val('');
+      filterSalesPerformance();
+    });
+  }
+
   function updateSalesPerformanceChart(orders) {
     const dateSalesMap = orders.reduce((acc, order) => {
       const date = new Date(order.deliveryDate).toLocaleDateString();
@@ -297,8 +325,20 @@
         data: ordersDelivered
       }],
       chart: {
-        type: 'line',
-        height: 350
+        type: 'bar',
+        height: 350,
+        toolbar: {
+          tools: {
+            selection: true
+          }
+        },
+        events: {
+          selection: function(chartContext, { xaxis }) {
+            const startDate = new Date(xaxis.min).toLocaleDateString();
+            const endDate = new Date(xaxis.max).toLocaleDateString();
+            filterSalesPerformance(startDate, endDate);
+          }
+        }
       },
       xaxis: {
         categories: dates
@@ -315,8 +355,24 @@
       }]
     };
 
-    const chart = new ApexCharts(document.querySelector("#dChart"), chartOptions);
-    chart.render();
+    if (chart) {
+      chart.updateOptions(chartOptions);
+    } else {
+      chart = new ApexCharts(document.querySelector("#dChart"), chartOptions);
+      chart.render();
+    }
+  }
+
+  function filterSalesPerformance(startDate, endDate) {
+    $.get('/admin/sales-performance', { startDate, endDate }, function(data) {
+      chart.updateSeries([{
+        name: 'Sales',
+        data: data.orders.map(order => order.grandTotalCost)
+      }, {
+        name: 'Orders Delivered',
+        data: data.orders.map(order => order.orderStatus === 'Delivered' ? 1 : 0)
+      }]);
+    });
   }
 
   // Trigger filterSales on date range change
@@ -324,9 +380,18 @@
     filterSales();
   });
 
-  // Initial load
+  // Trigger filterSalesPerformance on date range change
+  $('.sales-daterange').on('apply.daterangepicker', function() {
+    const daterange = $('.sales-daterange').val();
+    const [startDate, endDate] = daterange.split(' - ');
+    filterSalesPerformance(startDate, endDate);
+  });
+
+  // Initial load for sales performance
   $(document).ready(function() {
+    initializeDateRangePicker();
     filterSales();
+    filterSalesPerformance();
   });
 
   $('#downloadPDF').on('click', function() {
