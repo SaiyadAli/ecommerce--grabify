@@ -230,18 +230,20 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-<script> function updatePaymentMethods() {
+<script>
+function updatePaymentMethods() {
     const grandTotal = parseFloat(document.getElementById('grandTotal').innerText);
-    const couponApplied = document.getElementById('hiddenCouponCode').value !== '';
-    const walletDeduction = parseFloat(document.getElementById('hiddenWalletDeduction').value) > 0;
+    const couponDeduction = parseFloat(document.getElementById('hiddenCouponCode').value) || 0;
+    const walletDeduction = parseFloat(document.getElementById('hiddenWalletDeduction').value) || 0;
+    const finalTotal = grandTotal - couponDeduction - walletDeduction;
 
-    if (grandTotal < 1000 && !couponApplied && !walletDeduction) {
-        document.getElementById('codPaymentMethod').style.display = 'none';
-    } else {
+    if (finalTotal < 1000) {
         document.getElementById('codPaymentMethod').style.display = 'block';
+    } else {
+        document.getElementById('codPaymentMethod').style.display = 'none';
     }
-}</script>
-
+}
+</script>
 
 <script>
     document.getElementById('order-form').addEventListener('submit', function(event) {
@@ -448,6 +450,7 @@
                 }).then(() => {
                     document.getElementById('grandTotal').innerText = `${data.newTotal}`;
                     document.getElementById('hiddenCouponCode').value = couponCode;
+                    updatePaymentMethods();
                     if (walletBalance != 0) {
                         document.getElementById('walletBalanceRow').style.display = 'table-row';
                         document.getElementById('useWalletRow').style.display = 'table-row';
