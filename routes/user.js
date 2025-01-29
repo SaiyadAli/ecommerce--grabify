@@ -10,7 +10,8 @@ const auth = require('../middleware/auth');
 const cartController = require('../controller/cartController'); // Import the cartController
 const shopController = require('../controller/shopController'); // Import the shopController
 const wishlistController = require('../controller/wishlistController'); // Import the wishlistController
-const walletController = require('../controller/walletController'); // Import the walletController
+const walletController = require('../controller/walletController');
+const invoiceController = require('../controller/invoiceController');
 
 router.get('/home', userController.loadHome);
 // router.get('/', homeController.loadHomePage);
@@ -127,6 +128,6 @@ router.post('/apply-coupon',auth.checkSession, cartController.applyCoupon);
 router.post('/update-wallet',auth.checkSession, cartController.updateWallet);
 
 // Route for handling invoice download request
-router.get('/download-invoice/:orderId', cartController.downloadInvoice);
+router.get('/download-invoice/:orderId', auth.checkSession,invoiceController.downloadInvoice);
 
 module.exports = router;

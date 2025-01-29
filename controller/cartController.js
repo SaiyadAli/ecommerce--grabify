@@ -517,99 +517,7 @@ const updateWallet = async (req, res) => {
     }
 };
 
-const downloadInvoice = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const order = await Order.findById(orderId).populate('cartData.variantId');
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
-        }
 
-        const user = await User.findById(order.userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const doc = new PDFDocument();
-        const invoiceStream = new stream.PassThrough();
-        doc.pipe(invoiceStream);
-
-        // Header Section
-        doc.fontSize(20).text('Phoneix', { align: 'center' });
-        doc.fontSize(12).text('Get Smart With Phoneix', { align: 'center' });
-        doc.text('Address: 31 Main Street, Bengaluru, Karnataka, 560077', { align: 'center' });
-        doc.text('Email: support@Phoneix.com | Phone: (123) 456-7890', { align: 'center' });
-        doc.moveDown(2);
-
-        // Invoice Details
-        doc.fontSize(16).text('Invoice', { align: 'left' });
-        doc.moveDown();
-        doc.fontSize(12).text(`Invoice Number: ${order.orderNumber}`);
-        doc.text(`Date: ${order.orderDate.toLocaleString()}`);
-        doc.text(`Payment Method: ${order.paymentType}`);
-        doc.text(`Payment Status: ${order.paymentStatus || 'Pending'}`);
-        doc.moveDown();
-
-        // Billing Address
-        if (order.addressChosen) {
-            const address = user.addresses.id(order.addressChosen);
-            if (address) {
-                doc.fontSize(12).text('Billing Details:');
-                doc.text(`Name: ${address.firstName} ${address.lastName}`);
-                doc.text(`Phone: ${address.number}`);
-                doc.text(`Address: ${address.street}`);
-                doc.text(`City: ${address.city}`);
-                doc.text(`State: ${address.state}`);
-                doc.text(`Postal Code: ${address.pincode}`);
-                doc.text(`Country: ${address.country}`);
-                doc.moveDown();
-            }
-        }
-
-        // Order Details Table
-        doc.fontSize(12).text('Order Details:');
-        doc.moveDown(0.5);
-
-        // Table Headers
-        doc.fontSize(12).text('Product', { continued: true, width: 100 });
-        doc.text('Variant', { continued: true, width: 100 });
-        doc.text('Quantity', { continued: true, width: 50 });
-        doc.text('Product Discount', { continued: true, width: 100 });
-        doc.text('Total Cost', { align: 'left' });
-
-        // Table Content
-        order.cartData.forEach((item) => {
-            doc.text(item.productName, { continued: true, width: 100 });
-            doc.text(item.variantColor + ' - ' + item.variantSize, { continued: true, width: 100 });
-            doc.text(item.quantity.toString(), { continued: true, width: 50 });
-            doc.text('None', { continued: true, width: 100 }); // Assuming no discounts
-            doc.text(`₹${item.price * item.quantity}`, { align: 'left' });
-        });
-        doc.moveDown();
-
-        // Coupon and Total Price
-        const discount = order.couponDiscount || 0;
-        const discountedPrice = order.grandTotalCost - discount;
-        doc.fontSize(12).text(`Coupon Used: ${discount > 0 ? `${discount}% Discount` : 'None'}`);
-        doc.text(`Total Price: ₹${discountedPrice}`);
-        doc.moveDown();
-
-        // Footer
-        doc.text('Thank you for shopping with us!', { align: 'center' });
-
-        // Finalize the PDF
-        doc.end();
-
-        // Set Response Headers
-        res.setHeader('Content-disposition', `attachment; filename=invoice_${order.orderNumber}.pdf`);
-        res.setHeader('Content-type', 'application/pdf');
-
-        invoiceStream.pipe(res);
-    } catch (error) {
-        console.error('Error generating invoice:', error);
-        res.status(500).json({ message: 'Error generating invoice', error });
-    }
-};
 
 module.exports = {
     viewCart,
@@ -617,12 +525,12 @@ module.exports = {
     deleteItem,
     updateCartQuantity,
     checkout,
-    createOrderCOD, // Ensure this function is exported
-    createAndVerifyOrderRazorpay, // Ensure this function is exported
+    createOrderCOD, 
+    createAndVerifyOrderRazorpay, 
     viewOrders,
     viewOrderStatus,
     cancelOrder,
-    applyCoupon, // Ensure this function is exported
-    updateWallet, // Ensure this function is exported
-    downloadInvoice // Ensure this function is exported
+    applyCoupon, 
+    updateWallet, 
+    
 };
