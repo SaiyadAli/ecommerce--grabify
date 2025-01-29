@@ -24,33 +24,41 @@
 
                 <div style="clear:both"></div>
 
+                <!-- Search Filter -->
+                <div class="col-xs-12 col-sm-12 text-right">
+                    <input type="text" id="searchInput" class="form-control" style="width: 25%; display: inline-block;" placeholder="Search Orders...">
+                    <button id="clearButton" class="btn btn-secondary" style="display: inline-block;">Clear</button>
+                </div>
+
+                <div style="clear:both"></div>
+
                 <div class="col-xs-12 col-sm-12">
                     <% if (orders.length > 0) { 
                         orders.sort((a, b) => b.orderDate.getTime() - a.orderDate.getTime());
                     %>
-                        <table class="footable">
+                        <table class="footable" id="orderTable">
                             <thead>
                                 <tr>
                                     <th data-class="expand" data-sort-initial="true"><span title="table sorted by this column on load">Order ID</span></th>
                                     <th data-hide="phone,tablet" data-sort-ignore="true">No. of items</th>
-                                    <th data-hide="phone,tablet" data-sort-ignore="true">Change status</th>
+                                    <th data-hide="phone,tablet" data-sort-ignore="true">View Details</th>
                                     <th data-hide="phone,tablet"><strong>Payment Method</strong></th>
-                                    <th data-hide="phone,tablet"><strong></strong></th>
+                                    <th data-hide="phone,tablet"><strong>items</strong></th>
                                     <th data-hide="default"> Price</th>
                                     <th data-hide="default" data-type="numeric"> Date</th>
                                     <th data-hide="phone" data-type="numeric"> Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="orderTableBody">
                                 <% orders.forEach(order => { %>
                                     <tr>
                                         <td>#<%= order.orderNumber %></td>
                                         <td><%= order.cartData.length %> <small>item(s)</small></td>
                                         <td>
-                                            <a href="/user/orderStatus/<%= order._id %>" class="btn btn-primary btn-sm">Change</a>
+                                            <a href="/user/orderStatus/<%= order._id %>" class="btn btn-primary btn-sm">Details</a>
                                         </td>
                                         <td><%= order.paymentType %></td>
-                                        <td><button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#orderDetails<%= order._id %>" aria-expanded="false" aria-controls="orderDetails<%= order._id %>">view Details</button></td>
+                                        <td><button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#orderDetails<%= order._id %>" aria-expanded="false" aria-controls="orderDetails<%= order._id %>">items</button></td>
                                         <td>₹<%= order.grandTotalCost %></td>
                                         <td data-value="<%= order.orderDate.getTime() %>"><%= order.orderDate.toLocaleDateString() %></td>
                                         <td data-value="<%= order.orderStatus === 'Pending' ? 1 : order.orderStatus === 'Done' ? 3 : 2 %>"><span class="label label-<%= order.orderStatus === 'Pending' ? 'primary' : order.orderStatus === 'Done' ? 'success' : 'danger' %>"><%= order.orderStatus %></span></td>
@@ -84,6 +92,13 @@
                                 <% }) %>
                             </tbody>
                         </table>
+                        <!-- Pagination Controls -->
+                        <div class="pagination-container text-right" id="paginationControls">
+                            <ul class="pagination" style="display: inline-block;">
+                                <li class="page-item"><a class="page-link" href="#" id="prevPage">Previous</a></li>
+                                <li class="page-item"><a class="page-link" href="#" id="nextPage">Next</a></li>
+                            </ul>
+                        </div>
                     <% } else { %>
                         <p>You have no orders.</p>
                     <% } %>
@@ -112,3 +127,72 @@
 <div class="gap"></div>
 
 <%- include('../partials/grabifyfooter.ejs') %>
+
+<script>
+    // JavaScript for search filter
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var filter = this.value.toUpperCase();
+        var rows = document.querySelector("#orderTableBody").rows;
+        var visibleRows = 0;
+        
+        for (var i = 0; i < rows.length; i++) {
+            var orderId = rows[i].cells[0].textContent;
+            if (orderId.toUpperCase().indexOf(filter) > -1) {
+                rows[i].style.display = "";
+                visibleRows++;
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+
+        if (visibleRows < 5) {
+            document.getElementById('paginationControls').style.display = 'none';
+        } else {
+            document.getElementById('paginationControls').style.display = 'block';
+        }
+    });
+
+    // JavaScript for clear button
+    document.getElementById('clearButton').addEventListener('click', function() {
+        location.reload();
+    });
+
+    // JavaScript for pagination
+    var currentPage = 1;
+    var rowsPerPage = 10;
+
+    function paginateTable() {
+        var rows = document.querySelector("#orderTableBody").rows;
+        var totalPages = Math.ceil(rows.length / rowsPerPage);
+
+        for (var i = 0; i < rows.length; i++) {
+            rows[i].style.display = "none";
+        }
+
+        for (var i = (currentPage - 1) * rowsPerPage; i < currentPage * rowsPerPage && i < rows.length; i++) {
+            rows[i].style.display = "";
+        }
+
+        document.getElementById('prevPage').parentElement.classList.toggle('disabled', currentPage === 1);
+        document.getElementById('nextPage').parentElement.classList.toggle('disabled', currentPage === totalPages);
+    }
+
+    document.getElementById('prevPage').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            paginateTable();
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', function(e) {
+        e.preventDefault();
+        var rows = document.querySelector("#orderTableBody").rows;
+        if (currentPage * rowsPerPage < rows.length) {
+            currentPage++;
+            paginateTable();
+        }
+    });
+
+    paginateTable();
+</script>
