@@ -278,21 +278,28 @@ const downloadReport = async (req, res) => {
             doc.moveDown(2);
 
             const headerHeight = 18;
-
-            doc.rect(50, doc.y, 50, headerHeight).fill('#3D464D');
-            doc.rect(100, doc.y, 150, headerHeight).fill('#3D464D');
-            doc.rect(250, doc.y, 100, headerHeight).fill('#3D464D');
-            doc.rect(350, doc.y, 150, headerHeight).fill('#3D464D');
-            doc.rect(500, doc.y, 100, headerHeight).fill('#3D464D');
-
-            doc.fontSize(8).fillColor('white')
-                .text('Sl. No', 55, doc.y + 5, { width: 50, align: 'center' })
-                .text('Order ID', 105, doc.y + 5, { width: 150, align: 'center' })
-                .text('Date (dd-mm-yyyy)', 255, doc.y + 5, { width: 100, align: 'center' })
-                .text('Customer ID', 355, doc.y + 5, { width: 150, align: 'center' })
-                .text('Total Amount (Rs)', 505, doc.y + 5, { width: 100, align: 'center' });
-
-            doc.moveDown(1)
+            const startY = doc.y; // Store the initial y position
+            
+            const headers = [
+                { x: 50, width: 50, text: 'Sl. No' },
+                { x: 100, width: 150, text: 'Order ID' },
+                { x: 250, width: 100, text: 'Date (dd-mm-yyyy)' },
+                { x: 350, width: 150, text: 'Customer ID' },
+                { x: 500, width: 100, text: 'Total Amount (Rs)' }
+            ];
+            
+            // Draw header background
+            headers.forEach(({ x, width }) => {
+                doc.rect(x, startY, width, headerHeight).fill('#3D464D');
+            });
+            
+            // Add text (keeping y position fixed)
+            doc.fontSize(8).fillColor('white');
+            headers.forEach(({ x, width, text }) => {
+                doc.text(text, x, startY + 5, { width, align: 'center' });
+            });
+            
+            doc.moveDown(1); 
             orders.forEach((order, index) => {
                 const yPosition = doc.y + 3;
                 const rowHeight = 18;
