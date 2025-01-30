@@ -8,6 +8,7 @@ const wishlistModel = require('../model/wishlistModel'); // Import the wishlist 
 const categoryModel = require('../model/categoryModel'); // Import the category model
 const productModel = require('../model/productModel'); // Import the product model
 const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs'); // Import ExcelJS
 
 const loadLogin = async (req, res) => {
     res.render('admin/login');
@@ -244,7 +245,6 @@ const downloadSalesReportPDF = async (req, res) => {
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
-        const PDFDocument = require('pdfkit');
         const doc = new PDFDocument({ margin: 30 });
 
         res.setHeader('Content-Type', 'application/pdf');
@@ -263,40 +263,62 @@ const downloadSalesReportPDF = async (req, res) => {
         doc.moveDown(2);
 
         // Table Header
-        doc.fontSize(14).text('Order Details', { underline: true });
+        doc.fontSize(12).font('Helvetica-Bold');
+        doc.text('Order ID', 50, doc.y, { width: 100 });
+        doc.text('Customer', 150, doc.y, { width: 150 });
+        doc.text('Total Price', 300, doc.y, { width: 100 });
+        doc.text('Delivered At', 400, doc.y, { width: 150 });
         doc.moveDown();
 
-        const tableHeader = ["Order ID", "Customer", "Total Price", "Delivered At"];
-        const tableColumnWidths = [80, 150, 100, 150];
-
-        // Draw table header
-        let cursorY = doc.y;
-        tableHeader.forEach((header, i) => {
-            doc.fontSize(12).font('Helvetica-Bold').text(header, 50 + tableColumnWidths.slice(0, i).reduce((a, b) => a + b, 0), cursorY, { width: tableColumnWidths[i], align: 'center' });
-        });
-
-        // Draw a horizontal line below header
-        doc.moveTo(50, cursorY + 15).lineTo(550, cursorY + 15).stroke();
-        doc.moveDown();
-
-        // Draw table rows
+        // Table Rows
+        doc.font('Helvetica').fontSize(10);
         orders.forEach(order => {
-            cursorY = doc.y;
-            const orderDetails = [
-                order.orderNumber,
-                order.userId.username,
-                `₹${order.grandTotalCost}`,
-                new Date(order.deliveryDate).toLocaleString()
-            ];
-
-            orderDetails.forEach((detail, i) => {
-                doc.fontSize(10).font('Helvetica').text(detail, 50 + tableColumnWidths.slice(0, i).reduce((a, b) => a + b, 0), cursorY, { width: tableColumnWidths[i], align: 'center' });
-            });
-
+            doc.text(order.orderNumber, 50, doc.y, { width: 100 });
+            doc.text(order.userId.username, 150, doc.y, { width: 150 });
+            doc.text(`₹${order.grandTotalCost}`, 300, doc.y, { width: 100 });
+            doc.text(new Date(order.deliveryDate).toLocaleString(), 400, doc.y, { width: 150 });
             doc.moveDown();
         });
 
         doc.end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+const downloadSalesReportExcel = async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+        const report = await generateSalesReport(null, startDate, endDate);
+        const orders = await orderModel.find({
+            deliveryDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
+            orderStatus: 'Delivered'
+        }).populate('userId', 'username');
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
+
+        // Add header row
+        worksheet.addRow(['Order ID', 'Customer', 'Total Price', 'Delivered At']);
+
+        // Add data rows
+        orders.forEach(order => {
+            worksheet.addRow([
+                order.orderNumber,
+                order.userId.username,
+                `₹${order.grandTotalCost}`,
+                new Date(order.deliveryDate).toLocaleString()
+            ]);
+        });
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
+
+        // Write to response
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error.' });
@@ -312,5 +334,6 @@ module.exports = {
     deleteUser, 
     logout, 
     getSalesReport, 
-    downloadSalesReportPDF // Add this line
+    downloadSalesReportPDF,
+    downloadSalesReportExcel // Add this line
 };

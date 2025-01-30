@@ -71,10 +71,11 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h3 class="h6">Sales performance</h3>
-              <!-- <div class="input-group" style="min-width: 16rem;">
-                <span class="input-group-text"><i class="bi bi-calendar-range"></i></span>
-                <input type="text" class="form-control sales-daterange" />
-              </div> -->
+              <div>
+                <button id="dailyPerformance" class="btn btn-sm btn-primary">Daily</button>
+                <button id="monthlyPerformance" class="btn btn-sm btn-secondary">Monthly</button>
+                <button id="yearlyPerformance" class="btn btn-sm btn-secondary">Yearly</button>
+              </div>
             </div>
             <div id="dChart" class="apex-chart"></div>
           </div>
@@ -140,9 +141,9 @@
                     <tr>
                       <td>
                         <div class="d-flex">
-                          <span class="me-2">
+                          <!-- <span class="me-2">
                             <img src="/kassets/images/content/2-185x160.png" alt="" width="25" class="img-fluid">
-                          </span>
+                          </span> -->
                           <a href="#" class="text-truncate w-75 text-reset"><%= product._id %></a>
                         </div>
                       </td>
@@ -207,6 +208,7 @@
           <!-- Sales report content will be dynamically loaded here -->
         </div>
         <button id="downloadPDF" class="btn btn-primary mt-3">Download PDF</button>
+        <button id="downloadExcel" class="btn btn-secondary mt-3">Download Excel</button>
       </div>
     </div>
     
@@ -222,6 +224,7 @@
 
 <script>
   let chart;
+  let currentPeriod = 'daily';
 
   function filterSales() {
     const daterange = $('.daterange').val();
@@ -253,7 +256,7 @@
               <td>${order.userId.username}</td>
               <td>${order.cartData.length} <small>item(s)</small></td>
               <td>${order.paymentType}</td>
-              <td>₹${order.grandTotalCost}</td>
+              <td>₹${order.grandTotalCost.toFixed(2)}</td>
               <td>${new Date(order.deliveryDate).toLocaleDateString()}</td>
               <td><span class="badge rounded-pill bg-success">Delivered</span></td>
               <td><a href="/admin/orders/${order._id}/status" class="btn btn-primary btn-sm">View Details</a></td>
@@ -275,7 +278,7 @@
       $('#total-discount-amount').text(`₹${data.totalDiscount.toFixed(2)}`); // Update total discount amount
 
       // Update sales performance chart
-      updateSalesPerformanceChart(data.orders);
+      updateSalesPerformanceChart(data.orders, currentPeriod);
     });
   }
 
@@ -290,30 +293,38 @@
 
     $('.sales-daterange').on('apply.daterangepicker', function(ev, picker) {
       $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-      filterSalesPerformance(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
+      filterSalesPerformance(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'), currentPeriod);
     });
 
     $('.sales-daterange').on('cancel.daterangepicker', function(ev, picker) {
       $(this).val('');
-      filterSalesPerformance();
+      filterSalesPerformance(null, null, currentPeriod);
     });
   }
 
-  function updateSalesPerformanceChart(orders) {
+  function updateSalesPerformanceChart(orders, period) {
     const dateSalesMap = orders.reduce((acc, order) => {
-      const date = new Date(order.deliveryDate).toLocaleDateString();
-      if (!acc[date]) {
-        acc[date] = { sales: 0, ordersDelivered: 0 };
+      const date = new Date(order.deliveryDate);
+      let key;
+      if (period === 'yearly') {
+        key = date.getFullYear();
+      } else if (period === 'monthly') {
+        key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+      } else {
+        key = date.toLocaleDateString();
       }
-      acc[date].sales += order.grandTotalCost;
+      if (!acc[key]) {
+        acc[key] = { sales: 0, ordersDelivered: 0 };
+      }
+      acc[key].sales += order.grandTotalCost;
       if (order.orderStatus === 'Delivered') {
-        acc[date].ordersDelivered += 1;
+        acc[key].ordersDelivered += 1;
       }
       return acc;
     }, {});
 
-    const dates = Object.keys(dateSalesMap).sort((a, b) => new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-')));
-    const sales = dates.map(date => dateSalesMap[date].sales);
+    const dates = Object.keys(dateSalesMap).sort((a, b) => new Date(a) - new Date(b));
+    const sales = dates.map(date => dateSalesMap[date].sales.toFixed(2));
     const ordersDelivered = dates.map(date => dateSalesMap[date].ordersDelivered);
 
     const chartOptions = {
@@ -330,13 +341,6 @@
         toolbar: {
           tools: {
             selection: true
-          }
-        },
-        events: {
-          selection: function(chartContext, { xaxis }) {
-            const startDate = new Date(xaxis.min).toLocaleDateString();
-            const endDate = new Date(xaxis.max).toLocaleDateString();
-            filterSalesPerformance(startDate, endDate);
           }
         }
       },
@@ -363,15 +367,9 @@
     }
   }
 
-  function filterSalesPerformance(startDate, endDate) {
+  function filterSalesPerformance(startDate, endDate, period = 'daily') {
     $.get('/admin/sales-performance', { startDate, endDate }, function(data) {
-      chart.updateSeries([{
-        name: 'Sales',
-        data: data.orders.map(order => order.grandTotalCost)
-      }, {
-        name: 'Orders Delivered',
-        data: data.orders.map(order => order.orderStatus === 'Delivered' ? 1 : 0)
-      }]);
+      updateSalesPerformanceChart(data.orders, period);
     });
   }
 
@@ -384,7 +382,7 @@
   $('.sales-daterange').on('apply.daterangepicker', function() {
     const daterange = $('.sales-daterange').val();
     const [startDate, endDate] = daterange.split(' - ');
-    filterSalesPerformance(startDate, endDate);
+    filterSalesPerformance(startDate, endDate, currentPeriod);
   });
 
   // Initial load for sales performance
@@ -392,12 +390,42 @@
     initializeDateRangePicker();
     filterSales();
     filterSalesPerformance();
+
+    $('#dailyPerformance').on('click', function() {
+      currentPeriod = 'daily';
+      filterSalesPerformance(null, null, 'daily');
+      $(this).addClass('btn-primary').removeClass('btn-secondary');
+      $('#monthlyPerformance').addClass('btn-secondary').removeClass('btn-primary');
+      $('#yearlyPerformance').addClass('btn-secondary').removeClass('btn-primary');
+    });
+
+    $('#monthlyPerformance').on('click', function() {
+      currentPeriod = 'monthly';
+      filterSalesPerformance(null, null, 'monthly');
+      $(this).addClass('btn-primary').removeClass('btn-secondary');
+      $('#dailyPerformance').addClass('btn-secondary').removeClass('btn-primary');
+      $('#yearlyPerformance').addClass('btn-secondary').removeClass('btn-primary');
+    });
+
+    $('#yearlyPerformance').on('click', function() {
+      currentPeriod = 'yearly';
+      filterSalesPerformance(null, null, 'yearly');
+      $(this).addClass('btn-primary').removeClass('btn-secondary');
+      $('#dailyPerformance').addClass('btn-secondary').removeClass('btn-primary');
+      $('#monthlyPerformance').addClass('btn-secondary').removeClass('btn-primary');
+    });
   });
 
   $('#downloadPDF').on('click', function() {
     const daterange = $('.daterange').val();
     const [startDate, endDate] = daterange.split(' - ');
     window.location.href = `/admin/sales-report-pdf?startDate=${startDate}&endDate=${endDate}`;
+  });
+
+  $('#downloadExcel').on('click', function() {
+    const daterange = $('.daterange').val();
+    const [startDate, endDate] = daterange.split(' - ');
+    window.location.href = `/admin/sales-report-excel?startDate=${startDate}&endDate=${endDate}`;
   });
 </script>
 
