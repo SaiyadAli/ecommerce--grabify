@@ -252,6 +252,10 @@ const downloadReport = async (req, res) => {
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
+        const totalSalesCount = orders.length;
+        const overallOrderAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
+        const totalCouponDeductions = orders.reduce((sum, order) => sum + order.couponDeduction, 0);
+
         const reportsDir = path.join(__dirname, '..', 'public', 'reports');
         if (!fs.existsSync(reportsDir)) {
             fs.mkdirSync(reportsDir, { recursive: true });
@@ -263,8 +267,14 @@ const downloadReport = async (req, res) => {
             const stream = fs.createWriteStream(filePath);
             doc.pipe(stream);
 
-            doc.fontSize(10).text('Sales Report', { align: 'center' });
+            doc.fontSize(10).text(`Sales Report from: ${new Date(startDate).toLocaleDateString('en-GB')} to ${new Date(endDate).toLocaleDateString('en-GB')}`, { align: 'center' });
             doc.moveDown(1);
+            doc.fontSize(10).text(`Total Sales Count: ${totalSalesCount}`, { align: 'center' });
+            doc.moveDown(1);
+            doc.fontSize(10).text(`Overall Order Amount: ₹${overallOrderAmount.toFixed(2)}`, { align: 'center' });
+            doc.moveDown(1);
+            doc.fontSize(10).text(`Total Coupon Deductions: ₹${totalCouponDeductions.toFixed(2)}`, { align: 'center' });
+            doc.moveDown(2);
 
             const headerHeight = 18;
 
@@ -274,14 +284,14 @@ const downloadReport = async (req, res) => {
             doc.rect(350, doc.y, 150, headerHeight).fill('#3D464D');
             doc.rect(500, doc.y, 100, headerHeight).fill('#3D464D');
 
-            doc.fontSize(8).fillColor('white')
-                .text('Sl. No', 55, 60, { width: 50, align: 'center' })
-                .text('Order ID', 105, 60, { width: 150, align: 'center' })
-                .text('Date (dd-mm-yyyy)', 255, 60, { width: 100, align: 'center' })
-                .text('Customer ID', 355, 60, { width: 150, align: 'center' })
-                .text('Total Amount (₹)', 505, 60, { width: 100, align: 'center' });
+            doc.fontSize(8).fillColor('black')
+                .text('Sl. No', 55, doc.y + 5, { width: 50, align: 'center' })
+                .text('Order ID', 105, doc.y + 5, { width: 150, align: 'center' })
+                .text('Date (dd-mm-yyyy)', 255, doc.y + 5, { width: 100, align: 'center' })
+                .text('Customer ID', 355, doc.y + 5, { width: 150, align: 'center' })
+                .text('Total Amount (₹)', 505, doc.y + 5, { width: 100, align: 'center' });
 
-            doc.moveDown(1);
+            doc.moveDown(1)
             orders.forEach((order, index) => {
                 const yPosition = doc.y + 3;
                 const rowHeight = 18;
@@ -294,8 +304,8 @@ const downloadReport = async (req, res) => {
 
                 doc.fontSize(8).fillColor('black')
                     .text(index + 1, 50, yPosition + 5, { width: 50, align: 'center' })
-                    .text(order._id, 120, yPosition + 5, { width: 150, align: 'center' })
-                    .text(new Date(order.createdAt).toLocaleDateString('en-GB'), 270, yPosition + 5, { width: 100, align: 'center' })
+                    .text(order.orderNumber, 120, yPosition + 5, { width: 150, align: 'center' })
+                    .text(new Date(order.deliveryDate).toLocaleDateString('en-GB'), 270, yPosition + 5, { width: 100, align: 'center' })
                     .text(order.userId.username, 380, yPosition + 5, { width: 100, align: 'center' })
                     .text(order.grandTotalCost, 490, yPosition + 5, { width: 100, align: 'center' });
 
@@ -330,14 +340,49 @@ const downloadReport = async (req, res) => {
                 { header: 'Total Amount (₹)', key: 'totalAmount', width: 20 },
             ];
 
+           
+
+            worksheet.addRow({}); // Empty row for spacing
+
             orders.forEach((order, index) => {
                 worksheet.addRow({
                     sl_no: index + 1,
-                    orderId: order._id,
-                    date: new Date(order.createdAt).toLocaleDateString('en-GB'),
+                    orderId: order.orderNumber,
+                    date: new Date(order.deliveryDate).toLocaleDateString('en-GB'),
                     userId: order.userId.username,
                     totalAmount: order.grandTotalCost,
                 });
+            });
+            worksheet.addRow({
+                sl_no: '',
+                orderId: `Sales Report from: ${new Date(startDate).toLocaleDateString('en-GB')} to ${new Date(endDate).toLocaleDateString('en-GB')}`,
+                date: '',
+                userId: '',
+                totalAmount: ''
+            });
+
+            worksheet.addRow({
+                sl_no: '',
+                orderId: `Total Sales Count: ${totalSalesCount}`,
+                date: '',
+                userId: '',
+                totalAmount: ''
+            });
+
+            worksheet.addRow({
+                sl_no: '',
+                orderId: `Overall Order Amount: ₹${overallOrderAmount.toFixed(2)}`,
+                date: '',
+                userId: '',
+                totalAmount: ''
+            });
+
+            worksheet.addRow({
+                sl_no: '',
+                orderId: `Total Coupon & Offer  Deductions: ₹${totalCouponDeductions.toFixed(2)}`,
+                date: '',
+                userId: '',
+                totalAmount: ''
             });
 
             worksheet.getRow(1).eachCell((cell) => {
