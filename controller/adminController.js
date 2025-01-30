@@ -266,14 +266,15 @@ const downloadReport = async (req, res) => {
             const filePath = path.join(reportsDir, 'salesReport.pdf');
             const stream = fs.createWriteStream(filePath);
             doc.pipe(stream);
-
+            doc.fontSize(18).text(`Sales Report`, { align: 'center' });
+            doc.moveDown(1);
             doc.fontSize(10).text(`Sales Report from: ${new Date(startDate).toLocaleDateString('en-GB')} to ${new Date(endDate).toLocaleDateString('en-GB')}`, { align: 'center' });
             doc.moveDown(1);
             doc.fontSize(10).text(`Total Sales Count: ${totalSalesCount}`, { align: 'center' });
             doc.moveDown(1);
-            doc.fontSize(10).text(`Overall Order Amount: ₹${overallOrderAmount.toFixed(2)}`, { align: 'center' });
+            doc.fontSize(10).text(`Overall Order Amount: Rs ${overallOrderAmount.toFixed(2)}`, { align: 'center' });
             doc.moveDown(1);
-            doc.fontSize(10).text(`Total Coupon Deductions: ₹${totalCouponDeductions.toFixed(2)}`, { align: 'center' });
+            doc.fontSize(10).text(`Total Coupon Deductions: Rs ${totalCouponDeductions.toFixed(2)}`, { align: 'center' });
             doc.moveDown(2);
 
             const headerHeight = 18;
@@ -284,12 +285,12 @@ const downloadReport = async (req, res) => {
             doc.rect(350, doc.y, 150, headerHeight).fill('#3D464D');
             doc.rect(500, doc.y, 100, headerHeight).fill('#3D464D');
 
-            doc.fontSize(8).fillColor('black')
+            doc.fontSize(8).fillColor('white')
                 .text('Sl. No', 55, doc.y + 5, { width: 50, align: 'center' })
                 .text('Order ID', 105, doc.y + 5, { width: 150, align: 'center' })
                 .text('Date (dd-mm-yyyy)', 255, doc.y + 5, { width: 100, align: 'center' })
                 .text('Customer ID', 355, doc.y + 5, { width: 150, align: 'center' })
-                .text('Total Amount (₹)', 505, doc.y + 5, { width: 100, align: 'center' });
+                .text('Total Amount (Rs)', 505, doc.y + 5, { width: 100, align: 'center' });
 
             doc.moveDown(1)
             orders.forEach((order, index) => {
