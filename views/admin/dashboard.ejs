@@ -316,7 +316,7 @@
       if (!acc[key]) {
         acc[key] = { sales: 0, ordersDelivered: 0 };
       }
-      acc[key].sales += order.grandTotalCost;
+      acc[key].sales += order.grandTotalCost + (order.walletDeduction || 0); // Add wallet deduction to sales
       if (order.orderStatus === 'Delivered') {
         acc[key].ordersDelivered += 1;
       }
