@@ -206,12 +206,12 @@ const logout = async (req, res) => {
 };
 
 const generateSalesReport = async (period, startDate, endDate) => {
-    const match = {};
+    const match = { orderStatus: 'Delivered' }; // Only include delivered orders
     if (startDate && endDate) {
         match.deliveryDate = { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) };
     }
 
-    const orders = await orderModel.find(match);
+    const orders = await orderModel.find(match).sort({ deliveryDate: -1 }); // Sort by deliveryDate in descending order
     const totalOrders = orders.length;
     const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
     const totalDiscount = orders.reduce((sum, order) => sum + (order.nonOfferPrice - (order.grandTotalCost + order.walletDeduction)), 0);
@@ -250,7 +250,7 @@ const downloadReport = async (req, res) => {
         const orders = await orderModel.find({
             deliveryDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
             orderStatus: 'Delivered'
-        }).populate('userId', 'username');
+        }).sort({ deliveryDate: -1 }).populate('userId', 'username'); // Sort by deliveryDate in descending order
 
         const totalSalesCount = orders.length;
         const overallOrderAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
