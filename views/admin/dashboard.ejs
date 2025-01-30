@@ -419,13 +419,13 @@
   $('#downloadPDF').on('click', function() {
     const daterange = $('.daterange').val();
     const [startDate, endDate] = daterange.split(' - ');
-    window.location.href = `/admin/sales-report-pdf?startDate=${startDate}&endDate=${endDate}`;
+    window.location.href = `/admin/download-report/pdf?startDate=${startDate}&endDate=${endDate}`;
   });
 
   $('#downloadExcel').on('click', function() {
     const daterange = $('.daterange').val();
     const [startDate, endDate] = daterange.split(' - ');
-    window.location.href = `/admin/sales-report-excel?startDate=${startDate}&endDate=${endDate}`;
+    window.location.href = `/admin/download-report/excel?startDate=${startDate}&endDate=${endDate}`;
   });
 </script>
 

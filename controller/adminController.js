@@ -7,8 +7,10 @@ const walletModel = require('../model/walletModel'); // Import the wallet model
 const wishlistModel = require('../model/wishlistModel'); // Import the wishlist model
 const categoryModel = require('../model/categoryModel'); // Import the category model
 const productModel = require('../model/productModel'); // Import the product model
-const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs'); // Import ExcelJS
+const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
 const loadLogin = async (req, res) => {
     res.render('admin/login');
@@ -236,92 +238,133 @@ const getSalesReport = async (req, res) => {
     }
 };
 
-const downloadSalesReportPDF = async (req, res) => {
+const downloadReport = async (req, res) => {
+    const { format } = req.params;
+    const { startDate, endDate } = req.query;
+
     try {
-        const { startDate, endDate } = req.query;
-        const report = await generateSalesReport(null, startDate, endDate);
+        if (!startDate || !endDate) {
+            return res.status(400).send('Start date and end date are required');
+        }
+
         const orders = await orderModel.find({
             deliveryDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
             orderStatus: 'Delivered'
         }).populate('userId', 'username');
 
-        const doc = new PDFDocument({ margin: 30 });
+        const reportsDir = path.join(__dirname, '..', 'public', 'reports');
+        if (!fs.existsSync(reportsDir)) {
+            fs.mkdirSync(reportsDir, { recursive: true });
+        }
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
+        if (format === 'pdf') {
+            const doc = new PDFDocument({ margin: 30 });
+            const filePath = path.join(reportsDir, 'salesReport.pdf');
+            const stream = fs.createWriteStream(filePath);
+            doc.pipe(stream);
 
-        doc.pipe(res);
+            doc.fontSize(10).text('Sales Report', { align: 'center' });
+            doc.moveDown(1);
 
-        // Header Section
-        doc.fontSize(20).text('Sales Report', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(12).text(`Report Type: Monthly`, { align: 'left' });
-        doc.text(`Sales Report Period: ${startDate} to ${endDate}`);
-        doc.text(`Total Sales Count: ${orders.length}`);
-        doc.text(`Overall Order Amount: ₹${report.totalSalesAmount}`);
-        doc.text(`Total Coupon Deductions: ₹${report.totalDiscount}`);
-        doc.moveDown(2);
+            const headerHeight = 18;
 
-        // Table Header
-        doc.fontSize(12).font('Helvetica-Bold');
-        doc.text('Order ID', 50, doc.y, { width: 100 });
-        doc.text('Customer', 150, doc.y, { width: 150 });
-        doc.text('Total Price', 300, doc.y, { width: 100 });
-        doc.text('Delivered At', 400, doc.y, { width: 150 });
-        doc.moveDown();
+            doc.rect(50, doc.y, 50, headerHeight).fill('#3D464D');
+            doc.rect(100, doc.y, 150, headerHeight).fill('#3D464D');
+            doc.rect(250, doc.y, 100, headerHeight).fill('#3D464D');
+            doc.rect(350, doc.y, 150, headerHeight).fill('#3D464D');
+            doc.rect(500, doc.y, 100, headerHeight).fill('#3D464D');
 
-        // Table Rows
-        doc.font('Helvetica').fontSize(10);
-        orders.forEach(order => {
-            doc.text(order.orderNumber, 50, doc.y, { width: 100 });
-            doc.text(order.userId.username, 150, doc.y, { width: 150 });
-            doc.text(`₹${order.grandTotalCost}`, 300, doc.y, { width: 100 });
-            doc.text(new Date(order.deliveryDate).toLocaleString(), 400, doc.y, { width: 150 });
-            doc.moveDown();
-        });
+            doc.fontSize(8).fillColor('white')
+                .text('Sl. No', 55, 60, { width: 50, align: 'center' })
+                .text('Order ID', 105, 60, { width: 150, align: 'center' })
+                .text('Date (dd-mm-yyyy)', 255, 60, { width: 100, align: 'center' })
+                .text('Customer ID', 355, 60, { width: 150, align: 'center' })
+                .text('Total Amount (₹)', 505, 60, { width: 100, align: 'center' });
 
-        doc.end();
+            doc.moveDown(1);
+            orders.forEach((order, index) => {
+                const yPosition = doc.y + 3;
+                const rowHeight = 18;
+
+                doc.rect(50, yPosition, 50, rowHeight).stroke();
+                doc.rect(120, yPosition, 150, rowHeight).stroke();
+                doc.rect(270, yPosition, 100, rowHeight).stroke();
+                doc.rect(380, yPosition, 100, rowHeight).stroke();
+                doc.rect(490, yPosition, 100, rowHeight).stroke();
+
+                doc.fontSize(8).fillColor('black')
+                    .text(index + 1, 50, yPosition + 5, { width: 50, align: 'center' })
+                    .text(order._id, 120, yPosition + 5, { width: 150, align: 'center' })
+                    .text(new Date(order.createdAt).toLocaleDateString('en-GB'), 270, yPosition + 5, { width: 100, align: 'center' })
+                    .text(order.userId.username, 380, yPosition + 5, { width: 100, align: 'center' })
+                    .text(order.grandTotalCost, 490, yPosition + 5, { width: 100, align: 'center' });
+
+                doc.moveDown(1);
+            });
+
+            doc.end();
+
+            stream.on('finish', () => {
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', 'attachment; filename="SalesReport.pdf"');
+                res.sendFile(filePath, (err) => {
+                    if (err) {
+                        console.error('Error downloading PDF:', err);
+                        return res.status(500).send('Error downloading file');
+                    }
+
+                    fs.unlink(filePath, (err) => {
+                        if (err) console.error('Error cleaning up PDF file:', err);
+                    });
+                });
+            });
+        } else if (format === 'excel') {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Sales Report');
+
+            worksheet.columns = [
+                { header: 'Sl. No', key: 'sl_no', width: 10 },
+                { header: 'Order ID', key: 'orderId', width: 30 },
+                { header: 'Date (dd-mm-yyyy)', key: 'date', width: 20 },
+                { header: 'Customer ID', key: 'userId', width: 20 },
+                { header: 'Total Amount (₹)', key: 'totalAmount', width: 20 },
+            ];
+
+            orders.forEach((order, index) => {
+                worksheet.addRow({
+                    sl_no: index + 1,
+                    orderId: order._id,
+                    date: new Date(order.createdAt).toLocaleDateString('en-GB'),
+                    userId: order.userId.username,
+                    totalAmount: order.grandTotalCost,
+                });
+            });
+
+            worksheet.getRow(1).eachCell((cell) => {
+                cell.font = { bold: true };
+            });
+
+            const filePath = path.join(reportsDir, 'salesReport.xlsx');
+            await workbook.xlsx.writeFile(filePath);
+
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename="SalesReport.xlsx"');
+            res.sendFile(filePath, (err) => {
+                if (err) {
+                    console.error('Error downloading Excel:', err);
+                    return res.status(500).send('Error downloading file');
+                }
+
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error('Error cleaning up Excel file:', err);
+                });
+            });
+        } else {
+            return res.status(400).send('Invalid format');
+        }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
-    }
-};
-
-const downloadSalesReportExcel = async (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;
-        const report = await generateSalesReport(null, startDate, endDate);
-        const orders = await orderModel.find({
-            deliveryDate: { $gte: new Date(startDate), $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
-            orderStatus: 'Delivered'
-        }).populate('userId', 'username');
-
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Sales Report');
-
-        // Add header row
-        worksheet.addRow(['Order ID', 'Customer', 'Total Price', 'Delivered At']);
-
-        // Add data rows
-        orders.forEach(order => {
-            worksheet.addRow([
-                order.orderNumber,
-                order.userId.username,
-                `₹${order.grandTotalCost}`,
-                new Date(order.deliveryDate).toLocaleString()
-            ]);
-        });
-
-        // Set response headers
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
-
-        // Write to response
-        await workbook.xlsx.write(res);
-        res.end();
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+        console.error('Error generating report:', error);
+        res.status(500).send('Internal Server Error');
     }
 };
 
@@ -334,6 +377,5 @@ module.exports = {
     deleteUser, 
     logout, 
     getSalesReport, 
-    downloadSalesReportPDF,
-    downloadSalesReportExcel // Add this line
+    downloadReport // Update this line
 };
