@@ -15,7 +15,8 @@ const orderSchema = new mongoose.Schema({
         quantity: { type: Number, required: true },
         size: { type: String, required: true },
         price: { type: Number, required: true },
-        variantId: { type: mongoose.Types.ObjectId, required: true, ref: 'Variant' }
+        variantId: { type: mongoose.Types.ObjectId, required: true, ref: 'Variant' },
+        variantImage: { type: String, required: true } // Add the variantImage field
     }],
     grandTotalCost: { type: Number, required: true },
     paymentId: { type: String },

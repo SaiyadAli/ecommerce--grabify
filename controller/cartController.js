@@ -178,7 +178,8 @@ const createOrderCOD = async (req, res) => {
             quantity: item.quantity,
             size: item.size,
             price: item.variantId.effectivePrice,
-            variantId: item.variantId._id
+            variantId: item.variantId._id,
+            variantImage: item.variantId.images[0] // Add the first image from the variant's images array
         }));
 
         for (const item of cartItems) {
@@ -264,7 +265,8 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                 quantity: item.quantity,
                 size: item.size,
                 price: item.variantId.effectivePrice,
-                variantId: item.variantId._id
+                variantId: item.variantId._id,
+                variantImage: item.variantId.images[0] // Add the first image from the variant's images array
             }));
 
             for (const item of cartItems) {
@@ -397,7 +399,10 @@ const retryPayment = async (req, res) => {
             orderNumber: Date.now(),
             paymentType: 'razorpay',
             addressChosen: order.addressChosen,
-            cartData: order.cartData,
+            cartData: order.cartData.map(item => ({
+                ...item,
+                variantImage: item.variantId.images[0] // Add the first image from the variant's images array
+            })),
             grandTotalCost: order.grandTotalCost,
             couponDeduction: order.couponDeduction,
             razorpayOrderId: razorpayOrder.id,
