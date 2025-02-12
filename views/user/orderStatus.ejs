@@ -94,10 +94,19 @@
                     </table>
 
                     <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered' ) { %>
-                        <form id="cancelOrderForm" action="/user/cancel-order/<%= order._id %>" method="POST">
-                            <button type="button" id="cancelOrderButton" class="btn btn-danger">Cancel Order</button>
-                        </form>
+                        <div style="display: flex; gap: 10px;">
+                            <form id="cancelOrderForm" action="/user/cancel-order/<%= order._id %>" method="POST">
+                                <button type="button" id="cancelOrderButton" class="btn btn-danger">Cancel Order</button>
+                            </form>
+                            <% if (order.paymentType === 'Pay Later') { %>
+                                <form id="retryPaymentForm" action="/user/retry-payment/<%= order._id %>" method="POST">
+                                    <button type="button" id="retryPaymentButton" class="btn btn-warning">Retry Payment</button>
+                                </form>
+                            <% } %>
+                        </div>
                     <% } %>
+                       
+                  
 
                     <% if (order.orderStatus === 'Delivered') { %>
                         <a href="/user/download-invoice/<%= order._id %>" class="btn btn-info" style="margin-top: 20px;">Download Invoice</a>
@@ -130,6 +139,22 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById('cancelOrderForm').submit();
+            }
+        });
+    });
+
+    document.getElementById('retryPaymentButton').addEventListener('click', function() {
+        Swal.fire({
+            title: 'Retry Payment',
+            text: "Do you want to retry the payment for this order?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, retry it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('retryPaymentForm').submit();
             }
         });
     });
