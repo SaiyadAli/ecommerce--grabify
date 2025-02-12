@@ -339,12 +339,35 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
 
                 res.json({ success: true, message: 'Payment verified and order placed successfully.' });
             } else {
-                res.json({ success: false, message: 'Payment verification failed.' });
+                res.json({ success: false, message: 'Payment verification failed. Please try again from your orders page.' });
             }
         }
     } catch (error) {
         console.error('Error creating or verifying order:', error);
         res.status(500).json({ success: false, message: 'Error creating or verifying order', error });
+    }
+};
+
+const createOrderPayLater = async (req, res) => {
+    try {
+        const tempOrder = req.session.tempOrder;
+        if (tempOrder) {
+            const newOrder = new Order(tempOrder);
+            newOrder.paymentStatus = 'Payment Pending';
+            newOrder.paymentType = 'Pay Later';
+            await newOrder.save();
+
+            await Cart.deleteMany({ userId: newOrder.userId });
+
+            req.session.tempOrder = null;
+
+            res.json({ success: true, message: 'Order created with payment pending. Please complete the payment from your orders page.' });
+        } else {
+            res.json({ success: false, message: 'Order creation failed. Please try again.' });
+        }
+    } catch (error) {
+        console.error('Error creating order with payment pending:', error);
+        res.status(500).json({ success: false, message: 'Error creating order with payment pending', error });
     }
 };
 
@@ -532,5 +555,6 @@ module.exports = {
     cancelOrder,
     applyCoupon, 
     updateWallet, 
+    createOrderPayLater,
     
 };

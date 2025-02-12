@@ -97,6 +97,9 @@ router.post('/create-order-cod', auth.checkSession, cartController.createOrderCO
 // Route for handling order creation and verification with Razorpay
 router.post('/create-and-verify-order-razorpay', auth.checkSession, cartController.createAndVerifyOrderRazorpay);
 
+// Add the new route for creating an order with payment status 'Payment Pending' and payment type 'Pay Later'
+router.post('/create-order-pay-later', auth.checkSession, cartController.createOrderPayLater);
+
 // Route for displaying order history
 router.get('/order', auth.checkSession, cartController.viewOrders);
 
@@ -129,5 +132,7 @@ router.post('/update-wallet',auth.checkSession, cartController.updateWallet);
 
 // Route for handling invoice download request
 router.get('/download-invoice/:orderId', auth.checkSession,invoiceController.downloadInvoice);
+
+
 
 module.exports = router;

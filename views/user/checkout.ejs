@@ -361,6 +361,8 @@ function updateCODVisibility() {
                                     icon: 'error',
                                     title: 'Error',
                                     text: 'An error occurred while verifying the payment: ' + error.message
+                                }).then(() => {
+                                    window.location.href = '/user/order';
                                 });
                             });
                         },
@@ -371,6 +373,50 @@ function updateCODVisibility() {
                         },
                         theme: {
                             color: '#F37254'
+                        },
+                        modal: {
+                            ondismiss: function() {
+                                fetch('/user/create-order-pay-later', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        chosenAddress: form.chosenAddress.value,
+                                        paymentType: 'Pay Later',
+                                        couponCode: document.getElementById('hiddenCouponCode').value,
+                                        walletDeduction: document.getElementById('hiddenWalletDeduction').value
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Payment Failed',
+                                            text: 'Order created with payment pending. Please complete the payment from your orders page.'
+                                        }).then(() => {
+                                            window.location.href = '/user/order';
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Payment Failed',
+                                            text: 'Payment verification failed. Please try again from your orders page.'
+                                        }).then(() => {
+                                            window.location.href = '/user/order';
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'An error occurred while creating the order: ' + error.message
+                                    });
+                                });
+                            }
                         }
                     };
                     const rzp = new Razorpay(options);
