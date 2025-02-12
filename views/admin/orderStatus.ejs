@@ -97,7 +97,7 @@
                             </form>
                         <% } %>
 
-                        <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Shipped' && order.orderStatus !== 'Delivered') { %>
+                        <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Shipped' && order.orderStatus !== 'Delivered' && order.paymentType !== 'Pay Later') { %>
                             <form id="ship-order-form" action="/admin/ship-order/<%= order._id %>" method="POST" style="display:inline-block;">
                                 <input type="hidden" name="deliveryDate" id="delivery-date-input">
                                 <button type="button" class="btn btn-success" id="ship-order-btn" style="width: 150px;">Ship Order</button>
