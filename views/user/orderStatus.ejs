@@ -125,6 +125,8 @@
 
 <div class="gap"></div>
 
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('cancelOrderButton').addEventListener('click', function() {
@@ -154,7 +156,135 @@
             confirmButtonText: 'Yes, retry it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('retryPaymentForm').submit();
+                fetch('/user/retry-payment/<%= order._id %>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const options = {
+                            key: 'rzp_test_3TZZC2O6tszKWO',
+                            amount: data.amount,
+                            currency: 'INR',
+                            name: 'Grabify',
+                            description: 'Order Payment',
+                            order_id: data.orderId,
+                            handler: function (response) {
+                                fetch('/user/create-and-verify-order-razorpay', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        paymentId: response.razorpay_payment_id,
+                                        orderId: response.razorpay_order_id,
+                                        signature: response.razorpay_signature
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Payment Successful',
+                                            text: 'Your order has been placed successfully.',
+                                            confirmButtonText: 'OK'
+                                        }).then(() => {
+                                            window.location.href = '/user/home';
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Payment Failed',
+                                            text: data.message
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'An error occurred while verifying the payment: ' + error.message
+                                    }).then(() => {
+                                        window.location.href = '/user/order';
+                                    });
+                                });
+                            },
+                            prefill: {
+                                name: data.userName,
+                                email: data.userEmail,
+                                contact: data.userContact
+                            },
+                            theme: {
+                                color: '#F37254'
+                            },
+                            modal: {
+                                ondismiss: function() {
+                                    fetch('/user/create-order-pay-later', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            chosenAddress: '<%= order.addressChosen %>',
+                                            paymentType: 'Pay Later',
+                                            couponCode: '<%= order.couponCode %>',
+                                            walletDeduction: '<%= order.walletDeduction %>'
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Payment Failed',
+                                                text: 'Order created with payment pending. Please complete the payment from your orders page.'
+                                            }).then(() => {
+                                                window.location.href = '/user/order';
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Payment Failed',
+                                                text: 'Payment verification failed. Please try again from your orders page.'
+                                            }).then(() => {
+                                                window.location.href = '/user/order';
+                                            });
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: 'An error occurred while creating the order: ' + error.message
+                                        });
+                                    });
+                                }
+                            }
+                        };
+                        const rzp = new Razorpay(options);
+                        rzp.open();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while retrying the payment: ' + error.message
+                    });
+                });
             }
         });
     });

@@ -315,6 +315,9 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                     return res.json({ success: false, message: 'Order not found.' });
                 }
 
+                // Delete previous order if it exists
+                await Order.deleteOne({ orderNumber: tempOrder.orderNumber });
+
                 const newOrder = new Order(tempOrder);
                 newOrder.paymentStatus = 'Paid';
                 await newOrder.save();
@@ -368,6 +371,45 @@ const createOrderPayLater = async (req, res) => {
     } catch (error) {
         console.error('Error creating order with payment pending:', error);
         res.status(500).json({ success: false, message: 'Error creating order with payment pending', error });
+    }
+};
+
+const retryPayment = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = await Order.findById(orderId).populate('cartData.variantId');
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const options = {
+            amount: order.grandTotalCost * 100,
+            currency: 'INR',
+            receipt: `receipt_order_${Date.now()}`
+        };
+        const razorpayOrder = await razorpay.orders.create(options);
+
+        // Delete previous order if it exists
+        await Order.deleteOne({ orderNumber: order.orderNumber });
+
+        req.session.tempOrder = {
+            userId: order.userId,
+            orderNumber: Date.now(),
+            paymentType: 'razorpay',
+            addressChosen: order.addressChosen,
+            cartData: order.cartData,
+            grandTotalCost: order.grandTotalCost,
+            couponDeduction: order.couponDeduction,
+            razorpayOrderId: razorpayOrder.id,
+            paymentStatus: 'Pending',
+            walletDeduction: order.walletDeduction,
+            nonOfferPrice: order.nonOfferPrice
+        };
+
+        res.json({ success: true, amount: options.amount, orderId: razorpayOrder.id, userName: req.user.name, userEmail: req.user.email, userContact: req.user.contact });
+    } catch (error) {
+        console.error('Error retrying payment:', error);
+        res.status(500).json({ message: 'Error retrying payment', error });
     }
 };
 
@@ -556,5 +598,6 @@ module.exports = {
     applyCoupon, 
     updateWallet, 
     createOrderPayLater,
+    retryPayment,
     
 };

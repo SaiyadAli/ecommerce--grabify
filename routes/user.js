@@ -109,6 +109,9 @@ router.get('/orderStatus/:orderId', auth.checkSession, cartController.viewOrderS
 // Route for cancelling order
 router.post('/cancel-order/:orderId', auth.checkSession, cartController.cancelOrder);
 
+// Route for retrying payment
+router.post('/retry-payment/:orderId', auth.checkSession, cartController.retryPayment);
+
 // Route for handling forgot password request
 router.get('/forgot', userController.forgotPassword);
 router.post('/reset-password', userController.resetPassword);
