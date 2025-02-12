@@ -56,9 +56,9 @@ const downloadInvoice = async (req, res) => {
                 doc.fontSize(12).fillColor('#333').text('Billing Details:', 400, 160);
                 doc.fontSize(10).fillColor('#000').text(`Name: ${address.firstName} ${address.lastName}`, 400, 175);
                 doc.text(`Phone: ${address.number}`, 400, 190);
-                doc.text(`Address: ${address.street}`, 400, 205);
-                doc.text(`City: ${address.city}`, 400, 220);
-                doc.text(`State: ${address.state}`, 400, 235);
+                doc.text(`Address: ${address.street.split(' ')[0]}`, 400, 205); 
+                doc.text(`City: ${address.city.split(' ')[0]}`, 400, 220); 
+                doc.text(`State: ${address.state.split(' ')[0]}`, 400, 235); 
                 doc.text(`Postal Code: ${address.pincode}`, 400, 250);
                 doc.text(`Country: ${address.country}`, 400, 265);
                 doc.moveDown(2);
