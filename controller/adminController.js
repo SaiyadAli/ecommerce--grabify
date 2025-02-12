@@ -262,7 +262,7 @@ const downloadReport = async (req, res) => {
         }
 
         if (format === 'pdf') {
-            const doc = new PDFDocument({ margin: 30 });
+            const doc = new PDFDocument({ size: 'A3', margin: 30 }); // Increase page size to A3
             const filePath = path.join(reportsDir, 'salesReport.pdf');
             const stream = fs.createWriteStream(filePath);
             doc.pipe(stream);
@@ -285,7 +285,9 @@ const downloadReport = async (req, res) => {
                 { x: 100, width: 150, text: 'Order ID' },
                 { x: 250, width: 100, text: 'Date (dd-mm-yyyy)' },
                 { x: 350, width: 150, text: 'Customer ID' },
-                { x: 500, width: 100, text: 'Total Amount (Rs)' }
+                { x: 500, width: 100, text: 'Total Amount (Rs)' },
+                { x: 600, width: 100, text: 'Payment Type' }, // New header
+                { x: 700, width: 100, text: 'Discount (Rs)' } // New header
             ];
             
             // Draw header background
@@ -309,13 +311,19 @@ const downloadReport = async (req, res) => {
                 doc.rect(270, yPosition, 100, rowHeight).stroke();
                 doc.rect(380, yPosition, 100, rowHeight).stroke();
                 doc.rect(490, yPosition, 100, rowHeight).stroke();
+                doc.rect(600, yPosition, 100, rowHeight).stroke(); // New column
+                doc.rect(700, yPosition, 100, rowHeight).stroke(); // New column
+
+                const customerId = order.userId.username.split(' ')[0]; // Get the first word of the customer ID
 
                 doc.fontSize(8).fillColor('black')
                     .text(index + 1, 50, yPosition + 5, { width: 50, align: 'center' })
                     .text(order.orderNumber, 120, yPosition + 5, { width: 150, align: 'center' })
                     .text(new Date(order.deliveryDate).toLocaleDateString('en-GB'), 270, yPosition + 5, { width: 100, align: 'center' })
-                    .text(order.userId.username, 380, yPosition + 5, { width: 100, align: 'center' })
-                    .text(order.grandTotalCost, 490, yPosition + 5, { width: 100, align: 'center' });
+                    .text(customerId, 380, yPosition + 5, { width: 100, align: 'center' }) // Modified field
+                    .text(order.grandTotalCost + order.walletDeduction, 490, yPosition + 5, { width: 100, align: 'center' }) // Modified field
+                    .text(order.paymentType, 600, yPosition + 5, { width: 100, align: 'center' }) // New field
+                    .text(order.couponDeduction, 700, yPosition + 5, { width: 100, align: 'center' }); // New field
 
                 doc.moveDown(1);
             });
@@ -346,19 +354,23 @@ const downloadReport = async (req, res) => {
                 { header: 'Date (dd-mm-yyyy)', key: 'date', width: 20 },
                 { header: 'Customer ID', key: 'userId', width: 20 },
                 { header: 'Total Amount (₹)', key: 'totalAmount', width: 20 },
+                { header: 'Payment Type', key: 'paymentType', width: 20 }, 
+                { header: 'Discount (₹)', key: 'discount', width: 20 } 
             ];
-
-           
 
             worksheet.addRow({}); // Empty row for spacing
 
             orders.forEach((order, index) => {
+                const customerId = order.userId.username.split(' ')[0]; 
+
                 worksheet.addRow({
                     sl_no: index + 1,
                     orderId: order.orderNumber,
                     date: new Date(order.deliveryDate).toLocaleDateString('en-GB'),
-                    userId: order.userId.username,
-                    totalAmount: order.grandTotalCost,
+                    userId: customerId, 
+                    totalAmount: order.grandTotalCost + order.walletDeduction, // Modified field
+                    paymentType: order.paymentType, 
+                    discount: order.couponDeduction 
                 });
             });
             worksheet.addRow({
