@@ -12,7 +12,8 @@ const viewWallet = async (req, res) => {
             });
             await wallet.save();
         }
-        res.render('user/wallet', { wallet, username: req.user.username });
+        const page = parseInt(req.query.page) || 1;
+        res.render('user/wallet', { wallet, username: req.user.username, page });
     } catch (error) {
         console.error('Error fetching wallet:', error);
         res.status(500).json({ message: 'Error fetching wallet', error });
