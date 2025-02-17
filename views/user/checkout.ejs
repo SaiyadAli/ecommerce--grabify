@@ -143,7 +143,7 @@
                         
                         <tr>
                             <td>Grand Total</td>
-                            <td class="site-color" id="total-price">₹<span id="grandTotal"><%= grandTotal %></span></td>
+                            <td class="site-color" id="total-price">₹<span id="grandTotal"><%= grandTotal.toFixed(2) %></span></td>
                         </tr>
                         <tr>
                             <td colspan="2">
@@ -507,7 +507,7 @@ function updateCODVisibility() {
                     showConfirmButton: false,
                     timer: 2000
                 }).then(() => {
-                    document.getElementById('grandTotal').innerText = `${data.newTotal}`;
+                    document.getElementById('grandTotal').innerText = data.newTotal.toFixed(2);
                     document.getElementById('hiddenCouponCode').value = couponCode;
                     updatePaymentMethods();
                     if (walletBalance != 0) {
