@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const Wallet = require('../model/walletModel'); // Import the Wallet model
 const PDFDocument = require('pdfkit'); // Import PDFKit for generating PDFs
 const stream = require('stream'); // Import stream for handling in-memory streams
+const StatusCodes = require('../statusCodes');
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -23,20 +24,20 @@ const addToCart = async (req, res) => {
 
         // Validate received data
         if (!userId || !productId || !variantId || !quantity || !size) {
-            return res.status(400).json({ error: 'All fields are required' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ error: 'All fields are required' });
         }
 
         // Check if the variant exists and has sufficient stock
         const variant = await Variant.findById(variantId);
         if (!variant) {
-            return res.status(404).json({ error: 'Variant not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ error: 'Variant not found' });
         }
         
         // Check if the cart item already exists for the user
         const existingCartItem = await Cart.findOne({ userId, productId, variantId, size });
         if (existingCartItem) {
             console.log('Duplicate cart item found:', existingCartItem); // Debugging line
-            return res.status(400).json({ error: 'This product is already in your cart.' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ error: 'This product is already in your cart.' });
         }
 
         
@@ -44,7 +45,7 @@ const addToCart = async (req, res) => {
         console.log('Available stock:', availableStock); // Debugging line
         console.log('Requested quantity:', quantity); // Debugging line
         if (availableStock < quantity) {
-            return res.status(400).json({ error: 'Insufficient quantity available' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Insufficient quantity available' });
         }
 
         
@@ -53,10 +54,10 @@ const addToCart = async (req, res) => {
         const newCartItem = new Cart({ userId, productId, variantId, quantity, size });
         await newCartItem.save();
         console.log('Added new cart item:', newCartItem); // Debugging line
-        res.status(200).json({ message: 'Product added to cart successfully!' });
+        res.status(StatusCodes.SUCCESS).json({ message: 'Product added to cart successfully!' });
     } catch (error) {
         console.error('Error adding product to cart:', error); // Debugging line
-        res.status(500).json({ message: 'Error adding product to cart', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error adding product to cart', error });
     }
 };
 
@@ -97,7 +98,7 @@ const updateCartQuantity = async (req, res) => {
         const variant = await Variant.findById(cartItem.variantId._id);
 
         if (variant.size.get(size) < quantity) {
-            return res.status(400).json({ message: 'Insufficient quantity available' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Insufficient quantity available' });
         }
 
         cartItem.quantity = quantity;
@@ -107,9 +108,9 @@ const updateCartQuantity = async (req, res) => {
         const total = cartItems.reduce((sum, item) => sum + item.variantId.effectivePrice * item.quantity, 0);
         const totalItem = cartItem.variantId.effectivePrice * cartItem.quantity;
 
-        res.status(200).json({ message: 'Cart updated successfully', total, totalItem });
+        res.status(StatusCodes.SUCCESS).json({ message: 'Cart updated successfully', total, totalItem });
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error' });
     }
 };
 
@@ -190,10 +191,10 @@ const createOrderCOD = async (req, res) => {
                     variant.size.set(item.size, currentStock - item.quantity);
                     await variant.save();
                 } else {
-                    return res.status(400).json({ success: false, message: `Insufficient stock for ${item.productId.name} (${item.variantId.color})` });
+                    return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: `Insufficient stock for ${item.productId.name} (${item.variantId.color})` });
                 }
             } else {
-                return res.status(400).json({ success: false, message: `Size ${item.size} not available for ${item.productId.name} (${item.variantId.color})` });
+                return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: `Size ${item.size} not available for ${item.productId.name} (${item.variantId.color})` });
             }
         }
 
@@ -230,7 +231,7 @@ const createOrderCOD = async (req, res) => {
         res.json({ success: true, message: 'Order created successfully!' });
     } catch (error) {
         console.error('Error creating order:', error);
-        res.status(500).json({ success: false, message: 'Error creating order', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Error creating order', error });
     }
 };
 
@@ -277,10 +278,10 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
                         variant.size.set(item.size, currentStock - item.quantity);
                         await variant.save();
                     } else {
-                        return res.status(400).json({ success: false, message: `Insufficient stock for ${item.productId.name} (${item.variantId.color})` });
+                        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: `Insufficient stock for ${item.productId.name} (${item.variantId.color})` });
                     }
                 } else {
-                    return res.status(400).json({ success: false, message: `Size ${item.size} not available for ${item.productId.name} (${item.variantId.color})` });
+                    return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: `Size ${item.size} not available for ${item.productId.name} (${item.variantId.color})` });
                 }
             }
 
@@ -349,7 +350,7 @@ const createAndVerifyOrderRazorpay = async (req, res) => {
         }
     } catch (error) {
         console.error('Error creating or verifying order:', error);
-        res.status(500).json({ success: false, message: 'Error creating or verifying order', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Error creating or verifying order', error });
     }
 };
 
@@ -478,7 +479,7 @@ const cancelOrder = async (req, res) => {
         const order = await Order.findById(orderId);
         if (!order) {
             console.log('Order not found');
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Order not found' });
         }
 
         console.log('Order found, adding stock count back to variant');
@@ -533,7 +534,7 @@ const cancelOrder = async (req, res) => {
         res.redirect(`/user/orderStatus/${orderId}`);
     } catch (error) {
         console.error('Error cancelling order:', error);
-        res.status(500).json({ message: 'Error cancelling order', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error cancelling order', error });
     }
 };
 
@@ -544,7 +545,7 @@ const applyCoupon = async (req, res) => {
 
         const coupon = await Coupon.findOne({ couponCode });
         if (!coupon) {
-            return res.status(400).json({ success: false, message: 'Invalid coupon code.' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: 'Invalid coupon code.' });
         }
 
         const cartItems = await Cart.find({ userId }).populate('variantId');
@@ -559,7 +560,7 @@ const applyCoupon = async (req, res) => {
         res.json({ success: true, discountAmount, newTotal });
     } catch (error) {
         console.error('Error applying coupon:', error);
-        res.status(500).json({ success: false, message: 'Error applying coupon', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Error applying coupon', error });
     }
 };
 
@@ -579,11 +580,11 @@ const updateWallet = async (req, res) => {
             await wallet.save();
             res.json({ success: true, message: 'Wallet updated successfully' });
         } else {
-            res.status(404).json({ success: false, message: 'Wallet not found' });
+            res.status(StatusCodes.NOT_FOUND).json({ success: false, message: 'Wallet not found' });
         }
     } catch (error) {
         console.error('Error updating wallet:', error);
-        res.status(500).json({ success: false, message: 'Error updating wallet', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Error updating wallet', error });
     }
 };
 

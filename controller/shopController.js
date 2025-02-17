@@ -1,6 +1,7 @@
 const Product = require('../model/productModel');
 const Variant = require('../model/variantModel');
 const Category = require('../model/categoryModel');
+const StatusCodes = require('../statusCodes');
 
 exports.getShopPage = async (req, res) => {
     try {
@@ -44,6 +45,6 @@ exports.getShopPage = async (req, res) => {
         });
     } catch (err) {
         console.error('Error fetching shop page:', err);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };

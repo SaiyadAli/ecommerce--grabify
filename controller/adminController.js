@@ -11,6 +11,7 @@ const ExcelJS = require('exceljs'); // Import ExcelJS
 const PDFDocument = require('pdfkit');
 const path = require('path');
 const fs = require('fs');
+const StatusCodes = require('../statusCodes');
 
 const loadLogin = async (req, res) => {
     res.render('admin/login');
@@ -169,13 +170,13 @@ const deleteUser = async (req, res) => {
             // Delete the wishlist associated with the user
             await wishlistModel.deleteMany({ userId: id });
 
-            return res.status(200).json({ message: 'User and associated data deleted successfully.' });
+            return res.status(StatusCodes.SUCCESS).json({ message: 'User and associated data deleted successfully.' });
         } else {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found.' });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.' });
     }
 };
 
@@ -187,16 +188,16 @@ const editUserStatus = async (req, res) => {
         const user = await userModel.findById(id);
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found.' });
         }
 
         user.isBlock = !user.isBlock; // Toggle the status
         await user.save();
 
-        res.status(200).json({ message: `User status updated to ${user.isBlock ? 'Blocked' : 'Live'}.` });
+        res.status(StatusCodes.SUCCESS).json({ message: `User status updated to ${user.isBlock ? 'Blocked' : 'Live'}.` });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.' });
     }
 };
 
@@ -231,10 +232,10 @@ const getSalesReport = async (req, res) => {
         const totalSalesAmount = orders.reduce((sum, order) => sum + order.grandTotalCost + order.walletDeduction, 0);
         const ordersDelivered = orders.length;
 
-        res.status(200).json({ ...report, orders, totalSalesAmount, ordersDelivered });
+        res.status(StatusCodes.SUCCESS).json({ ...report, orders, totalSalesAmount, ordersDelivered });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.' });
     }
 };
 

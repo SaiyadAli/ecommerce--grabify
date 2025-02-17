@@ -4,23 +4,24 @@ const Variant = require('../model/variantModel');
 const Category = require('../model/categoryModel');
 const CategoryOffer = require('../model/categoryOfferModel'); // Add this line
 const ProductOffer = require('../model/productOfferModel'); // Add this line
+const StatusCodes = require('../statusCodes');
 
 const displayProduct = async (req, res) => {
     try {
         const variantId = req.params.id;
         console.log('variantId:', variantId); // Log the variantId for debugging
         if (!variantId) {
-            return res.status(400).send('Variant ID is required');
+            return res.status(StatusCodes.BAD_REQUEST).send('Variant ID is required');
         }
 
         const variant = await Variant.findById(variantId).populate('productId');
         if (!variant) {
-            return res.status(404).send('Variant not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Variant not found');
         }
 
         const product = await Product.findById(variant.productId._id).populate('categoryid');
         if (!product) {
-            return res.status(404).send('Product not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Product not found');
         }
 
         const category = await Category.findById(product.categoryid);
@@ -44,7 +45,7 @@ const displayProduct = async (req, res) => {
         res.render('user/userproduct', { product, variants, category, variant, finalPrice, username, user: req.user });
     } catch (error) {
         console.error('Error displaying product:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -72,7 +73,7 @@ async function getProductDetails(req, res) {
             variants: [product] // Assuming a single variant for simplicity
         });
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 }
 

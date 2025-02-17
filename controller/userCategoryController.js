@@ -1,6 +1,7 @@
 const Category = require('../model/categoryModel');
 const Variant = require('../model/variantModel');
 const Product = require('../model/productModel');
+const StatusCodes = require('../statusCodes');
 
 const getCategoryProducts = async (req, res) => {
     try {
@@ -25,7 +26,7 @@ const getCategoryProducts = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching category products:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 

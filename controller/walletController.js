@@ -1,4 +1,5 @@
 const Wallet = require('../model/walletModel');
+const StatusCodes = require('../statusCodes');
 
 const viewWallet = async (req, res) => {
     try {
@@ -16,7 +17,7 @@ const viewWallet = async (req, res) => {
         res.render('user/wallet', { wallet, username: req.user.username, page });
     } catch (error) {
         console.error('Error fetching wallet:', error);
-        res.status(500).json({ message: 'Error fetching wallet', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching wallet', error });
     }
 };
 

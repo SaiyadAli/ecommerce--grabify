@@ -4,6 +4,7 @@ const Category = require('../model/categoryModel');
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
+const StatusCodes = require('../statusCodes');
 
 const getAddVariantPage = async (req, res) => {
     try {
@@ -12,7 +13,7 @@ const getAddVariantPage = async (req, res) => {
         res.render('admin/addvariant', { products, selectedProductId, message: null, messageType: null });
     } catch (error) {
         console.error('Error loading products:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -77,7 +78,7 @@ const addVariant = async (req, res) => {
         res.redirect('/admin/variant');
     } catch (error) {
         console.error('Error adding variant:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -105,7 +106,7 @@ const getVariantsPage = async (req, res) => {
         });
     } catch (error) {
         console.error('Error loading variants:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -117,7 +118,7 @@ const toggleVariantStatus = async (req, res) => {
         const variant = await Variant.findById(variantId);
         
         if (!variant) {
-            return res.status(404).send('Variant not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Variant not found');
         }
 
         // Toggle the isListed status
@@ -130,7 +131,7 @@ const toggleVariantStatus = async (req, res) => {
         res.json(true);
     } catch (error) {
         console.error('Error updating variant status:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while updating variant status.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An error occurred while updating variant status.' });
     }
 };
 
@@ -141,7 +142,7 @@ const deleteVariant = async (req, res) => {
         // Find the variant by ID
         const variant = await Variant.findById(variantId);
         if (!variant) {
-            return res.status(404).json({ success: false, message: 'Variant not found.' });
+            return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: 'Variant not found.' });
         }
 
         // Delete the images from the file system
@@ -158,7 +159,7 @@ const deleteVariant = async (req, res) => {
         res.json({ success: true, message: 'Variant deleted successfully!' });
     } catch (error) {
         console.error('Error deleting variant:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while deleting the variant.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An error occurred while deleting the variant.' });
     }
 };
 
@@ -168,7 +169,7 @@ const getEditVariantPage = async (req, res) => {
         const variant = await Variant.findById(variantId).populate('productId');
 
         if (!variant) {
-            return res.status(404).send('Variant not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Variant not found');
         }
 
         const products = await Product.find({ isListed: true });
@@ -176,7 +177,7 @@ const getEditVariantPage = async (req, res) => {
         res.render('admin/editvariant', { variant, products, message: null, messageType: null });
     } catch (error) {
         console.error('Error loading variant:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -189,7 +190,7 @@ const editVariant = async (req, res) => {
         const variant = await Variant.findById(variantId);
 
         if (!variant) {
-            return res.status(404).send('Variant not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Variant not found');
         }
 
         // Check for duplicate variant color
@@ -243,7 +244,7 @@ const editVariant = async (req, res) => {
         res.redirect('/admin/variant');
     } catch (error) {
         console.error('Error editing variant:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 

@@ -1,5 +1,6 @@
 const User = require('../model/userModel');
 const mongoose = require('mongoose');
+const StatusCodes = require('../statusCodes');
 
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
@@ -56,7 +57,7 @@ const postAddAddress = async (req, res) => {
             if (user) {
                 const existingAlias = user.addresses.find(address => address.addressAlias === req.body.addressAlias);
                 if (existingAlias) {
-                    return res.status(400).json({ message: 'Address alias must be unique.' });
+                    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Address alias must be unique.' });
                 }
                 user.addresses.push({
                     firstName: req.body.firstName,
@@ -116,7 +117,7 @@ const postEditAddress = async (req, res) => {
             if (address) {
                 const existingAlias = user.addresses.find(addr => addr.addressAlias === req.body.addressAlias && addr._id.toString() !== req.params.addressId);
                 if (existingAlias) {
-                    return res.status(400).json({ message: 'Address alias must be unique.' });
+                    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Address alias must be unique.' });
                 }
                 address.firstName = req.body.firstName;
                 address.lastName = req.body.lastName;
@@ -206,7 +207,7 @@ const updateUserInformation = async (req, res) => {
             }
 
             if (errors.length > 0) {
-                return res.status(400).json({ errors });
+                return res.status(StatusCodes.BAD_REQUEST).json({ errors });
             }
 
             user.username = username;
@@ -218,10 +219,10 @@ const updateUserInformation = async (req, res) => {
 
             await user.save();
             req.session.otp = null; // Clear the OTP after successful verification
-            res.status(200).json({ message: 'Your details have been updated successfully!' });
+            res.status(StatusCodes.SUCCESS).json({ message: 'Your details have been updated successfully!' });
         } catch (err) {
             console.error('Error updating user information:', err);
-            res.status(500).json({ message: 'Error updating user information' });
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error updating user information' });
         }
     } else {
         res.redirect('/user/login');
@@ -250,9 +251,9 @@ const sendOTP = (req, res) => {
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error('Error sending OTP:', error);
-                res.status(500).send('Error sending OTP');
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Error sending OTP');
             } else {
-                res.status(200).send('OTP sent successfully');
+                res.status(StatusCodes.SUCCESS).send('OTP sent successfully');
             }
         });
     } else {

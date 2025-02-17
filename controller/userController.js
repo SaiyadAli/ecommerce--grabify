@@ -6,6 +6,7 @@ const saltround = 10;
 const Product = require('../model/productModel'); // Add this line to import the Product model
 const Category = require('../model/categoryModel'); // Add this line to import the Category model
 const Variant = require('../model/variantModel'); // Add this line to import the Variant model
+const StatusCodes = require('../statusCodes');
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -53,7 +54,7 @@ const registerUser = async (req, res) => {
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error('Error sending OTP email:', error);
-                return res.status(500).send('Error sending OTP email');
+                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Error sending OTP email');
             }
 
             // Store OTP and user details in session
@@ -64,7 +65,7 @@ const registerUser = async (req, res) => {
         });
     } catch (error) {
         console.error('Server Error:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -130,7 +131,7 @@ const resendOtp = async (req, res) => {
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error('Error sending OTP email:', error);
-                return res.status(500).json({ success: false, message: 'Error sending OTP email' });
+                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Error sending OTP email' });
             }
 
             // Store new OTP in session
@@ -140,7 +141,7 @@ const resendOtp = async (req, res) => {
         });
     } catch (error) {
         console.error('Server Error:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server Error' });
     }
 };
 
@@ -184,7 +185,7 @@ const loginUser = async (req, res) => {
 
         res.redirect('/user/home');
     } catch (error) {
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -209,7 +210,7 @@ const loadHome = async (req, res) => {
         res.render('user/home', { username, products, categories, variants:filteredVariants });
     } catch (error) {
         console.error('Error loading products, categories, and variants:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 
@@ -260,7 +261,7 @@ const resetPassword = async (req, res) => {
         res.status(200).json({ success: true, message: 'Password reset successful. Please log in.' });
     } catch (error) {
         console.error('Server Error:', error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server Error' });
     }
 };
 
