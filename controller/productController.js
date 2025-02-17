@@ -1,5 +1,6 @@
 const productModel = require('../model/productModel');
 const categoryModel = require('../model/categoryModel');
+const StatusCodes = require('../statusCodes');
 
 // Load products page with categories
 const loadProducts = async (req, res) => {
@@ -23,7 +24,7 @@ const loadProducts = async (req, res) => {
         });
     } catch (error) {
         console.error('Error loading products:', error);
-        res.status(500).send('An error occurred while fetching products.');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('An error occurred while fetching products.');
     }
 };
 
@@ -36,7 +37,7 @@ const toggleProductStatus = async (req, res) => {
         const product = await productModel.findById(productId);
 
         if (!product) {
-            return res.status(404).send('Product not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Product not found');
         }
 
         // Toggle the isListed status
@@ -49,7 +50,7 @@ const toggleProductStatus = async (req, res) => {
         res.json({ success: true, isListed: product.isListed });
     } catch (error) {
         console.error('Error updating product status:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while updating product status.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An error occurred while updating product status.' });
     }
 };
 
@@ -61,7 +62,7 @@ const addProduct = async (req, res) => {
         // Check if the product name already exists (case-insensitive)
         const existingProduct = await productModel.findOne({ name: { $regex: new RegExp(name, 'i') } });
         if (existingProduct) {
-            return res.status(400).json({ success: false, message: 'Product name already exists. Please use a different name.' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: 'Product name already exists. Please use a different name.' });
         }
 
         // Create a new product
@@ -78,7 +79,7 @@ const addProduct = async (req, res) => {
         res.json({ success: true, message: 'Product added successfully!' });
     } catch (error) {
         console.error('Error adding product:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while adding the product.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An error occurred while adding the product.' });
     }
 };
 
@@ -90,7 +91,7 @@ const editProduct = async (req, res) => {
         // Check if the product name already exists (case-insensitive)
         const existingProduct = await productModel.findOne({ name: { $regex: new RegExp(name, 'i') }, _id: { $ne: productId } });
         if (existingProduct) {
-            return res.status(400).json({ success: false, message: 'Product name already exists. Please use a different name.' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: 'Product name already exists. Please use a different name.' });
         }
 
         // Find the product by ID and update
@@ -106,13 +107,13 @@ const editProduct = async (req, res) => {
         );
 
         if (!updatedProduct) {
-            return res.status(404).json({ success: false, message: 'Product not found.' });
+            return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: 'Product not found.' });
         }
 
         res.json({ success: true, message: 'Product updated successfully!' });
     } catch (error) {
         console.error('Error editing product:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while editing the product.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An error occurred while editing the product.' });
     }
 };
 
@@ -125,13 +126,13 @@ const deleteProduct = async (req, res) => {
         const deletedProduct = await productModel.findByIdAndDelete(productId);
 
         if (!deletedProduct) {
-            return res.status(404).json({ success: false, message: 'Product not found.' });
+            return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: 'Product not found.' });
         }
 
         res.json({ success: true, message: 'Product deleted successfully!' });
     } catch (error) {
         console.error('Error deleting product:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while deleting the product.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An error occurred while deleting the product.' });
     }
 };
 
@@ -140,7 +141,7 @@ const getProductsByCategory = async (req, res) => {
         const products = await productModel.find({ categoryid: req.params.categoryId }); // Ensure the field name matches your schema
         res.json(products);
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 };
 

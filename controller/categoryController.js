@@ -1,4 +1,5 @@
 const categoryModel = require('../model/categoryModel');
+const StatusCodes = require('../statusCodes');
 
 // Load categories page
 const loadCategories = async (req, res) => {
@@ -21,7 +22,7 @@ const loadCategories = async (req, res) => {
 
     } catch (error) {
         console.error('Error loading categories:', error);
-        res.status(500).send('An error occurred while fetching categories.');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('An error occurred while fetching categories.');
     }
 };
 
@@ -34,7 +35,7 @@ const toggleCategoryStatus = async (req, res) => {
         const category = await categoryModel.findById(categoryId);
 
         if (!category) {
-            return res.status(404).send('Category not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Category not found');
         }
 
         // Toggle the isListed status
@@ -44,10 +45,10 @@ const toggleCategoryStatus = async (req, res) => {
         await category.save();
 
         // Respond with the new status to send back to the client (AJAX)
-        res.json({ success: true, isListed: category.isListed });
+        res.status(StatusCodes.SUCCESS).json({ success: true, isListed: category.isListed });
     } catch (error) {
         console.error('Error updating category status:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while updating category status.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An error occurred while updating category status.' });
     }
 };
 
@@ -60,7 +61,7 @@ const addCategory = async (req, res) => {
         const existingCategory = await categoryModel.findOne({ categoryName: { $regex: new RegExp(categoryName.trim(), 'i') } });
 
         if (existingCategory) {
-            return res.json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
                 message: 'A category with this name already exists. Please use a different name.',
             });
@@ -75,10 +76,10 @@ const addCategory = async (req, res) => {
 
         await newCategory.save();
 
-        res.json({ success: true });
+        res.status(StatusCodes.SUCCESS).json({ success: true });
     } catch (error) {
         console.error('Error adding category:', error);
-        res.status(500).json({ success: false, message: 'Failed to add category.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Failed to add category.' });
     }
 };
 
@@ -94,7 +95,7 @@ const editCategory = async (req, res) => {
         });
 
         if (existingCategory) {
-            return res.json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
                 message: 'A category with this name already exists. Please use a different name.',
             });
@@ -112,13 +113,13 @@ const editCategory = async (req, res) => {
         );
 
         if (updatedCategory) {
-            res.json({ success: true });
+            res.status(StatusCodes.SUCCESS).json({ success: true });
         } else {
-            res.json({ success: false, message: 'Failed to update the category.' });
+            res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: 'Failed to update the category.' });
         }
     } catch (error) {
         console.error('Error editing category:', error);
-        res.status(500).json({ success: false, message: 'An unexpected error occurred.' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'An unexpected error occurred.' });
     }
 };
 
@@ -130,16 +131,16 @@ const deleteCategory = async (req, res) => {
         // Check if the category exists
         const category = await categoryModel.findById(id);
         if (!category) {
-            return res.status(404).json({ success: false, message: 'Category not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ success: false, message: 'Category not found' });
         }
 
         // Delete the category
         await categoryModel.findByIdAndDelete(id);
 
-        res.json({ success: true, message: 'Category deleted successfully' });
+        res.status(StatusCodes.SUCCESS).json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {
         console.error('Error deleting category:', error);
-        res.status(500).json({ success: false, message: 'Failed to delete category' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Failed to delete category' });
     }
 };
 

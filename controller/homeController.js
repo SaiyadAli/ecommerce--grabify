@@ -1,6 +1,7 @@
 const Product = require('../model/productModel');
 const Category = require('../model/categoryModel');
 const Variant = require('../model/variantModel'); // Import the Variant model
+const StatusCodes = require('../statusCodes');
 
 const loadHomePage = async (req, res) => {
     try {
@@ -25,7 +26,7 @@ const loadHomePage = async (req, res) => {
         res.render('user/home', { products, categories, variants: filteredVariants, username });
     } catch (error) {
         console.error('Error loading home page:', error);
-        res.status(500).send('Server Error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server Error');
     }
 };
 

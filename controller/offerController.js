@@ -2,6 +2,7 @@ const ProductOffer = require('../model/productOfferModel');
 const Product = require('../model/productModel');
 const CategoryOffer = require('../model/categoryOfferModel');
 const Category = require('../model/categoryModel'); // Ensure this is the correct path to your Category model
+const StatusCodes = require('../statusCodes');
 
 const getOffers = async (req, res) => {
     try {
@@ -10,7 +11,7 @@ const getOffers = async (req, res) => {
         const categories = await Category.find(); // Fetch categories
         res.render('admin/offer', { offers, products, categories }); // Pass categories to the view
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 };
 
@@ -19,7 +20,7 @@ const createOffer = async (req, res) => {
         const { productId, productOfferPercentage, startDate, endDate, currentStatus } = req.body;
         const existingOffer = await ProductOffer.findOne({ productId });
         if (existingOffer) {
-            return res.status(400).json({ message: 'An offer for this product already exists.' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'An offer for this product already exists.' });
         }
         const product = await Product.findById(productId);
         const newOffer = new ProductOffer({
@@ -34,7 +35,7 @@ const createOffer = async (req, res) => {
         res.json({ message: 'Offer created successfully.' });
     } catch (error) {
         console.error('Error creating coupon:', error);
-        res.status(500).json({ message: 'Error creating coupon' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error creating coupon' });
     }
 };
 
@@ -44,7 +45,7 @@ const editOffer = async (req, res) => {
         const products = await Product.find();
         res.render('admin/editOffer', { offer, products });
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 };
 
@@ -63,7 +64,7 @@ const updateOffer = async (req, res) => {
         res.json({ message: 'Offer updated successfully.' });
     } catch (error) {
         console.error('Error updating offer:', error);
-        res.status(500).json({ message: 'Error updating offer' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error updating offer' });
     }
 };
 
@@ -73,7 +74,7 @@ const deleteOffer = async (req, res) => {
         res.json({ message: 'Offer deleted successfully.' });
     } catch (error) {
         console.error('Error deleting offer:', error);
-        res.status(500).json({ message: 'Error deleting offer' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error deleting offer' });
     }
 };
 
@@ -83,7 +84,7 @@ const getCategoryOffers = async (req, res) => {
         const categories = await Category.find();
         res.render('admin/categoryOffer', { offers, categories });
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 };
 
@@ -92,7 +93,7 @@ const createCategoryOffer = async (req, res) => {
         const { categoryId, categoryOfferPercentage, startDate, endDate, currentStatus } = req.body;
         const existingOffer = await CategoryOffer.findOne({ categoryId });
         if (existingOffer) {
-            return res.status(400).json({ message: 'An offer for this category already exists.' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'An offer for this category already exists.' });
         }
         const category = await Category.findById(categoryId);
         const newOffer = new CategoryOffer({
@@ -107,7 +108,7 @@ const createCategoryOffer = async (req, res) => {
         res.json({ message: 'Category offer created successfully.' });
     } catch (error) {
         console.error('Error creating category offer:', error);
-        res.status(500).json({ message: 'Error creating category offer' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error creating category offer' });
     }
 };
 
@@ -117,7 +118,7 @@ const editCategoryOffer = async (req, res) => {
         const categories = await Category.find();
         res.render('admin/editCategoryOffer', { offer, categories });
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 };
 
@@ -134,7 +135,7 @@ const updateCategoryOffer = async (req, res) => {
         res.json({ message: 'Category offer updated successfully.' });
     } catch (error) {
         console.error('Error updating category offer:', error);
-        res.status(500).json({ message: 'Error updating category offer' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error updating category offer' });
     }
 };
 
@@ -144,7 +145,7 @@ const deleteCategoryOffer = async (req, res) => {
         res.json({ message: 'Category offer deleted successfully.' });
     } catch (error) {
         console.error('Error deleting category offer:', error);
-        res.status(500).json({ message: 'Error deleting category offer' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error deleting category offer' });
     }
 };
 

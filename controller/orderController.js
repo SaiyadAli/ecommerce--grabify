@@ -2,6 +2,7 @@ const Order = require('../model/orderModel');
 const User = require('../model/userModel');
 const Product = require('../model/productModel');
 const Wallet = require('../model/walletModel'); // Import the Wallet model
+const StatusCodes = require('../statusCodes');
 
 // List all orders
 const listOrders = async (req, res) => {
@@ -9,7 +10,7 @@ const listOrders = async (req, res) => {
         const orders = await Order.find().populate('userId').populate('cartData.variantId');
         res.render('admin/order', { orders });
     } catch (error) {
-        res.status(500).send('Error listing orders: ' + error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Error listing orders: ' + error.message);
     }
 };
 
@@ -19,12 +20,12 @@ const viewOrderStatus = async (req, res) => {
 
         const order = await Order.findById(id).populate('cartData.variantId');
         if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Order not found' });
         }
 
         const user = await User.findById(order.userId);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
         }
 
         const address = user.addresses.id(order.addressChosen);
@@ -38,7 +39,7 @@ const viewOrderStatus = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching order:', error);
-        res.status(500).send('Server error');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Server error');
     }
 };
 
@@ -48,11 +49,11 @@ const cancelOrder = async (req, res) => {
         const order = await Order.findById(orderId).populate('cartData.variantId');
 
         if (!order) {
-            return res.status(404).send('Order not found');
+            return res.status(StatusCodes.NOT_FOUND).send('Order not found');
         }
 
         if (order.orderStatus === 'Cancelled') {
-            return res.status(400).send('Order is already cancelled');
+            return res.status(StatusCodes.BAD_REQUEST).send('Order is already cancelled');
         }
 
         // Update stock
@@ -89,7 +90,6 @@ const cancelOrder = async (req, res) => {
                     }]
                 });
                 await newWallet.save();
-                console.log('New wallet created and money added:', newWallet);
             }
         }
 

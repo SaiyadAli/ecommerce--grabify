@@ -3,18 +3,19 @@ const User = require('../model/userModel'); // Import the User model
 const Order = require('../model/orderModel'); // Import the Order model
 const PDFDocument = require('pdfkit'); // Import PDFKit for generating PDFs
 const stream = require('stream');
+const StatusCodes = require('../statusCodes');
 
 const downloadInvoice = async (req, res) => {
     try {
         const { orderId } = req.params;
         const order = await Order.findById(orderId).populate('cartData.variantId');
         if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Order not found' });
         }
 
         const user = await User.findById(order.userId);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
         }
 
         const doc = new PDFDocument({ margin: 50 });
@@ -168,7 +169,7 @@ const downloadInvoice = async (req, res) => {
         invoiceStream.pipe(res);
     } catch (error) {
         console.error('Error generating invoice:', error);
-        res.status(500).json({ message: 'Error generating invoice', error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error generating invoice', error });
     }
 };
 
