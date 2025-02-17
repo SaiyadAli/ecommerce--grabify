@@ -87,12 +87,13 @@
                         </div>
                         <div class="mb-3">
                             <label for="productCategory" class="form-label">Category</label>
-                            <select class="form-control" id="productCategory" name="categoryid" required>
+                            <select class="form-control" id="productCategory" name="categoryid" required style="max-height: 200px; overflow-y: auto;">
+                                <option value="">Select a category</option>
                                 <% categories.forEach(category => { %>
                                 <option value="<%= category._id %>"><%= category.categoryName %></option>
                                 <% }); %>
                             </select>
-                        </div>
+                                                    </div>
                         <input type="hidden" name="isListed" value="true">
                     </div>
                     <div class="modal-footer">
@@ -130,7 +131,7 @@
                                 <option value="<%= category._id %>"><%= category.categoryName %></option>
                                 <% }); %>
                             </select>
-                        </div>
+                                                    </div>
                         <input type="hidden" id="editProductIsListed" name="isListed" value="true">
                     </div>
                     <div class="modal-footer">
@@ -284,6 +285,6 @@ document.querySelectorAll('.delete-product-btn').forEach((button) => {
     });
 });
 
-</script>
+    </script>
 
 <%- include('../partials/footer.ejs') %>
