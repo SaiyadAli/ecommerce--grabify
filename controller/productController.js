@@ -1,7 +1,6 @@
 const productModel = require('../model/productModel');
 const categoryModel = require('../model/categoryModel');
 
-
 // Load products page with categories
 const loadProducts = async (req, res) => {
     try {
@@ -136,9 +135,14 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-
-
-
+const getProductsByCategory = async (req, res) => {
+    try {
+        const products = await productModel.find({ categoryid: req.params.categoryId }); // Ensure the field name matches your schema
+        res.json(products);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
 
 module.exports = {
     loadProducts,
@@ -146,7 +150,7 @@ module.exports = {
     editProduct,
     toggleProductStatus,
     deleteProduct,
-   
+    getProductsByCategory
 };
 
 

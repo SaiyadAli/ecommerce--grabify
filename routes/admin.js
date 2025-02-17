@@ -36,6 +36,7 @@ router.get('/products/toggle-status/:id', adminAuth.checkSession, productControl
 router.post('/products/add', adminAuth.checkSession, productController.addProduct);
 router.post('/products/edit', adminAuth.checkSession, adminAuth.checkSession, productController.editProduct);
 router.delete('/products/delete/:id', adminAuth.checkSession, productController.deleteProduct);
+router.get('/products/by-category/:categoryId', productController.getProductsByCategory); // Ensure this line is present
 
 // Order management routes
 router.get('/orders', adminAuth.checkSession, orderController.listOrders);

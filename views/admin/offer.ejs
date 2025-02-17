@@ -105,11 +105,18 @@
             <form id="newOfferForm" action="/admin/offers" method="POST">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="productId">Product</label>
-                        <select class="form-control" name="productId" required>
-                            <% products.forEach(product => { %>
-                                <option value="<%= product._id %>"><%= product.name %></option>
+                        <label for="categoryId">Category</label>
+                        <select class="form-control" name="categoryId" id="categoryId" required>
+                            <option value="">Select Category</option>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>"><%= category.categoryName %></option>
                             <% }); %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productId">Product</label>
+                        <select class="form-control" name="productId" id="productId" required>
+                            <option value="">Select Product</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -164,6 +171,28 @@
 
         startDateInput.addEventListener('change', function() {
             endDateInput.min = this.value;
+        });
+
+        const categoryIdSelect = document.getElementById('categoryId');
+        const productIdSelect = document.getElementById('productId');
+
+        categoryIdSelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            productIdSelect.innerHTML = '<option value="">Select Product</option>';
+
+            if (categoryId) {
+                fetch(`/admin/products/by-category/${categoryId}`)
+                    .then(response => response.json())
+                    .then(products => {
+                        products.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product._id;
+                            option.textContent = product.name;
+                            productIdSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching products:', error));
+            }
         });
     });
 

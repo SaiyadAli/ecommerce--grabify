@@ -7,7 +7,8 @@ const getOffers = async (req, res) => {
     try {
         const offers = await ProductOffer.find().populate('productId');
         const products = await Product.find();
-        res.render('admin/offer', { offers, products });
+        const categories = await Category.find(); // Fetch categories
+        res.render('admin/offer', { offers, products, categories }); // Pass categories to the view
     } catch (error) {
         res.status(500).send(error.message);
     }
