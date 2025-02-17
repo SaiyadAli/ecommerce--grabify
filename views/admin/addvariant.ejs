@@ -72,12 +72,9 @@
                             <div class="col-lg-8">
                                 <div class="fx-vendor-upload-detail">
                                     <div class="col-md-6">
-                                        <label for="productId" class="form-label">Select Product</label>
-                                        <select class="form-control" id="productId" name="productId" required>
-                                            <% products.forEach(product => { %>
-                                                <option value="<%= product._id %>"><%= product.name %></option>
-                                            <% }); %>
-                                        </select>
+                                        <label for="productName" class="form-label">Selected Product</label>
+                                        <input class="form-control" id="productName" readonly>
+                                        <input type="hidden" id="productId" name="productId" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="color" class="form-label">Color</label>
@@ -235,6 +232,15 @@
             }
         });
     });
+
+    // Pre-select product if productId is provided in query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('productId');
+    if (productId) {
+        const productName = "<%= products.find(product => product._id.toString() === selectedProductId)?.name %>";
+        document.getElementById('productId').value = productId;
+        document.getElementById('productName').value = productName;
+    }
 
     // Show success message if variant is added successfully
     <% if (message) { %>

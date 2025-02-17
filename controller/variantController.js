@@ -8,7 +8,8 @@ const sharp = require('sharp');
 const getAddVariantPage = async (req, res) => {
     try {
         const products = await Product.find({ isListed: true });
-        res.render('admin/addvariant', { products, message: null, messageType: null });
+        const selectedProductId = req.query.productId || null;
+        res.render('admin/addvariant', { products, selectedProductId, message: null, messageType: null });
     } catch (error) {
         console.error('Error loading products:', error);
         res.status(500).send('Server Error');
